@@ -1,5 +1,6 @@
 .containerHome {
   position: relative;
+  z-index: 1;
 }
 
 .banner {
@@ -98,6 +99,6 @@
   border: none;
 }
 
-.sliderTrack::-webkit-scrollbar-thumb:hover{
-    cursor: pointer;
+.sliderTrack::-webkit-scrollbar-thumb:hover {
+  cursor: pointer;
 }

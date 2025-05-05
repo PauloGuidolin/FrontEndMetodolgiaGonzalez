@@ -63,7 +63,7 @@ export const HomeScreen = () => {
         <div className={styles.sliderClothes}>
         <h2>Tendencias de las tiendas</h2>
           <div className={styles.sliderTrack}>
-            {[...Array(6)].map((_, i) => (
+            {[...Array(8)].map((_, i) => (
               <div key={i} className={styles.clothes}>
                 <img
                   src="../../../images/camperonBoca.png"

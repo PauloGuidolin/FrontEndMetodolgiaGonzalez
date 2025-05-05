@@ -21,6 +21,8 @@
   h3:hover{
     cursor: pointer;
     border-bottom: 2px solid;
+    position: relative;
+    display: inline-block;
   }
 }
 
@@ -44,3 +46,8 @@
   gap: 20px;
 }
 
+.containerDropDown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+}

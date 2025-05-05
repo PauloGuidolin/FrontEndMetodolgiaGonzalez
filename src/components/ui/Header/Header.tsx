@@ -15,8 +15,13 @@ export const Header = () => {
           />
         </div>
         <div className={styles.containerTitles}>
-          {drop && <DropDownClothes />}
-          <h3>Calzado</h3>
+          <h3
+          onMouseEnter={() => setDrop(true)}
+          onMouseLeave={() => setDrop(false)}
+          >Calzado
+          {drop && <div
+            className={styles.containerDropDown}><DropDownClothes /></div>}
+          </h3>
           <h3>Ropa</h3>
           <h3>Deporte</h3>
         </div>
