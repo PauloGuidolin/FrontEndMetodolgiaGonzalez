@@ -1,0 +1,46 @@
+.containerPrincipal {
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  display: grid;
+  grid-template-columns: 1fr 3fr 1fr;
+  align-items: end;
+  justify-items: center;
+  width: 98vw;
+  padding-bottom: 10px;
+}
+
+.containerLogo {
+  img {
+    width: 140px;
+    height: 80px;
+  }
+}
+
+.containerTitles {
+  display: flex;
+  gap: 20px;
+  h3:hover{
+    cursor: pointer;
+    border-bottom: 2px solid;
+  }
+}
+
+.containerSearch{
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.containerLogin {
+  display: flex;
+  gap: 5px;
+  h4:hover{
+    cursor: pointer;
+    border-bottom: 1px solid;
+  }
+}
+
+.containerPurchase {
+  display: flex;
+  gap: 20px;
+}
+

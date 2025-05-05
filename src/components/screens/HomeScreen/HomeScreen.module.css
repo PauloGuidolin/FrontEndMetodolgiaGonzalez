@@ -1,0 +1,103 @@
+.containerHome {
+  position: relative;
+}
+
+.banner {
+  img {
+    width: 100%;
+  }
+}
+
+.shirt {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  img {
+    width: 100%;
+  }
+}
+
+.imgRelative {
+  position: relative;
+  display: flex;
+}
+
+.text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  h3,
+  h4 {
+    margin-top: 10px;
+    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS",
+      sans-serif;
+    padding: 10px;
+    background-color: white;
+    color: black;
+  }
+}
+
+.sliderShoes {
+  padding: 20px;
+}
+
+.sliderTrack {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 20px;
+  padding-bottom: 10px;
+}
+
+.shoesRunning {
+  flex: 0 0 auto;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 10px;
+}
+
+.shoesRunning img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+}
+
+.sliderClothes {
+  padding: 20px;
+}
+
+.clothes {
+  flex: 0 0 auto;
+  width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 10px;
+}
+
+.clothes img {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+}
+
+/*Aplicado CSS al scroll bar de la home screen */
+.sliderTrack::-webkit-scrollbar {
+  height: 7px;
+}
+
+.sliderTrack::-webkit-scrollbar-track {
+  background: #cacaca;
+}
+
+.sliderTrack::-webkit-scrollbar-thumb {
+  background-color: black;
+  border-radius: 0px;
+  border: none;
+}
+
+.sliderTrack::-webkit-scrollbar-thumb:hover{
+    cursor: pointer;
+}
