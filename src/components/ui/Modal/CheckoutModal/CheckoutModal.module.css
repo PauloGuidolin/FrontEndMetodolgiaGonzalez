@@ -1,0 +1,230 @@
+/* Estilos para el overlay (fondo oscuro semi-transparente) */
+.modalOverlay {
+    position: fixed; /* Se mantiene fijo en la ventana */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro con transparencia */
+    display: flex; /* Para centrar el contenido */
+    justify-content: center; /* Centrado horizontal */
+    align-items: center; /* Centrado vertical */
+    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    padding: 20px; /* Un poco de padding para evitar que el contenido toque los bordes en pantallas pequeñas */
+    overflow-y: auto; /* Permite scroll si el contenido es muy largo */
+}
+
+/* Estilos para el contenido principal del modal */
+.modalContent {
+    background-color: #fff; /* Fondo blanco */
+    padding: 30px; /* Espacio interior */
+    border-radius: 8px; /* Bordes redondeados */
+    max-width: 900px; /* Ancho máximo */
+    width: 95%; /* Ocupa casi todo el ancho disponible */
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Sombra sutil */
+    position: relative; /* Para el botón de cerrar si se añade */
+    max-height: 90vh; /* Altura máxima, permite scroll si es necesario */
+    overflow-y: auto; /* Habilita el scroll dentro del modal si el contenido es largo */
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee; /* Línea separadora */
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.modalHeader h2 {
+    margin: 0;
+    font-size: 1.5em;
+    color: #333;
+}
+
+/* Estilos para el cuerpo del modal (flexbox para columnas) */
+.modalBody {
+    display: flex;
+    gap: 40px; /* Espacio entre las columnas (Envío/Pago y Resumen) */
+    flex-wrap: wrap; /* Permite que las columnas se apilen en pantallas pequeñas */
+}
+
+/* Estilos para la sección de Envío/Pago (columna izquierda) */
+.shippingSection {
+    flex: 2; /* Ocupa más espacio si hay suficiente */
+    min-width: 300px; /* Ancho mínimo para evitar que se vea aplastado */
+}
+
+.shippingSection h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #555;
+    font-size: 1.2em;
+}
+
+.formGroup {
+    margin-bottom: 15px;
+}
+
+.formGroup label {
+    display: block; /* Etiqueta encima del input */
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #444;
+}
+
+.inputField {
+    width: 100%; /* Ocupa todo el ancho del contenedor */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho */
+}
+
+.inputField::placeholder {
+    color: #999;
+}
+
+.paymentTitle {
+    margin-top: 25px;
+}
+
+.paymentMethods {
+    margin-bottom: 20px;
+}
+
+.radioGroup {
+    margin-bottom: 10px;
+}
+
+.radioGroup input[type="radio"] {
+    margin-right: 10px;
+}
+
+.radioGroup label {
+     font-weight: normal; /* Etiquetas de radio button normales */
+     color: #444;
+}
+
+
+.confirmButton {
+    display: block; /* Botón ocupa todo el ancho */
+    width: 100%;
+    padding: 12px;
+    background-color: #007bff; /* Color azul */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.confirmButton:hover {
+    background-color: #0056b3; /* Azul más oscuro al pasar el mouse */
+}
+
+/* Estilos para el Resumen del Pedido (columna derecha) */
+.orderSummary {
+    flex: 1; /* Ocupa el espacio restante */
+    min-width: 250px; /* Ancho mínimo */
+    background-color: #f9f9f9; /* Fondo ligeramente gris */
+    padding: 20px;
+    border-radius: 8px;
+    display: flex; /* Usa flexbox para organizar los items */
+    flex-direction: column; /* Los items se apilan verticalmente */
+    height: fit-content; /* Ajusta la altura a su contenido */
+}
+
+.orderSummary h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.3em;
+    color: #333;
+    text-align: center;
+}
+
+.summaryItem {
+    display: flex; /* Usa flexbox para poner span a la izquierda y derecha */
+    justify-content: space-between; /* Espacio entre los elementos */
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #ddd; /* Línea punteada */
+}
+
+.summaryItem span:first-child {
+    font-weight: bold;
+    color: #555;
+}
+
+.summaryTotal {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #333; /* Línea sólida más gruesa */
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+}
+
+.proceedToPaymentButton {
+     display: block; /* Botón ocupa todo el ancho */
+    width: 100%;
+    padding: 12px;
+    background-color: #28a745; /* Color verde */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px; /* Espacio arriba del botón */
+}
+
+.proceedToPaymentButton:hover {
+    background-color: #218838; /* Verde más oscuro al pasar el mouse */
+}
+
+/* Media query para pantallas más pequeñas: apilar las columnas */
+@media (max-width: 768px) {
+    .modalBody {
+        flex-direction: column;
+        gap: 20px; /* Menos espacio entre las secciones cuando se apilan */
+    }
+
+    .shippingSection,
+    .orderSummary {
+        min-width: auto; /* Permite que ocupen el ancho disponible */
+        width: 100%; /* Ocupan todo el ancho en pantallas pequeñas */
+    }
+
+    .orderSummary {
+         order: -1; /* Coloca el resumen arriba en móviles si se desea, o quita esta línea para que quede abajo */
+         /* Opcional: ajustar padding o margen para móviles */
+         padding: 15px;
+    }
+
+    .confirmButton {
+        margin-top: 20px; /* Añade espacio arriba si queda justo después de los métodos de pago */
+    }
+
+     .proceedToPaymentButton {
+        margin-top: 15px; /* Menos espacio arriba si va después del resumen */
+    }
+}
+
+
+/* Estilos para el botón de cerrar (si lo incluyes) */
+/*.closeButton {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    padding: 0;
+    color: #aaa;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}*/
