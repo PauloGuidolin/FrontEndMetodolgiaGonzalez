@@ -6,7 +6,7 @@ import LoginModal from "../Modal/LogIn/LoginModal";
 import RegisterModal from "../Modal/Register/RegisterModal";
 
 export const Header = () => {
-  const [drop, setDrop] = useState(true);
+  const [drop, setDrop] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -56,8 +56,8 @@ export const Header = () => {
         </div>
         <div className={styles.containerTitles}>
           <h3
-          onMouseEnter={() => setDrop(true)}
-          onMouseLeave={() => setDrop(false)}
+            onMouseEnter={() => setDrop(true)}
+            onMouseLeave={() => setDrop(false)}
           >
             Calzado
             {drop && (
@@ -66,8 +66,26 @@ export const Header = () => {
               </div>
             )}
           </h3>
-          <h3>Ropa</h3>
-          <h3>Deporte</h3>
+          <h3
+            onMouseEnter={() => setDrop(true)}
+            onMouseLeave={() => setDrop(false)}
+          >Ropa
+            {drop && (
+              <div className={styles.containerDropDown}>
+                <DropDownClothes />
+              </div>
+            )}
+          </h3>
+          <h3
+            onMouseEnter={() => setDrop(true)}
+            onMouseLeave={() => setDrop(false)}
+          >Deporte
+            {drop && (
+              <div className={styles.containerDropDown}>
+                <DropDownClothes />
+              </div>
+            )}
+          </h3>
         </div>
         <div className={styles.containerSearch}>
           <div className={styles.containerLogin}>

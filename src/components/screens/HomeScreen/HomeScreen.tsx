@@ -1,8 +1,11 @@
+import { useNavigate } from "react-router";
 import { Footer } from "../../ui/Footer/Footer";
 import { Header } from "../../ui/Header/Header";
 import styles from "./HomeScreen.module.css";
 
 export const HomeScreen = () => {
+  const navigate = useNavigate()
+
   return (
     <>
       <div>
@@ -33,26 +36,32 @@ export const HomeScreen = () => {
         <div className={styles.sliderShoes}>
           <h2>Descubrí lo indescubierto</h2>
           <div className={styles.sliderTrack}>
+
             <div className={styles.shoesRunning}>
               <img src="../../../images/zapaAdidas.avif" alt="" />
               Modelo de zapas
             </div>
+
             <div className={styles.shoesRunning}>
               <img src="../../../images/zapaAdidas.avif" alt="" />
               Modelo de zapas
             </div>
+
             <div className={styles.shoesRunning}>
               <img src="../../../images/zapaAdidas.avif" alt="" />
               Modelo de zapas
             </div>
+
             <div className={styles.shoesRunning}>
               <img src="../../../images/zapaAdidas.avif" alt="" />
               Modelo de zapas
             </div>
+
             <div className={styles.shoesRunning}>
               <img src="../../../images/zapaAdidas.avif" alt="" />
               Modelo de zapas
             </div>
+
             <div className={styles.shoesRunning}>
               <img src="../../../images/zapaAdidas.avif" alt="" />
               Modelo de zapas
@@ -74,7 +83,7 @@ export const HomeScreen = () => {
             ))}
           </div>
         </div>
-
+        <button onClick={() => navigate("/UserProfile")}>IR AL LOG</button>
         <Footer />
       </div>
     </>

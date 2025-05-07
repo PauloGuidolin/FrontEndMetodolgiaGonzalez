@@ -1,0 +1,111 @@
+/* Fondo semitransparente detrás del modal */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); /* fondo gris oscuro semitransparente */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  /* Caja del modal */
+  .modal {
+    background-color: #e0e0e0; /* gris claro */
+    padding: 30px;
+    border-radius: 8px;
+    width: 360px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    z-index: 1001;
+  }
+  
+  /* Título del modal */
+  .modalTitle {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 20px;
+  }
+  
+  /* Campos de texto */
+  .inputText {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+    box-sizing: border-box;
+  }
+  
+  /* Sección de fecha de nacimiento */
+  .dobSection {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .dobLegend {
+    font-weight: bold;
+    font-size: 12px;
+  }
+  
+  .dobInputs {
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+  }
+  
+  .dobInput {
+    flex: 1;
+    padding: 6px;
+    text-align: center;
+    border: 1px solid #aaa;
+    border-radius: 4px;
+  }
+  
+  /* Sección de género */
+  .genderSection {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 15px;
+  }
+  
+  .genderLegend {
+    font-weight: bold;
+    font-size: 14px;
+  }
+  
+  .genderOption {
+    display: inline-block;
+    margin-right: 10px;
+    font-size: 14px;
+  }
+  
+  /* Botones */
+  .buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  
+  .cancelBtn,
+  .acceptBtn {
+    width: 45%;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    background-color: black;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  
+  .cancelBtn:hover,
+  .acceptBtn:hover {
+    opacity: 0.85;
+  }
+  
+  
