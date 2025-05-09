@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./CartCard.module.css";
-import { IProductoDetalle } from "../../../Types/IProductoDetalle";
+import { IProductoDetalle } from "../../../../types/IProductoDetalle";
 
 interface CartCardProps {
   productDetail: IProductoDetalle;

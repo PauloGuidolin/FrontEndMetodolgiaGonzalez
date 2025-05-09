@@ -1,7 +1,7 @@
 import styles from "./Header.module.css";
 import { useState } from "react";
 import { DropDownClothes } from "../Modal/DropDownClothes/DropDownClothes";
-import { Link, Navigate, useNavigate } from "react-router-dom"; // ¡Importante usar react-router-dom para Link!
+import { Link, useNavigate } from "react-router-dom"; // ¡Importante usar react-router-dom para Link!
 import LoginModal from "../Modal/LogIn/LoginModal";
 import RegisterModal from "../Modal/Register/RegisterModal";
 
@@ -66,26 +66,8 @@ export const Header = () => {
               </div>
             )}
           </h3>
-          <h3
-            onMouseEnter={() => setDrop(true)}
-            onMouseLeave={() => setDrop(false)}
-          >Ropa
-            {drop && (
-              <div className={styles.containerDropDown}>
-                <DropDownClothes />
-              </div>
-            )}
-          </h3>
-          <h3
-            onMouseEnter={() => setDrop(true)}
-            onMouseLeave={() => setDrop(false)}
-          >Deporte
-            {drop && (
-              <div className={styles.containerDropDown}>
-                <DropDownClothes />
-              </div>
-            )}
-          </h3>
+          <h3>Ropa</h3>
+          <h3>Deporte</h3>
         </div>
         <div className={styles.containerSearch}>
           <div className={styles.containerLogin}>

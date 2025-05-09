@@ -4,14 +4,14 @@ import styles from "./CartScreen.module.css";
 // Importa el nuevo modal y sus tipos (si los creaste en el mismo lugar)
 
 
-import { Color } from "../../Types/IColor";
-import { Talle } from "../../Types/ITalle";
-import { Sexo } from "../../Types/ISexo";
-import { ICategoria } from "../../Types/ICategoria";
-import { IImagen } from "../../Types/IImagen";
-import { IProductoDetalle } from "../../Types/IProductoDetalle";
-import { IProducto } from "../../Types/IProducto";
-import { IDescuento } from "../../Types/IDescuento";
+import { Color } from "../../../types/IColor";
+import { Talle } from "../../../types/ITalle";
+import { Sexo } from "../../../types/ISexo";
+import { ICategoria } from "../../../types/ICategoria";
+import { IImagen } from "../../../types/IImagen";
+import { IProductoDetalle } from "../../../types/IProductoDetalle";
+import { IProducto } from "../../../types/IProducto";
+import { IDescuento } from "../../../types/IDescuento";
 import CartCard from "../../ui/Cards/CartCard/CartCard";
 import { Header } from "../../ui/Header/Header";
 import { Footer } from "../../ui/Footer/Footer";
