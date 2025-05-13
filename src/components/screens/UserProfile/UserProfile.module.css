@@ -1,73 +1,87 @@
 .main {
-    display: grid;
-    grid-template-columns: 1fr 3fr;
-    gap: 50px;
-    justify-content: space-evenly;
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 50px;
+  justify-content: space-evenly;
 }
 
-.fotoperfil {
-    margin: 20px;
-    height: 80%;
-    padding-top: 20px;
-    display: flex;
-    flex-direction: column;
-    background-color: rgb(168, 167, 167);
-    align-items: center;
-    text-align: center;
+.profileContainer {
+  margin: 20px;
+  height: 80%;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(168, 167, 167);
+  align-items: center;
+  text-align: center;
 
-    img {
-        width: 150px;
-        height: 150px;
-        border-radius: 50%;
-    }
+  img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+  }
 
-    p {
-        padding-top: 10px;
-        font-size: 30px;
-    }
+  p {
+    padding-top: 10px;
+    font-size: 30px;
+  }
 
-    button {
-        margin-top: 30px;
-        padding: 10px;
-        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-        background-color: black;
-        color: white;
-        font-size: 30px;
-    }
+  button {
+    margin-top: 30px;
+    padding: 10px;
+    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+    background-color: black;
+    color: white;
+    font-size: 30px;
+  }
+
+  button:hover {
+    cursor: pointer;
+  }
 }
 
-.datos {
-    margin: 20px;
-    padding: 20px;
-    background-color: rgb(168, 167, 167);
-    flex-direction: column;
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+.dataContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin: 20px;
+  padding: 20px;
+  background-color: rgb(168, 167, 167);
+  flex-direction: column;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
 
-    h4 {
-        font-size: 30px;
+  h4 {
+    font-size: 30px;
+  }
 
-    }
+  h5 {
+    font-size: 25px;
+  }
 
-    h5 {
-        font-size: 25px;
-    }
+  p {
+    font-size: 25px;
+  }
+  .editButton {
+    max-width: 50px;
+    margin-top: 10px;
+    background-color: transparent;
+    border: none;
+    border-bottom: 1px solid black;
+    color: black;
+    font-size: 20px;
+    font-weight: bold;
+  }
 
-    p {
-        font-size: 25px;
-    }
-
-
+  button:hover {
+    cursor: pointer;
+  }
 }
-.eliminar{
-    align-items: center;
-    text-align: center;
-    button {
-        align-items: center;
-        margin-top: 30px;
-        padding: 10px;
-        font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-        background-color: black;
-        color: white;
-        font-size: 30px;
-    }
+
+.deleteButton {
+  margin-top: 30px;
+  padding: 10px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  background-color: black;
+  color: white;
+  font-size: 30px;
 }

@@ -4,11 +4,16 @@ import { DropDownClothes } from "../Modal/DropDownClothes/DropDownClothes";
 import { Link, useNavigate } from "react-router-dom"; // ¡Importante usar react-router-dom para Link!
 import LoginModal from "../Modal/LogIn/LoginModal";
 import RegisterModal from "../Modal/Register/RegisterModal";
+import { DropDownShoes } from "../Modal/DropDownShoes/DropDownShoes";
+import { DropDownSport } from "../Modal/DropDownSport/DropDownSport";
 
 export const Header = () => {
-  const [drop, setDrop] = useState(false);
+  const [dropClothes, setDropClothes] = useState(false);
+  const [dropShoes, setDropShoes] = useState(false);
+  const [ dropSport , setDropSport ] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
   const navigate = useNavigate();
 
   const openLoginModal = () => {
@@ -56,18 +61,38 @@ export const Header = () => {
         </div>
         <div className={styles.containerTitles}>
           <h3
-            onMouseEnter={() => setDrop(true)}
-            onMouseLeave={() => setDrop(false)}
+          onMouseEnter={() => setDropShoes(true)}
+          onMouseLeave={() => setDropShoes(false)}
+          >Calzado
+          {dropShoes && (
+            <div className={styles.containerDropDown}>
+              <DropDownShoes />
+            </div>
+          )}
+          </h3>
+
+          <h3
+            onMouseEnter={() => setDropClothes(true)}
+            onMouseLeave={() => setDropClothes(false)}
           >
-            Calzado
-            {drop && (
+            Ropa
+            {dropClothes && (
               <div className={styles.containerDropDown}>
                 <DropDownClothes />
               </div>
             )}
           </h3>
-          <h3>Ropa</h3>
-          <h3>Deporte</h3>
+
+          <h3
+          onMouseEnter={() => setDropSport(true)}
+          onMouseLeave={() => setDropSport(false)}
+          >Deporte
+          { dropSport && (
+            <div className={styles.containerDropDown}>
+              <DropDownSport />
+            </div>
+          )}
+          </h3>
         </div>
         <div className={styles.containerSearch}>
           <div className={styles.containerLogin}>

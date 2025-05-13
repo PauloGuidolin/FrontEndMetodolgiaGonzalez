@@ -1,32 +1,33 @@
-import styles from "./DropDownClothes.module.css";
+import styles from "./DropDownShoes.module.css";
 
-export const DropDownClothes = () => {
+
+export const DropDownShoes = () => {
   return (
     <>
       <div className={styles.containerPrincipal}>
         <table className={styles.containerTable}>
           <thead>
             <tr>
-              <th>Mujer</th>
-              <th>Hombre</th>
-              <th>Niños</th>
+              <th>Infaltable</th>
+              <th>Tendencias</th>
+              <th>Deportivo</th>
             </tr>
           </thead>
           <tbody>
             <tr>
-              <td>Tops Deportivos</td>
-              <td>Remeras</td>
-              <td>Camiseta de Fúbol</td>
+              <td>Running</td>
+              <td>Zapatillas blancas</td>
+              <td>Futbol</td>
             </tr>
             <tr>
-              <td>Calzas</td>
-              <td>Camperas</td>
-              <td>Buzos</td>
+              <td>Futbol</td>
+              <td>Zapatillas negras</td>
+              <td>Tenis</td>
             </tr>
             <tr>
-              <td>Buzos</td>
-              <td>Shorts</td>
-              <td>Pantalones</td>
+              <td>Urbano</td>
+              <td>Zapatillas para caminar</td>
+              <td>GYM</td>
             </tr>
           </tbody>
         </table>
