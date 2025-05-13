@@ -3,6 +3,8 @@ export enum Talle {
     M = 'M',
     S = 'S',
     XL = 'XL',
+    XXL = 'XXL', 
+    XS = 'XS',
     TALLE_25 = 'TALLE_25',
     TALLE_26 = 'TALLE_26',
     TALLE_27 = 'TALLE_27',

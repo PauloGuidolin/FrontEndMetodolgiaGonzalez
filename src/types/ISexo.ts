@@ -3,4 +3,5 @@ export enum Sexo {
     MASCULINO = 'MASCULINO',
     UNISEX_CHILD = 'UNISEX_CHILD',
     UNISEX = 'UNISEX',
+    OTRO = 'OTRO'
   }

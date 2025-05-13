@@ -1,0 +1,99 @@
+/* Archivo: src/components/ProductCard/ProductCard.module.css */
+
+/* Estilos para el contenedor principal de la tarjeta */
+.card {
+    max-width: 384px; /* max-w-sm en Tailwind */
+    border-radius: 0.5rem; /* rounded en Tailwind */
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-lg en Tailwind */
+    margin: 1rem; /* m-4 en Tailwind */
+    cursor: pointer;
+    background-color: #ffffff; /* bg-white en Tailwind */
+    transition: box-shadow 0.3s ease-in-out; /* transition-shadow duration-300 en Tailwind */
+}
+
+.card:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05); /* hover:shadow-xl en Tailwind */
+}
+
+/* Estilos para el contenedor de la imagen */
+.imageContainer {
+    width: 100%; /* w-full en Tailwind */
+    height: 12rem; /* h-48 en Tailwind */
+    overflow: hidden;
+    /* Alineación opcional si la imagen no cubre completamente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Estilos para la imagen dentro de la tarjeta */
+.productImage {
+    width: 100%; /* w-full en Tailwind */
+    height: 100%; /* h-full en Tailwind */
+    object-fit: cover; /* object-cover en Tailwind */
+}
+
+/* Estilos para el cuerpo del contenido de la tarjeta */
+.cardContent {
+    padding: 1.5rem; /* px-6 py-4 en Tailwind (ajustado) */
+}
+
+/* Estilos para el nombre del producto */
+.productName {
+    font-weight: bold; /* font-bold en Tailwind */
+    font-size: 1.25rem; /* text-xl en Tailwind */
+    margin-bottom: 0.5rem; /* mb-2 en Tailwind */
+    color: #1f2937; /* text-gray-800 en Tailwind */
+}
+
+/* Estilos para el contenedor de categorías */
+.categoryContainer {
+    margin-bottom: 0.5rem; /* mb-2 en Tailwind */
+}
+
+/* Estilos para las etiquetas de categoría */
+.categoryTag {
+    display: inline-block;
+    background-color: #e5e7eb; /* bg-gray-200 en Tailwind */
+    border-radius: 9999px; /* rounded-full en Tailwind */
+    padding: 0.25rem 0.75rem; /* px-3 py-1 en Tailwind */
+    font-size: 0.875rem; /* text-sm en Tailwind */
+    font-weight: 600; /* font-semibold en Tailwind */
+    color: #4b5563; /* text-gray-700 en Tailwind */
+    margin-right: 0.5rem; /* mr-2 en Tailwind */
+    margin-bottom: 0.5rem; /* mb-2 en Tailwind */
+}
+
+/* Estilos para el contenedor de precios */
+.priceContainer {
+     color: #1f2937; /* text-gray-900 en Tailwind */
+     font-size: 1rem; /* text-base en Tailwind */
+}
+
+
+/* Estilos para el precio original (tachado) */
+.originalPrice {
+    color: #6b7280; /* text-gray-500 en Tailwind */
+    text-decoration: line-through; /* line-through en Tailwind */
+    margin-right: 0.5rem; /* mr-2 en Tailwind */
+}
+
+/* Estilos para el precio final */
+.finalPrice {
+    font-weight: bold; /* font-bold en Tailwind */
+    color: #10b981; /* text-green-600 en Tailwind */
+}
+
+/* Estilos para el indicador de promoción */
+.promotionIndicator {
+    display: inline-block;
+    background-color: #facc15; /* bg-yellow-400 en Tailwind */
+    border-radius: 9999px; /* rounded-full en Tailwind */
+    padding: 0.25rem 0.5rem; /* px-2 py-1 en Tailwind */
+    font-size: 0.75rem; /* text-xs en Tailwind */
+    font-weight: bold; /* font-bold en Tailwind */
+    color: #b45309; /* text-yellow-800 en Tailwind */
+    margin-top: 0.5rem; /* mt-2 en Tailwind */
+}
+
