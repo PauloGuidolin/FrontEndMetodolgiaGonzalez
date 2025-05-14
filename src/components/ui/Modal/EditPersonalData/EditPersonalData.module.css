@@ -1,0 +1,82 @@
+.modal {
+  background-color: #e0e0e0; /* gris claro */
+  padding: 2rem;
+  border-radius: 10px;
+  width: 400px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.modalTitle {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.inputText {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #999;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.dobSection,
+.genderSection {
+  border: 1px solid #ccc;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.dobLegend,
+.genderLegend {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.dobInputs {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.dobInput {
+  flex: 1;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #999;
+  border-radius: 4px;
+}
+
+.genderOption {
+  display: inline-block;
+  margin-right: 1rem;
+  font-size: 1rem;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.cancelBtn,
+.acceptBtn {
+  background-color: black;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  width: 45%;
+  font-weight: bold;
+}
+
+.cancelBtn:hover,
+.acceptBtn:hover {
+  background-color: #333;
+}

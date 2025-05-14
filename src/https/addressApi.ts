@@ -1,7 +1,5 @@
-
-
-import { IDireccion } from '../types/IDireccion'; // Importamos la interfaz de Direccion
-import { http } from './httpService'; // Importamos el servicio HTTP base (ahora usa Axios)
+import { IDireccion } from "../types/IDireccion"; // Importamos la interfaz de Direccion
+import { http } from "./httpService"; // Importamos el servicio HTTP base (ahora usa Axios)
 
 // Obtenemos la URL base del servidor desde las variables de entorno
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -20,7 +18,6 @@ const ADDRESS_ENDPOINT = `${API_BASE_URL}/direcciones`; // Coincide con @Request
  * Estos endpoints probablemente requieren autenticación (ej. para gestionar las direcciones de un cliente).
  */
 export const addressService = {
-
   /**
    * Obtiene todas las direcciones.
    * Coincide con GET /direcciones.
@@ -33,7 +30,7 @@ export const addressService = {
     return http.get<IDireccion[]>(url);
   },
 
-   /**
+  /**
    * Obtiene una dirección por su ID.
    * Coincide con GET /direcciones/{id}.
    * @param id El ID de la dirección.
@@ -53,52 +50,62 @@ export const addressService = {
    * @returns Una Promesa que resuelve con un array de IDireccion.
    * @throws Un error si la solicitud falla.
    */
-  getAllByLocalidadId: async (idLocalidad: number | string): Promise<IDireccion[]> => {
-       const url = `${ADDRESS_ENDPOINT}/localidad/${idLocalidad}`;
-       // Este endpoint probablemente requiere autenticación
-       try {
-          const response = await http.get<IDireccion[]>(url);
-           // Si el backend devuelve 200 con cuerpo null o lista vacía, devolvemos [].
-           if (response === null) {
-               return [];
-           }
-           return response;
-      } catch (error) {
-           // Si el backend devuelve 404 en caso de error, devolvemos [].
-           if (error instanceof Error && error.message.includes('Status: 404')) {
-              return [];
-          }
-          console.error(`Error fetching addresses by localidad ID ${idLocalidad}:`, error);
-          throw error; // Relanza otros errores
+  getAllByLocalidadId: async (
+    idLocalidad: number | string
+  ): Promise<IDireccion[]> => {
+    const url = `${ADDRESS_ENDPOINT}/localidad/${idLocalidad}`;
+    // Este endpoint probablemente requiere autenticación
+    try {
+      const response = await http.get<IDireccion[]>(url);
+      // Si el backend devuelve 200 con cuerpo null o lista vacía, devolvemos [].
+      if (response === null) {
+        return [];
       }
-   },
+      return response;
+    } catch (error) {
+      // Si el backend devuelve 404 en caso de error, devolvemos [].
+      if (error instanceof Error && error.message.includes("Status: 404")) {
+        return [];
+      }
+      console.error(
+        `Error fetching addresses by localidad ID ${idLocalidad}:`,
+        error
+      );
+      throw error; // Relanza otros errores
+    }
+  },
 
-   /**
+  /**
    * Obtiene todas las direcciones asociadas a un cliente.
    * Coincide con GET /direcciones/cliente/{idCliente}.
    * @param idCliente El ID del cliente.
    * @returns Una Promesa que resuelve con un array de IDireccion.
    * @throws Un error si la solicitud falla.
    */
-  getAllByClienteId: async (idCliente: number | string): Promise<IDireccion[]> => {
-       const url = `${ADDRESS_ENDPOINT}/cliente/${idCliente}`;
-       // Este endpoint probablemente requiere autenticación (el propio cliente o ADMIN)
-       try {
-          const response = await http.get<IDireccion[]>(url);
-           // Si el backend devuelve 200 con cuerpo null o lista vacía, devolvemos [].
-           if (response === null) {
-               return [];
-           }
-           return response;
-      } catch (error) {
-           // Si el backend devuelve 404 en caso de error, devolvemos [].
-           if (error instanceof Error && error.message.includes('Status: 404')) {
-              return [];
-          }
-           console.error(`Error fetching addresses by cliente ID ${idCliente}:`, error);
-          throw error; // Relanza otros errores
+  getAllByClienteId: async (
+    idCliente: number | string
+  ): Promise<IDireccion[]> => {
+    const url = `${ADDRESS_ENDPOINT}/cliente/${idCliente}`;
+    // Este endpoint probablemente requiere autenticación (el propio cliente o ADMIN)
+    try {
+      const response = await http.get<IDireccion[]>(url);
+      // Si el backend devuelve 200 con cuerpo null o lista vacía, devolvemos [].
+      if (response === null) {
+        return [];
       }
-   },
+      return response;
+    } catch (error) {
+      // Si el backend devuelve 404 en caso de error, devolvemos [].
+      if (error instanceof Error && error.message.includes("Status: 404")) {
+        return [];
+      }
+      console.error(
+        `Error fetching addresses by cliente ID ${idCliente}:`,
+        error
+      );
+      throw error; // Relanza otros errores
+    }
+  },
 
   // Métodos CRUD estándar (heredados de BaseController y expuestos por DireccionController)
   // Estos métodos probablemente requieren autenticación
@@ -111,9 +118,9 @@ export const addressService = {
    * @throws Un error si la solicitud falla.
    */
   create: async (addressData: Partial<IDireccion>): Promise<IDireccion> => {
-      const url = ADDRESS_ENDPOINT;
-      // Este endpoint probablemente requiere autenticación
-      return http.post<IDireccion>(url, addressData);
+    const url = ADDRESS_ENDPOINT;
+    // Este endpoint probablemente requiere autenticación
+    return http.post<IDireccion>(url, addressData);
   },
 
   /**
@@ -124,10 +131,11 @@ export const addressService = {
    * @returns Una Promesa que resuelve con la dirección actualizada.
    * @throws Un error si la solicitud falla.
    */
-  update: async (addressData: IDireccion): Promise<IDireccion> => { // Esperamos el objeto completo con ID
-      const url = ADDRESS_ENDPOINT;
-      // Este endpoint probablemente requiere autenticación
-      return http.put<IDireccion>(url, addressData);
+  update: async (addressData: IDireccion): Promise<IDireccion> => {
+    // Esperamos el objeto completo con ID
+    const url = ADDRESS_ENDPOINT;
+    // Este endpoint probablemente requiere autenticación
+    return http.put<IDireccion>(url, addressData);
   },
 
   /**
@@ -138,8 +146,8 @@ export const addressService = {
    * @throws Un error si la solicitud falla.
    */
   delete: async (id: number | string): Promise<void> => {
-      const url = `${ADDRESS_ENDPOINT}/${id}`;
-      // Este endpoint probablemente requiere autenticación
-      return http.delete<void>(url);
+    const url = `${ADDRESS_ENDPOINT}/${id}`;
+    // Este endpoint probablemente requiere autenticación
+    return http.delete<void>(url);
   },
 };

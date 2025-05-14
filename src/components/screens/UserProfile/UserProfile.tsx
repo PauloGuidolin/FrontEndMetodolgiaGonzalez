@@ -2,11 +2,15 @@ import { Header } from "../../ui/Header/Header"
 import { Footer } from "../../ui/Footer/Footer"
 import styles from './UserProfile.module.css'
 import { useState } from "react"
-import { EditUserData } from "../../ui/Modal/EditUserData/EditUserData"
+import { EditPersonalData } from "../../ui/Modal/EditPersonalData/EditPersonalData"
 
 export const UserProfile = () => {
 
     const [ openEditModal , setopenEditModal] = useState(false)
+
+    const closeEditPersonalData = () => {
+        setopenEditModal(false)
+    }
 
     return (
         <>
@@ -47,7 +51,7 @@ export const UserProfile = () => {
                         <button className={styles.deleteButton}>Eliminar Cuenta</button>
                     </div>
                 </div>
-                {openEditModal && <EditUserData />}
+                {openEditModal && <EditPersonalData closeEditPersonalData={closeEditPersonalData} />}
             </div>
             <Footer/>
         </>
