@@ -1,0 +1,139 @@
+/* Archivo: src/ui/FilterPanel/FilterPanel.module.css */
+
+.filterPanelOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: flex-end; /* Alinea el panel a la derecha */
+    z-index: 1000;
+    /* Animación de entrada (opcional) */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Clase para mostrar el overlay */
+.filterPanelOverlay.isOpen {
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.filterPanel {
+    background-color: #fff;
+    width: 300px; /* Ancho del panel */
+    max-width: 90%; /* Máximo 90% del ancho de la pantalla en móviles */
+    height: 100%;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    /* Animación de entrada (opcional) */
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+/* Clase para mostrar el panel con animación */
+.filterPanelOverlay.isOpen .filterPanel {
+     transform: translateX(0);
+}
+
+
+.filterPanelHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.filterPanelHeader h2 {
+    margin: 0;
+    font-size: 1.2em;
+}
+
+.closeFilterButton {
+    background: none;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    color: #333;
+}
+
+.filterPanelContent {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.filterSection {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.filterSection h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    font-size: 1em;
+    color: #555;
+    text-transform: uppercase;
+}
+
+.filterSelect,
+.priceInput { /* Estilos para select e inputs de precio */
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box; /* Incluye padding y borde en el ancho */
+}
+
+.priceInput {
+    margin-bottom: 10px; /* Espacio entre inputs de precio */
+}
+
+/* Estilos para checkboxes (ejemplo en la sección de Color y Talla) */
+.filterSection input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+.filterSection label {
+    font-size: 0.9em;
+}
+
+
+.filterPanelFooter {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    text-align: center;
+}
+
+.applyFilterButton {
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease;
+}
+
+.applyFilterButton:hover {
+    background-color: #333;
+}
+
+/* --- Media Queries para Responsividad --- */
+@media (max-width: 768px) {
+    .filterPanel {
+        width: 100%;
+        max-width: 100%;
+    }
+}
+

@@ -1,92 +1,118 @@
 // Archivo: src/components/ProductCard/ProductCard.tsx
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Usamos react-router-dom para navegación
-import { ProductoDTO } from '../../../dto/ProductoDTO'; // Importamos la interfaz del DTO de Producto
-import styles from './ProductCard.module.css'; // Importamos el archivo de módulo CSS
+import { useNavigate } from 'react-router-dom';
+import styles from './ProductCard.module.css';
+import { ProductoDTO } from '../../../dto/ProductoDTO';
+import { ProductoDetalleDTO } from '../../../dto/ProductoDetalleDTO';
+import { CategoriaDTO } from '../../../dto/CategoriaDTO';
 
-// Definimos las props que el componente ProductCard espera recibir
+
+
 interface ProductCardProps {
-  product: ProductoDTO; // El producto a mostrar, usando la interfaz ProductoDTO
+    product: ProductoDTO;
 }
 
-// Componente funcional ProductCard
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const navigate = useNavigate(); // Hook para la navegación
+    const navigate = useNavigate();
 
-  // Función para manejar el clic en la tarjeta
-  // Podríamos navegar a una página de detalle del producto
-  const handleCardClick = () => {
-    // Navegar a la ruta del detalle del producto.
-    // Asume que tienes una ruta configurada como '/product/:id'
-    navigate(`/product/${product.id}`);
-    console.log(`Clicked on product: ${product.denominacion}`);
-  };
+    const handleCardClick = () => {
+        if (product.id !== undefined && product.id !== null) {
+            navigate(`/product/${product.id}`);
+        } else {
+            console.warn(`Product ${product.denominacion || 'Unknown Product'} has no ID, cannot navigate.`);
+        }
+    };
 
-  // Usamos las clases del módulo CSS para estilizar la tarjeta
-  return (
-    <div
-      className={styles.card} // Usamos la clase 'card' del módulo CSS
-      onClick={handleCardClick} // Manejador de clic en la tarjeta
-    >
-      {/* Imagen del producto */}
-      {/* Usamos la primera imagen de la lista 'imagenes' del DTO */}
-      {/* Añadimos un fallback si no hay imágenes o la URL falla */}
-      <div className={styles.imageContainer}> {/* Contenedor de imagen con clase CSS Module */}
-        <img
-          className={styles.productImage} // Usamos la clase 'productImage' del módulo CSS
-          src={product.imagenes && product.imagenes.length > 0 ? product.imagenes[0] : 'https://placehold.co/600x400/E2E8F0/FFFFFF?text=Sin+Imagen'}
-          alt={product.denominacion || 'Imagen de producto'}
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.onerror = null; // Evita bucles infinitos de error
-            target.src = 'https://placehold.co/600x400/E2E8F0/FFFFFF?text=Error+al+cargar+imagen'; // Fallback en caso de error de carga
-          }}
-        />
-      </div>
+    const hasPromotion = product.tienePromocion ?? false;
+
+    // Extraer colores únicos de los detalles para mostrar
+    // Usar product.productos_detalles según el nombre del campo en el DTO
+    const uniqueColors = Array.from(new Set(Array.isArray(product.productos_detalles) ? product.productos_detalles.map((detail: ProductoDetalleDTO) => detail.color).filter(Boolean) : []));
+
+    // Extraer tallas únicas de los detalles para mostrar
+    // Usar product.productos_detalles según el nombre del campo en el DTO
+    const uniqueSizes = Array.from(new Set(Array.isArray(product.productos_detalles) ? product.productos_detalles.map((detail: ProductoDetalleDTO) => detail.talle).filter(Boolean) : []));
+
+    // Obtener la URL de la primera imagen
+    // Acceder a la propiedad 'denominacion' del objeto ImagenDTO
+    const firstImageUrl = Array.isArray(product.imagenes) && product.imagenes.length > 0 && product.imagenes[0]
+        ? product.imagenes[0].denominacion // <--- Acceder a .denominacion para obtener la URL
+        : 'https://placehold.co/600x400/E2E8F0/FFFFFF?text=Sin+Imagen'; // Placeholder si no hay imagen
+
+    // Logs de depuración para verificar los datos recibidos en el frontend
+    console.log(`Card for product ${product.denominacion || product.id}:`);
+    console.log("  precioOriginal:", product.precioOriginal);
+    console.log("  precioFinal:", product.precioFinal);
+    console.log("  tienePromocion:", product.tienePromocion);
+    console.log("  imagenes:", product.imagenes); // Verifica que sean objetos con denominacion
+    console.log("  productos_detalles:", product.productos_detalles); // Verifica que sean objetos
+    console.log("  categorias:", product.categorias); // Verifica que sean objetos con id/denominacion
 
 
-      {/* Contenido de la tarjeta */}
-      <div className={styles.cardContent}> {/* Contenido con clase CSS Module */}
-        {/* Nombre del producto */}
-        <div className={styles.productName}>{product.denominacion}</div> {/* Nombre con clase CSS Module */}
+    return (
+        <div className={styles.card} onClick={handleCardClick}>
+            {hasPromotion && (<span className={styles.promotionIndicator}>¡Promoción!</span>)}
+            <div className={styles.imageContainer}>
+                <img
+                    className={styles.productImage}
+                    src={firstImageUrl} // Usar la URL calculada
+                    alt={product.denominacion || 'Imagen de producto'}
+                    onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src = 'https://placehold.co/600x400/E2E8F0/FFFFFF?text=Error+al+cargar+imagen'; console.error(`Error loading image for product: ${product.denominacion || 'Unknown Product'}`, 'Failed URL:', firstImageUrl); }}
+                />
+            </div>
 
-        {/* Categorías del producto */}
-        {/* Mostramos las categorías como etiquetas */}
-        <div className={styles.categoryContainer}> {/* Contenedor de categorías con clase CSS Module */}
-            {product.categorias?.map((categoria, index) => (
-                <span key={index} className={styles.categoryTag}> {/* Etiqueta de categoría con clase CSS Module */}
-                    {categoria}
-                </span>
-            ))}
+            <div className={styles.cardContent}>
+                <div className={styles.productName}>{product.denominacion || 'Producto Desconocido'}</div>
+
+                {/* Categorías - Usar objetos CategoriaDTO y key por ID */}
+                {Array.isArray(product.categorias) && product.categorias.length > 0 && (
+                    <div className={styles.categoryContainer}>
+                        {product.categorias.map((categoria: CategoriaDTO, index) => {
+                            // Usar el ID de la categoría como key si está disponible
+                            const key = categoria.id !== undefined && categoria.id !== null ? categoria.id : categoria.denominacion || index;
+                            const categoryName = categoria.denominacion;
+
+                             if (!categoryName || typeof categoryName !== 'string') {
+                                 console.warn("Skipping rendering for invalid category item in ProductCard:", categoria);
+                                 return null;
+                             }
+
+                            return (
+                                <span key={key} className={styles.categoryTag}>{categoryName}</span>
+                            );
+                        })}
+                    </div>
+                )}
+
+                {/* Contenedor para Colores y Tallas - Usar product.productos_detalles */}
+                {Array.isArray(product.productos_detalles) && product.productos_detalles.length > 0 && (
+                    <div className={styles.detailsContainer}>
+                        {uniqueColors.length > 0 && (<div><strong>Colores:</strong> {uniqueColors.join(', ')}</div>)}
+                        {uniqueSizes.length > 0 && (<div><strong>Tallas:</strong> {uniqueSizes.join(', ')}</div>)}
+                    </div>
+                )}
+
+                {/* Precio del producto - Mostrar Original si hay promo, siempre mostrar Final */}
+                <div className={styles.priceContainer}>
+                    {/* Muestra precio original (del DTO) si tiene promoción y es un número válido */}
+                    {hasPromotion && typeof product.precioOriginal === 'number' && product.precioOriginal > 0 && (
+                         <span className={styles.originalPrice}>${product.precioOriginal.toFixed(2)}</span>
+                    )}
+                    {/* Muestra el precio final (del DTO), usando precioOriginal como fallback si precioFinal es null */}
+                    {/* Asegurarse de que el precio final sea un número válido antes de toFixed */}
+                    <span className={styles.finalPrice}>
+                        ${typeof product.precioFinal === 'number'
+                            ? product.precioFinal.toFixed(2)
+                            : (typeof product.precioOriginal === 'number' ? product.precioOriginal.toFixed(2) : '0.00') // Fallback a original si final no es numérico
+                        }
+                    </span>
+                </div>
+
+            </div>
+
         </div>
-
-        {/* Precio del producto */}
-        {/* Mostramos el precio original (si es diferente del final) y el precio final */}
-        <div className={styles.priceContainer}> {/* Contenedor de precios con clase CSS Module */}
-            {product.tienePromocion && product.precioOriginal !== product.precioFinal && (
-                <span className={styles.originalPrice}>${product.precioOriginal?.toFixed(2)}</span> // Precio original con clase CSS Module
-            )}
-            <span className={styles.finalPrice}>${product.precioFinal?.toFixed(2)}</span> {/* Precio final con clase CSS Module */}
-        </div>
-
-        {/* Indicador de promoción (opcional) */}
-        {product.tienePromocion && (
-             <span className={styles.promotionIndicator}> {/* Indicador de promoción con clase CSS Module */}
-                ¡Promoción!
-             </span>
-        )}
-      </div>
-
-      {/* Pie de la tarjeta (opcional) */}
-      {/* Si usas el pie, también deberías añadirle una clase del módulo CSS */}
-      {/* <div className={styles.cardFooter}>
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-          Ver Detalles
-        </button>
-      </div> */}
-    </div>
-  );
+    );
 };
 
 export default ProductCard;

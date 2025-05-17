@@ -1,29 +1,18 @@
-import { Sexo } from "../../types/ISexo";
+import { CategoriaDTO } from "./CategoriaDTO";
+import { ImagenDTO } from "./ImagenDTO";
+import { ProductoDetalleDTO } from "./ProductoDetalleDTO";
+
 
 export interface ProductoDTO {
-    // Mapea Long a number en TypeScript
     id: number;
-
-    // Mapea String a string
     denominacion: string;
-
-    // Mapea Double a number
     precioOriginal: number;
-
-    // Mapea Double a number (precio con descuento aplicado)
-    precioFinal: number;
-
-    // Mapea List<String> a string[] (lista de nombres de categorías)
-    categorias: string[];
-
-    // Mapea el enum Sexo a string (asumiendo que se serializa como string)
-    // Si necesitas el enum tipificado, importa Sexo y usa 'sexo: Sexo;'
-    sexo?: Sexo;
-
-    // Mapea boolean a boolean
+    precioFinal: number | null;
+    categorias: CategoriaDTO[]; // Array de objetos CategoriaDTO
+    sexo: string; // Mantendremos string en el frontend
     tienePromocion: boolean;
-
-    // Mapea List<String> a string[] (asumiendo que es una lista de URLs de imágenes como strings)
-    imagenes: string[];
+    imagenes: ImagenDTO[]; // Array de objetos ImagenDTO
+    productos_detalles: ProductoDetalleDTO[]; // Nombre corregido a 'productos_detalles'
+    descuentos: any[]; // Si no has definido DescuentoDTO, 'any[]' está bien por ahora
+    // Añade otras propiedades que tu backend envíe
 }
-
