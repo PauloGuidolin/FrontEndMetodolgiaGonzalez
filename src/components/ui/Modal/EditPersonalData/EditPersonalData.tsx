@@ -8,6 +8,7 @@ interface EditPersonalDataProps {
 export const EditPersonalData: FC<EditPersonalDataProps> = ({closeEditPersonalData}) => {
   return (
     <>
+      <div className={styles.background}></div>
       <div className={styles.modal}>
         <h2 className={styles.modalTitle}>Editar Datos</h2>
 
