@@ -1,82 +1,246 @@
+/* src/components/ui/Header/Header.module.css */
+
+.containerTitleUp {
+    background-color: black;
+    color: white;
+    display: flex;
+    justify-content: center; /* Centra horizontalmente el texto */
+    align-items: center; /* Centra verticalmente el texto */
+    width: 100%;
+    padding: 8px 0; /* Un poco de padding arriba y abajo */
+    font-size: 0.85em; /* Tamaño de fuente más pequeño para el título superior */
+    text-align: center;
+}
+
 .containerPrincipal {
-  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  display: grid;
-  grid-template-columns: 1fr 3fr 1fr;
-  align-items: end;
-  justify-items: center;
-  width: 98vw;
-  padding-bottom: 10px;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    display: flex; /* Usamos flexbox para mayor control y responsividad */
+    justify-content: space-between; /* Espacio entre las secciones */
+    align-items: center; /* Alinea los elementos verticalmente al centro */
+    padding: 10px 20px; /* Padding a los lados y arriba/abajo */
+    width: 100%;
+    box-sizing: border-box; /* Incluye padding en el ancho total */
+    border-bottom: 1px solid #e0e0e0; /* Un borde sutil en la parte inferior */
 }
 
-.containerTitleUp{
-  background-color: black;
-  color: white;
-  align-items: center;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
+.containerLogo .LogoBoton { /* Corregido: .LogoBoton dentro de .containerLogo */
+    width: 120px; /* Tamaño un poco más pequeño para el logo */
+    height: 70px; /* Ajusta la altura proporcionalmente */
+    object-fit: contain; /* Asegura que la imagen no se distorsione */
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
 
-.containerLogo {
-  img {
-    width: 140px;
-    height: 80px;
-  }
+.containerLogo .LogoBoton:hover {
+    transform: scale(0.98); /* Ligero encogimiento al pasar el ratón */
+    opacity: 0.85;
 }
 
 .containerTitles {
-  display: flex;
-  gap: 20px;
-  h3:hover{
-    cursor: pointer;
-    border-bottom: 2px solid;
-    position: relative;
-    display: inline-block;
-  }
+    display: flex;
+    gap: 30px; /* Más espacio entre los títulos de categoría */
+    align-items: center;
 }
 
-.containerSearch{
+.containerTitles h3 {
+    margin: 0; /* Elimina el margen por defecto de los h3 */
+    padding-bottom: 5px; /* Espacio para la línea inferior */
+    font-size: 1.1em; /* Tamaño de fuente para las categorías */
+    color: #333;
+    position: relative; /* Necesario para el pseudo-elemento */
+}
+
+.containerTitles h3:hover {
+    cursor: pointer;
+    /* Usamos un pseudo-elemento para la línea inferior para una animación más suave */
+    color: #000; /* Color del texto al pasar el ratón */
+}
+
+.containerTitles h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0; /* Inicialmente no hay ancho */
+    height: 2px; /* Grosor de la línea */
+    background-color: #000; /* Color de la línea */
+    transition: width 0.3s ease-in-out; /* Animación de ancho */
+}
+
+.containerTitles h3:hover::after {
+    width: 100%; /* La línea se extiende al 100% al pasar el ratón */
+}
+
+
+.containerDropDown {
+    position: absolute;
+    top: calc(100% + 5px); /* Posiciona el dropdown justo debajo del h3 con un pequeño espacio */
+    left: 50%; /* Centra el dropdown relativo al h3 */
+    transform: translateX(-50%); /* Ajusta el centro horizontal */
+    z-index: 999; /* Asegura que el dropdown esté por encima de otros elementos */
+    /* Añadir estilos para el dropdown box, ej: background, border, box-shadow */
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+    min-width: 150px; /* Ancho mínimo para los dropdowns */
+    box-sizing: border-box;
+}
+
+.containerSearch {
     display: flex;
-    flex-direction: column;
-    gap: 40px;
+    flex-direction: column; /* Apila los elementos verticalmente */
+    gap: 15px; /* Espacio entre los grupos de búsqueda/compra */
+    align-items: flex-end; /* Alinea los elementos a la derecha */
 }
 
 .containerLogin {
-  display: flex;
-  gap: 5px;
-  h4:hover{
+    display: flex;
+    gap: 10px; /* Espacio entre los elementos de login/perfil */
+    align-items: center; /* Alinea verticalmente */
+    font-size: 0.9em; /* Tamaño de fuente ligeramente más pequeño */
+}
+
+.containerLogin h4 {
+    margin: 0;
+    color: #555;
+    transition: color 0.2s ease-in-out;
+}
+
+.containerLogin h4:hover {
     cursor: pointer;
-    border-bottom: 1px solid;
-  }
+    color: #000; /* Oscurece el texto al pasar el ratón */
+    text-decoration: underline; /* Subrayado al pasar el ratón */
+}
+
+.containerLogin p {
+    margin: 0;
+    color: #ccc; /* Color para el separador */
+}
+
+.profileImage {
+    width: 35px; /* Tamaño de la imagen de perfil */
+    height: 35px;
+    border-radius: 50%; /* Para que sea redonda */
+    object-fit: cover; /* Para que la imagen no se distorsione */
+    border: 1px solid #ddd; /* Borde sutil para la imagen */
+}
+
+.profileIcon {
+    font-size: 35px; /* Tamaño del ícono de perfil */
+    color: #777; /* Color del ícono */
+}
+
+.userName {
+    font-weight: 600; /* Un poco más de negrita para el nombre/email */
+    color: #333;
 }
 
 .containerPurchase {
-  display: flex;
-  gap: 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
 }
 
-.containerDropDown {
-  position: absolute;
-  top: 100%;
-  left: 0;
+.containerPurchase h3 {
+    margin: 0;
+    font-size: 1em; /* Tamaño de fuente para Búsqueda y Carrito */
+    color: #555;
+    transition: color 0.2s ease-in-out;
 }
 
-.botonCarrito{
-  cursor: pointer; /* Cambia el cursor a una mano para indicar que es interactivo */
-  transition: color 0.3s ease-in-out; /* Añade una transición suave para el cambio de color */
-  color: #333; /* Color de texto normal */
+.containerPurchase h3:hover {
+    color: #000;
+}
+
+.botonCarrito {
+    cursor: pointer;
+    /* Si tienes un ícono de carrito, aquí puedes estilizarlo */
+    /* Por ejemplo, si fuera un <i> o un <span> */
+    font-size: 1.1em; /* Ajusta el tamaño si es texto */
+    font-weight: bold;
+    color: #000; /* Color inicial del botón de carrito */
+    transition: color 0.3s ease-in-out, transform 0.2s ease-in-out;
 }
 
 .botonCarrito:hover {
-  color: #007bff; /* Cambia el color al hacer hover (azul de ejemplo) */
+    color: #007bff; /* Un color de acento, o el color de tu marca */
+    transform: scale(1.05); /* Ligeramente más grande al pasar el ratón */
 }
 
-.LogoBoton {
-  cursor: pointer; /* Indica que es interactivo */
-  transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; /* Transiciones suaves para los efectos */
+/* --- Media Queries para Responsividad --- */
+
+/* Pantallas pequeñas (ej. móviles) */
+@media (max-width: 768px) {
+    .containerPrincipal {
+        flex-direction: column; /* Apila las secciones verticalmente */
+        align-items: center; /* Centra los elementos */
+        padding: 10px;
+    }
+
+    .containerLogo .LogoBoton {
+        width: 100px;
+        height: 60px;
+        margin-bottom: 10px;
+    }
+
+    .containerTitles {
+        flex-wrap: wrap; /* Permite que los títulos se envuelvan en varias líneas */
+        justify-content: center; /* Centra los títulos */
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+
+    .containerTitles h3 {
+        font-size: 1em;
+    }
+
+    .containerSearch {
+        flex-direction: row; /* Vuelve a poner búsqueda y compra en fila */
+        justify-content: space-around; /* Distribuye el espacio */
+        width: 100%;
+        margin-top: 10px;
+        gap: 10px;
+    }
+
+    .containerLogin {
+        font-size: 0.8em;
+        gap: 5px;
+    }
+
+    .profileImage, .profileIcon {
+        width: 30px;
+        height: 30px;
+        font-size: 30px;
+    }
+
+    .containerPurchase h3, .botonCarrito {
+        font-size: 0.9em;
+    }
 }
 
-.LogoBoton:hover {
-  transform: scale(0.95);
-  opacity: 0.7;
+/* Pantallas extra pequeñas (ej. móviles muy pequeños) */
+@media (max-width: 480px) {
+    .containerTitleUp h3 {
+        font-size: 0.75em;
+    }
+
+    .containerTitles {
+        gap: 10px;
+    }
+
+    .containerTitles h3 {
+        font-size: 0.9em;
+    }
+
+    .containerLogin, .containerPurchase {
+        flex-direction: column; /* Apila los elementos de login y compra */
+        gap: 5px;
+        align-items: center;
+    }
+
+    .containerLogin p { /* Oculta los separadores en móviles muy pequeños si molestan */
+        display: none;
+    }
 }

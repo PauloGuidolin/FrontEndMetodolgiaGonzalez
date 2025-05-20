@@ -1,127 +1,160 @@
 .modalOverlay {
-    position: fixed;
+    position: fixed; /* Esto es crucial para que el modal flote sobre el contenido */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    padding-top: 50px;
-    z-index: 1000;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-  }
-  
-  .modalOverlay.active {
+    align-items: center;
+    z-index: 1000; /* Asegura que esté por encima de la mayoría de los elementos */
+
+    /* Propiedades para ocultar/mostrar */
+    opacity: 0;
+    visibility: hidden;
+    /* Transición para un efecto suave al aparecer/desaparecer */
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* *** CAMBIO CLAVE AQUÍ: Mayor especificidad para la clase 'active' *** */
+/* Cuando el modalOverlay tiene también la clase active, se vuelve visible */
+.modalOverlay.active {
     opacity: 1;
     visibility: visible;
-  }
-  
-  .modalContent {
-    background-color: #fff;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 30px; /* Aumentado para mejor espaciado */
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
     width: 90%;
-    max-width: 350px; /* Ajustado para ser más angosto */
-    overflow: hidden;
-  }
-  
-  .modalHeader {
-    padding: 20px;
-    border-bottom: 1px solid #eee;
+    max-width: 450px; /* Ancho máximo para el modal */
+    box-sizing: border-box; /* Incluir padding y border en el ancho/alto */
+
+    /* Animación de entrada opcional (descomentar si quieres) */
+    /* transform: translateY(-20px); */
+    /* transition: transform 0.3s ease; */
+}
+
+/* Animación de entrada opcional para el contenido */
+/* .modalOverlay.active .modalContent {
+    transform: translateY(0);
+} */
+
+
+.modalHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-  
-  .logoContainer {
+    margin-bottom: 25px; /* Espacio debajo del encabezado */
+    border-bottom: 1px solid #eee; /* Línea separadora */
+    padding-bottom: 15px;
+}
+
+.logoContainer {
     display: flex;
     align-items: center;
-    gap: 10px;
-  }
-  
-  .logo {
-    width: 30px; /* Ajusta el tamaño del logo */
-    height: auto;
-  }
-  
-  .modalHeader h2 {
+    gap: 15px; /* Espacio entre logo y título */
+}
+
+.logo {
+    height: 40px; /* Tamaño del logo */
+    width: auto;
+}
+
+.modalHeader h2 {
     margin: 0;
-    font-size: 1.2em; /* Reducido el tamaño del título */
-  }
-  
-  .closeButton {
-    font-size: 2em;
-    font-weight: bold;
-    color: #aaa;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-    line-height: 1;
-  }
-  
-  .closeButton:hover {
+    font-size: 1.8em; /* Tamaño de fuente del título */
     color: #333;
-  }
-  
-  .modalBody {
-    padding: 20px;
-  }
-  
-  .formGroup {
-    margin-bottom: 15px;
-  }
-  
-  .formGroup label {
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 2em; /* Tamaño de la 'x' */
+    color: #999;
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+    color: #333;
+}
+
+.modalBody {
+    font-size: 1em;
+}
+
+.formGroup {
+    margin-bottom: 20px; /* Espacio entre grupos de formulario */
+}
+
+.formGroup label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-weight: bold;
-    font-size: 0.8em; /* Reducido el tamaño de la etiqueta */
     color: #555;
-  }
-  
-  .formGroup input[type="email"],
-  .formGroup input[type="password"] {
-    width: calc(100% - 12px);
-    padding: 8px;
-    border: 1px solid #ccc;
+}
+
+.formGroup input[type="email"],
+.formGroup input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 0.9em; /* Reducido el tamaño del texto del input */
-  }
-  
-  .loginButton {
-    background-color: #000;
-    color: #fff;
-    padding: 10px 15px;
+    font-size: 1em;
+    box-sizing: border-box; /* Incluir padding en el ancho */
+}
+
+.formGroup input:focus {
+    outline: none;
+    border-color: #007bff; /* Color de borde al enfocar */
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.errorText {
+    color: red;
+    font-size: 0.85em;
+    margin-top: 5px;
+}
+
+.loginButton, .registerLink {
+    width: 100%;
+    padding: 15px;
     border: none;
     border-radius: 4px;
+    font-size: 1.1em;
     cursor: pointer;
-    font-size: 0.9em; /* Reducido el tamaño del texto del botón */
-    width: 100%;
-    display: block;
-    margin-bottom: 10px;
-  }
-  
-  .loginButton:hover {
-    opacity: 0.9;
-  }
-  
-  .registerLink {
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-top: 10px; /* Espacio entre botones */
+}
+
+.loginButton {
+    background-color: #000; /* Fondo negro como Adidas */
+    color: white;
+    font-weight: bold;
+}
+
+.loginButton:hover:not(:disabled) {
+    background-color: #333;
+}
+
+.loginButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.registerLink {
     background-color: transparent;
     color: #000;
-    border: 1px solid #000;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9em; /* Reducido el tamaño del texto del enlace */
-    width: 100%;
-    display: block;
-    text-align: center;
-    text-decoration: none;
-  }
-  
-  .registerLink:hover {
-    background-color: #f0f0f0;
-  }
+    border: 1px solid #000; /* Borde para el botón de registro */
+    margin-top: 15px; /* Más espacio para distinguirlo */
+}
+
+.registerLink:hover {
+    background-color: #eee;
+    color: #333;
+}

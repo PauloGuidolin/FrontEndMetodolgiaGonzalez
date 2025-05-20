@@ -7,135 +7,165 @@
     background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
-    align-items: flex-start;
-    padding-top: 50px;
-    z-index: 1000;
-    transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-  }
-  
-  .modalOverlay.active {
+    align-items: center;
+    z-index: 1000; /* Asegura que esté por encima de la mayoría de los elementos */
+
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* *** CAMBIO CLAVE AQUÍ: Mayor especificidad para la clase 'active' *** */
+.modalOverlay.active {
     opacity: 1;
     visibility: visible;
-  }
-  
-  .modalContent {
-    background-color: #fff;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 30px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     width: 90%;
-    max-width: 350px; /* Ajustado para ser más angosto */
-    overflow: hidden;
-  }
-  
-  .modalHeader {
-    padding: 20px;
-    border-bottom: 1px solid #eee;
+    max-width: 500px; /* Un poco más ancho para el formulario de registro */
+    box-sizing: border-box;
+
+    /* Animación de entrada opcional */
+    /* transform: translateY(-20px); */
+    /* transition: transform 0.3s ease; */
+}
+
+/* .modalOverlay.active .modalContent {
+    transform: translateY(0);
+} */
+
+.modalHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-  }
-  
-  .logoContainer {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.logoContainer {
     display: flex;
     align-items: center;
-    gap: 10px;
-  }
-  
-  .logo {
-    width: 30px; /* Ajusta el tamaño del logo */
-    height: auto;
-  }
-  
-  .modalHeader h2 {
+    gap: 15px;
+}
+
+.logo {
+    height: 40px;
+    width: auto;
+}
+
+.modalHeader h2 {
     margin: 0;
-    font-size: 1.2em; /* Reducido el tamaño del título */
-  }
-  
-  .closeButton {
-    font-size: 2em;
-    font-weight: bold;
-    color: #aaa;
-    cursor: pointer;
-    border: none;
-    background: none;
-    padding: 0;
-    line-height: 1;
-  }
-  
-  .closeButton:hover {
+    font-size: 1.8em;
     color: #333;
-  }
-  
-  .modalBody {
-    padding: 20px;
-  }
-  
-  .formGroup {
-    margin-bottom: 15px;
-  }
-  
-  .formGroup label {
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 2em;
+    color: #999;
+    cursor: pointer;
+    padding: 5px 10px;
+    transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+    color: #333;
+}
+
+.modalBody {
+    font-size: 1em;
+}
+
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.formGroup label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-weight: bold;
-    font-size: 0.8em; /* Reducido el tamaño de la etiqueta */
     color: #555;
-  }
-  
-  .formGroup input[type="email"],
-  .formGroup input[type="password"],
-  .formGroup input[type="text"] {
-    width: calc(100% - 12px);
-    padding: 8px;
-    border: 1px solid #ccc;
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="email"],
+.formGroup input[type="password"],
+.formGroup input[type="number"] { /* Incluye type="number" */
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 0.9em; /* Reducido el tamaño del texto del input */
-  }
-  
-  .radioGroup {
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+.formGroup input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.radioGroup {
     display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-bottom: 15px;
-  }
-  
-  .radioGroup input[type="radio"] {
-    margin-right: 5px;
-  }
-  
-  .registerButton,
-  .cancelButton {
-    background-color: #000;
-    color: #fff;
-    padding: 10px 15px;
+    gap: 20px; /* Espacio entre las opciones de radio */
+    margin-top: 5px;
+}
+
+.radioGroup label {
+    font-weight: normal; /* Labels de radio menos prominentes */
+    margin-bottom: 0;
+    display: flex;
+    align-items: center; /* Alinea texto y radio button */
+    gap: 5px;
+}
+
+.errorText {
+    color: red;
+    font-size: 0.85em;
+    margin-top: 5px;
+}
+
+.registerButton, .cancelButton {
+    width: 100%;
+    padding: 15px;
     border: none;
     border-radius: 4px;
+    font-size: 1.1em;
     cursor: pointer;
-    font-size: 0.9em; /* Reducido el tamaño del texto del botón */
-    width: 100%;
-    display: block;
-    margin-bottom: 10px;
-    text-align: center;
-  }
-  
-  .registerButton:hover,
-  .cancelButton:hover {
-    opacity: 0.9;
-  }
-  
-  .cancelButton {
+    transition: background-color 0.2s ease, color 0.2s ease;
+    margin-top: 10px;
+}
+
+.registerButton {
+    background-color: #000;
+    color: white;
+    font-weight: bold;
+}
+
+.registerButton:hover:not(:disabled) {
+    background-color: #333;
+}
+
+.registerButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.cancelButton {
     background-color: transparent;
     color: #000;
     border: 1px solid #000;
-    padding: 10px 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 0.9em; /* Reducido el tamaño del texto del botón */
-    width: 100%;
-    display: block;
-    text-align: center;
-  }
-  
-  .cancelButton:hover {
-    background-color: #f0f0f0;
-  }
+    margin-top: 15px;
+}
+
+.cancelButton:hover {
+    background-color: #eee;
+    color: #333;
+}
