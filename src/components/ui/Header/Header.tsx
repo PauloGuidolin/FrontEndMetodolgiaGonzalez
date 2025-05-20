@@ -11,6 +11,7 @@ import { DropDownSport } from "../Modal/DropDownSport/DropDownSport";
 // Importa un ícono de React Icons para el perfil (asegúrate de tener 'react-icons' instalado: npm install react-icons)
 import { FaUserCircle } from 'react-icons/fa'; // O FaUserAlt, FaUser, etc.
 import { useAuthStore } from "../../../store/authStore";
+import { FaSearch } from "react-icons/fa";
 
 export const Header = () => {
   // Estados para los dropdowns de categorías
@@ -126,7 +127,7 @@ export const Header = () => {
             )}
           </h3>
         </div>
-        <div className={styles.containerSearch}>
+        <div className={styles.containerRight}>
           {/* Lógica condicional para mostrar Iniciar Sesión/Cerrar Sesión y Perfil */}
           <div className={styles.containerLogin}>
             {isAuthenticated ? (
@@ -181,7 +182,12 @@ export const Header = () => {
             )}
           </div>
           <div className={styles.containerPurchase}>
-            <h3>Busqueda</h3>
+              {/* Hay que pasar el siguiente div a FORM y manejar el search con una function */}
+              <div className={styles.containerSearch}>
+                <FaSearch className={styles.searchIcon} />
+                <input type="text" placeholder="Buscar" />
+              </div>
+
             <h3
               className={styles.botonCarrito}
               onClick={() => navigate("/CartScreen")}

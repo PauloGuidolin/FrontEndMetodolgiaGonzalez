@@ -88,7 +88,7 @@
     box-sizing: border-box;
 }
 
-.containerSearch {
+.containerRight {
     display: flex;
     flex-direction: column; /* Apila los elementos verticalmente */
     gap: 15px; /* Espacio entre los grupos de búsqueda/compra */
@@ -243,4 +243,31 @@
     .containerLogin p { /* Oculta los separadores en móviles muy pequeños si molestan */
         display: none;
     }
+}
+
+.containerSearch {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  background-color: rgb(221, 221, 221);
+  padding: 10px;
+  border-radius: 10px;
+  gap: 5px;
+  input {
+    flex: 1;
+    border: none;
+    background-color: rgb(221, 221, 221);
+    color: #000;
+    font-size: 15px;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+  }
+  input:focus {
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.searchIcon {
+  color: #555;
+  font-size: 18px;
 }
