@@ -3,13 +3,19 @@ import { Footer } from "../../ui/Footer/Footer"
 import styles from './UserProfile.module.css'
 import { useState } from "react"
 import { EditPersonalData } from "../../ui/Modal/EditPersonalData/EditPersonalData"
+import EditAcccesData from "../../ui/Modal/EditAccesData/EditAcccesData"
 
 export const UserProfile = () => {
 
-    const [ openEditModal , setopenEditModal] = useState(false)
+    const [ openEditPersonalDataModal , setEditPersonalDataModal] = useState(false)
+    const [ openEditAccesDataModal , setEditAccesDataModal] = useState(false)
 
     const closeEditPersonalData = () => {
-        setopenEditModal(false)
+        setEditPersonalDataModal(false)
+    }
+
+    const closeEditAccesData = () => {
+        setEditAccesDataModal(!openEditAccesDataModal)
     }
 
     return (
@@ -36,7 +42,7 @@ export const UserProfile = () => {
                         <p>Fecha Nacimiento:</p>
                         <p>Sexo: </p>
                         <p>Direccion: </p>
-                        <button className={styles.editButton} onClick={() => setopenEditModal(!openEditModal)}>Editar</button>
+                        <button className={styles.editButton} onClick={() => setEditPersonalDataModal(!openEditPersonalDataModal)}>Editar</button>
                     </div>
 
                     <div>
@@ -44,14 +50,15 @@ export const UserProfile = () => {
                         <p>Correo Electronico:</p>
                         <p>teampolenta@gmail.com</p>
                         <p>Contraseña: ****</p>
-                        <button className={styles.editButton}>Editar</button>
+                        <button className={styles.editButton} onClick={closeEditAccesData}>Editar</button>
                     </div>
 
                     <div>
                         <button className={styles.deleteButton}>Eliminar Cuenta</button>
                     </div>
                 </div>
-                {openEditModal && <EditPersonalData closeEditPersonalData={closeEditPersonalData} />}
+                {openEditPersonalDataModal && <EditPersonalData closeEditPersonalData={closeEditPersonalData} />}
+                {openEditAccesDataModal && <EditAcccesData closeEditAccesData={closeEditAccesData}/>}
             </div>
             <Footer/>
         </>

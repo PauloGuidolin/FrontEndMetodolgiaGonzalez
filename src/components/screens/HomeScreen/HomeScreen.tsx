@@ -9,10 +9,15 @@ import styles from "./HomeScreen.module.css";
 import { useProductStore } from "../../../store/productStore"; // Verifica la ruta
 import CardList from "../../ui/Cards/CardList/CardList";
 import { useShallow } from 'zustand/shallow';
+import { useNavigate } from "react-router";
 
 
 export const HomeScreen = () => {
-    // const navigate = useNavigate();
+     const navigate = useNavigate();
+
+const handleNavigate = () => {
+    navigate('/UserProfile')
+}
 
     // Consumimos el estado y las acciones del store de productos
     const {
@@ -141,7 +146,7 @@ export const HomeScreen = () => {
                     </div>
 
                     {/* Botón y Footer */}
-                    <button>IR AL LOG</button> {/* Este botón parece estático, considera si debe ser dinámico */}
+                    <button onClick={handleNavigate}>IR AL LOG</button> {/* Este botón hay que borrarlo y utilizarlo cuando un usuario este logueado */}
                     <Footer />
                 </div>
             </div>
