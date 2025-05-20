@@ -7,11 +7,11 @@ import RegisterModal from "../Modal/Register/RegisterModal";
 import { DropDownShoes } from "../Modal/DropDownShoes/DropDownShoes";
 import { DropDownSport } from "../Modal/DropDownSport/DropDownSport";
 
-
-// Importa un ícono de React Icons para el perfil (asegúrate de tener 'react-icons' instalado: npm install react-icons)
-import { FaUserCircle } from 'react-icons/fa'; // O FaUserAlt, FaUser, etc.
+// Importa un ícono de React Icons para el perfil
+import { FaUserCircle } from "react-icons/fa"; // O FaUserAlt, FaUser, etc.
 import { useAuthStore } from "../../../store/authStore";
 import { FaSearch } from "react-icons/fa";
+import { AiOutlineShopping } from "react-icons/ai";
 
 export const Header = () => {
   // Estados para los dropdowns de categorías
@@ -136,14 +136,20 @@ export const Header = () => {
                 {/* Imagen de perfil: Si user.imagenUser.url existe, úsala; de lo contrario, usa un ícono */}
                 {/* Puedes cambiar el FaUserCircle por una imagen PNG/JPG por defecto */}
                 {user?.imagenUser?.denominacion ? (
-                  <img src={user.imagenUser.denominacion} alt="Foto de perfil" className={styles.profileImage} />
+                  <img
+                    src={user.imagenUser.denominacion}
+                    alt="Foto de perfil"
+                    className={styles.profileImage}
+                  />
                 ) : (
                   // Si no hay imagen, muestra un ícono de usuario por defecto
                   <FaUserCircle className={styles.profileIcon} />
                 )}
 
                 {/* Saludo al usuario: muestra su email o nombre si está disponible */}
-                {user?.email && <h4 className={styles.userName}>{user.email}</h4>}
+                {user?.email && (
+                  <h4 className={styles.userName}>{user.email}</h4>
+                )}
 
                 {/* Separador */}
                 <p>|</p>
@@ -158,7 +164,7 @@ export const Header = () => {
                 </Link>
 
                 {/* Botón para Panel de Administración (solo si el rol es ADMIN) */}
-                {user?.rol === 'ADMIN' && ( // Verifica el rol del usuario
+                {user?.rol === "ADMIN" && ( // Verifica el rol del usuario
                   <>
                     <p>|</p>
                     {/* Asegúrate de que esta ruta '/admin-panel' exista en tu router */}
@@ -182,18 +188,16 @@ export const Header = () => {
             )}
           </div>
           <div className={styles.containerPurchase}>
-              {/* Hay que pasar el siguiente div a FORM y manejar el search con una function */}
-              <div className={styles.containerSearch}>
-                <FaSearch className={styles.searchIcon} />
-                <input type="text" placeholder="Buscar" />
-              </div>
+            {/* Hay que pasar el siguiente div a FORM y manejar el search con una function */}
+            <div className={styles.containerSearch}>
+              <FaSearch className={styles.searchIcon} />
+              <input type="text" placeholder="Buscar" />
+            </div>
 
-            <h3
-              className={styles.botonCarrito}
-              onClick={() => navigate("/CartScreen")}
-            >
-              Boton de carrito
-            </h3>
+            <div className={styles.iconBag}>
+              <AiOutlineShopping className={styles.icon} onClick={() => navigate("/CartScreen")}/>
+            </div>
+
           </div>
         </div>
       </div>
