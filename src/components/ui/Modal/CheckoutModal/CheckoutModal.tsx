@@ -65,14 +65,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                 <input type="radio" id="mercadopago" name="paymentMethod" value="mercadopago" />
                 <label htmlFor="mercadopago">Mercado Pago</label>
               </div>
-              <div className={styles.radioGroup}>
-                <input type="radio" id="debito" name="paymentMethod" value="debito" />
-                <label htmlFor="debito">Débito</label>
-              </div>
-              <div className={styles.radioGroup}>
-                <input type="radio" id="credito" name="paymentMethod" value="credito" />
-                <label htmlFor="credito">Crédito</label>
-              </div>
             </div>
 
             <button className={styles.confirmButton}>
