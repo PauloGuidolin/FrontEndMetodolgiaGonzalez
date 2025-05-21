@@ -1,93 +1,292 @@
-
-/*Este CSS hace un fondo gris para que no se pueda hacer click fuera del modal*/
-.background{
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 900;
+/* ------------------------------------------------------------------------- */
+/* Fondo oscurecido del modal */
+.background {
+    position: fixed; /* Fija el fondo en la ventana de visualización */
+    top: 0;
+    left: 0;
+    width: 100vw; /* Cubre todo el ancho de la ventana */
+    height: 100vh; /* Cubre toda la altura de la ventana */
+    background-color: rgba(0, 0, 0, 0.7); /* Color negro semi-transparente */
+    z-index: 1000; /* Asegura que esté por debajo del modal */
+    display: flex; /* Para centrar el modal dentro de él */
+    justify-content: center; /* Centra horizontalmente */
+    align-items: center; /* Centra verticalmente */
 }
 
+/* ------------------------------------------------------------------------- */
+/* Contenedor principal del modal */
 .modal {
-  background-color: #e0e0e0; /* gris claro */
-  padding: 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50% , -50%);
-  z-index: 1000;
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4); /* Sombra más pronunciada */
+    z-index: 1001; /* Asegura que el modal esté por encima del fondo */
+
+    /* --- CAMBIOS CLAVE PARA EL CENTRADO ABSOLUTO --- */
+    position: fixed; /* Fija el modal en la ventana de visualización */
+    top: 50%; /* Lo mueve al 50% de la altura de la ventana */
+    left: 50%; /* Lo mueve al 50% del ancho de la ventana */
+    transform: translate(-50%, -50%); /* Corrige el punto de origen al centro del propio modal */
+    /* ----------------------------------------------- */
+
+    width: 90%; /* Ancho responsivo */
+    max-width: 700px; /* Ancho máximo para pantallas grandes */
+    max-height: 90vh; /* Altura máxima para evitar desbordamiento */
+    overflow-y: auto; /* Agrega scroll si el contenido es demasiado largo */
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Espaciado entre secciones */
 }
 
 .modalTitle {
-  text-align: center;
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
+    text-align: center;
+    color: #333;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+    font-weight: 600;
 }
 
+/* ------------------------------------------------------------------------- */
+/* Sección de la imagen de perfil */
+.profileImageSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.profileImagePreview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%; /* Circular */
+    object-fit: cover; /* Ajusta la imagen sin distorsionarla */
+    border: 3px solid #ddd;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.fileInput {
+    display: none; /* Oculta el input de archivo por defecto */
+}
+
+.uploadButton {
+    background-color: #007bff; /* Azul de botón */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background-color 0.3s ease;
+}
+
+.uploadButton:hover {
+    background-color: #0056b3;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Estilos para Inputs de texto */
 .inputText {
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 1px solid #999;
-  width: 100%;
+    width: 100%;
+    padding: 12px 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box; /* Incluye padding y border en el ancho total */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.dobSection,
-.genderSection {
-  border: 1px solid #ccc;
-  padding: 0.5rem;
-  border-radius: 4px;
+.inputText:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
 }
 
-.dobLegend,
-.genderLegend {
-  font-weight: bold;
-  font-size: 0.9rem;
+/* ------------------------------------------------------------------------- */
+/* Sección de Fecha de Nacimiento */
+.dobSection {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.dobLegend {
+    font-weight: 600;
+    color: #555;
+    padding: 0 10px;
+    margin-left: -10px; /* Para alinear con el borde */
 }
 
 .dobInputs {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+    display: flex;
+    gap: 10px;
+    justify-content: space-between;
 }
 
 .dobInput {
-  flex: 1;
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 1px solid #999;
-  border-radius: 4px;
+    flex: 1; /* Distribuye el espacio equitativamente */
+    padding: 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 1em;
+    text-align: center;
+    box-sizing: border-box;
+    -moz-appearance: textfield; /* Oculta las flechas de number input en Firefox */
+}
+
+/* Ocultar flechas en Chrome, Safari, Edge */
+.dobInput::-webkit-outer-spin-button,
+.dobInput::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+
+/* ------------------------------------------------------------------------- */
+/* Sección de Sexo */
+.genderSection {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.genderLegend {
+    font-weight: 600;
+    color: #555;
+    padding: 0 10px;
+    margin-left: -10px;
 }
 
 .genderOption {
-  display: inline-block;
-  margin-right: 1rem;
-  font-size: 1rem;
+    margin-right: 20px;
+    font-size: 1em;
+    color: #333;
+    display: inline-flex; /* Permite alinear el input y el texto */
+    align-items: center;
+    cursor: pointer;
 }
 
+.genderOption input[type="radio"] {
+    margin-right: 8px;
+    /* Puedes personalizar el radio button si lo deseas */
+    transform: scale(1.1); /* Ligeramente más grande */
+}
+
+
+/* ------------------------------------------------------------------------- */
+/* Botón "Añadir Nueva Dirección" */
+.addAddressBtn {
+    background-color: #28a745; /* Verde de éxito */
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: fit-content; /* Se ajusta al contenido */
+    align-self: center; /* Centra el botón si el modal es flex-column */
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.addAddressBtn:hover {
+    background-color: #218838;
+    transform: translateY(-2px);
+}
+
+.addAddressBtn:active {
+    transform: translateY(0);
+}
+
+/* ------------------------------------------------------------------------- */
+/* Sección de botones de acción (Cancelar y Aceptar) */
 .buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 1rem;
+    display: flex;
+    justify-content: space-evenly; /* Espacio entre los botones */
+    gap: 20px; /* Espacio entre los botones */
+    margin-top: 30px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
 }
 
 .cancelBtn,
 .acceptBtn {
-  background-color: black;
-  color: white;
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  border: none;
-  cursor: pointer;
-  width: 45%;
-  font-weight: bold;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    flex-grow: 1; /* Permite que los botones crezcan para llenar el espacio */
+    max-width: 200px; /* Ancho máximo para los botones */
 }
 
-.cancelBtn:hover,
+.cancelBtn {
+    background-color: #dc3545; /* Rojo para cancelar */
+    color: white;
+}
+
+.cancelBtn:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+}
+
+.acceptBtn {
+    background-color: #007bff; /* Azul para aceptar */
+    color: white;
+}
+
 .acceptBtn:hover {
-  background-color: #333;
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.cancelBtn:disabled,
+.acceptBtn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ------------------------------------------------------------------------- */
+/* Media Queries para responsividad (ajusta según tus necesidades) */
+@media (max-width: 768px) {
+    .modal {
+        padding: 20px;
+        max-width: 95%;
+    }
+
+    .modalTitle {
+        font-size: 1.5em;
+    }
+
+    .subTitle {
+        font-size: 1.2em;
+    }
+
+    .dobInputs,
+    .buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .cancelBtn,
+    .acceptBtn,
+    .addAddressBtn {
+        width: 100%;
+        max-width: none;
+    }
+
+    .genderOption {
+        margin-right: 10px;
+        font-size: 0.9em;
+    }
 }
