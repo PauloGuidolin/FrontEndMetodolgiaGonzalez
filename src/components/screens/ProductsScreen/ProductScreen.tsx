@@ -143,8 +143,10 @@ const ProductScreen: React.FC = () => {
 
   // Renderiza la pantalla de productos
   return (
+    <>
+    <Header />
     <div className={styles.container}>
-      <Header />{" "}
+      
       {/* Asegúrate de que Header no cause problemas de renderizado o estilos */}
       {/* Botón o elemento para abrir el panel de filtros */}
       {/* Puedes añadir un botón aquí en tu UI principal */}
@@ -195,18 +197,15 @@ const ProductScreen: React.FC = () => {
               )
             ))}
 
-        {/* Indicador de refiltrado si es necesario */}
-        {/* Esto es opcional y puede superponerse a la lista actual mientras se carga la nueva */}
-        {/*
-                 {loading && filteredProducts.length > 0 && (
-                     <div className={styles.refilterLoadingOverlay}>Refiltrando...</div>
-                 )}
-                 */}
+        
       </div>
-      <Footer />{" "}
-      {/* Asegúrate de que Footer no cause problemas de renderizado o estilos */}
+      
     </div>
+    <Footer />
+    </>
   );
+  
 };
+
 
 export default ProductScreen;
