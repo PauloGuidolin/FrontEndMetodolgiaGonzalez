@@ -84,6 +84,7 @@ export const Header = () => {
       <div className={styles.containerPrincipal}>
         <div className={styles.containerLogo}>
           <img
+          style={{padding: "0" , margin: "0"}}
             className={styles.LogoBoton}
             onClick={() => navigate("/HomeScreen")}
             src="https://th.bing.com/th/id/R.a256d74b77286d29095f6bcd600cf991?rik=ZPx%2fHsPcoCEgZQ&riu=http%3a%2f%2f1000logos.net%2fwp-content%2fuploads%2f2016%2f10%2fAdidas-Logo.jpg&ehk=W3QAdAlZyX6x2fhyFVPKxcbnmjhMAJJu%2fZiPr26XrkY%3d&risl=&pid=ImgRaw&r=0"
@@ -188,7 +189,7 @@ export const Header = () => {
             )}
           </div>
           <div className={styles.containerPurchase}>
-            {/* Hay que pasar el siguiente div a FORM y manejar el search con una function */}
+            {/* Hay que pasar el siguiente input a FORM y manejar el search con una function */}
             <div className={styles.containerSearch}>
               <FaSearch className={styles.searchIcon} />
               <input type="text" placeholder="Buscar" />
