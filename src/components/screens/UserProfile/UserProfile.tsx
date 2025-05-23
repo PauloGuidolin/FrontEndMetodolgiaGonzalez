@@ -1,8 +1,7 @@
-// src/components/screens/UserProfile/UserProfile.tsx
 import { Header } from "../../ui/Header/Header";
 import { Footer } from "../../ui/Footer/Footer";
 import styles from './UserProfile.module.css';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react"; // Mantén useCallback
 import { EditPersonalData } from "../../ui/Modal/EditPersonalData/EditPersonalData";
 import EditAcccesData from "../../ui/Modal/EditAccesData/EditAcccesData";
 import { useAuthStore } from "../../../store/authStore";
@@ -10,32 +9,41 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 export const UserProfile = () => {
-    const { user, loadingUser, errorUser, fetchUser, logout } = useAuthStore();
+    const { user, loadingUser, errorUser, fetchUser, logout, isAuthenticated } = useAuthStore(); // Asegúrate de obtener isAuthenticated
     const navigate = useNavigate();
 
     const [openEditPersonalDataModal, setEditPersonalDataModal] = useState(false);
     const [openEditAccesDataModal, setEditAccesDataModal] = useState(false);
 
+    const fetchUserData = useCallback(async () => {
+        try {
+            await fetchUser();
+        } catch (error: any) {
+            console.error("Error inicial al cargar el usuario en UserProfile:", error);
+            // El errorUser ya se setea en el store, la UI lo maneja.
+        }
+    }, [fetchUser]);
+
     useEffect(() => {
         if (!user && !loadingUser && !errorUser) {
             const token = localStorage.getItem('jwt_token');
             if (token) {
-                fetchUser();
+                fetchUserData(); // Intenta cargar el usuario
             } else {
-                navigate("/HomeScreen");
+                navigate("/HomeScreen"); // O a /login
                 toast.error("Debes iniciar sesión para acceder a tu perfil.");
             }
         }
-    }, [user, loadingUser, errorUser, navigate, fetchUser]);
+    }, [user, loadingUser, errorUser, navigate, fetchUserData]); //isAuthenticated ya no es una dependencia directa en esta lógica
 
     const closeEditPersonalData = () => {
         setEditPersonalDataModal(false);
-        fetchUser(); // Recargar datos del usuario para ver los cambios
+        fetchUserData(); // Recargar datos del usuario para ver los cambios
     };
 
     const closeEditAccesData = () => {
         setEditAccesDataModal(false);
-        fetchUser(); // Recargar datos del usuario para ver los cambios
+        fetchUserData(); // Recargar datos del usuario para ver los cambios
     };
 
     const handleLogout = () => {
@@ -71,7 +79,7 @@ export const UserProfile = () => {
         );
     }
 
-    if (!user) {
+    if (!user) { // Esta condición debería ser suficiente si el store maneja el estado de `user` correctamente.
         return (
             <>
                 <Header />
@@ -87,7 +95,7 @@ export const UserProfile = () => {
     }
 
     // Acceder a la primera dirección si existe en el array 'addresses'
-    const firstAddress = user.addresses?.[0]; // <--- ¡Esta es la corrección clave!
+    const firstAddress = user.addresses?.[0];
 
     return (
         <>
@@ -101,7 +109,7 @@ export const UserProfile = () => {
                         onError={(e) => {
                             const target = e.target as HTMLImageElement;
                             target.onerror = null;
-                            target.src = 'https://placehold.co/200x200/E2E8F0/FFFFFF?text=Error';
+                            target.src = 'https://placehold.co/200x200/FFFFFF/000000?text=Error'; // Fondo blanco, texto negro
                             console.error("Error loading profile image in UserProfile:", user?.profileImage?.url);
                         }}
                     />
@@ -119,11 +127,15 @@ export const UserProfile = () => {
                         <h4>Datos Personales</h4>
                         <p>Fecha Nacimiento: {user.fechaNacimiento || 'No especificado'}</p>
                         <p>Sexo: {user.sexo || 'No especificado'}</p>
-                        {/* MODIFICACIÓN: Acceder a las propiedades de la primera DomicilioDTO dentro del array 'addresses' */}
                         <p>
                             Dirección:
                             {firstAddress
-                                ? `${firstAddress.calle} ${firstAddress.numero || ''}${firstAddress.piso ? `, Piso ${firstAddress.piso}` : ''}${firstAddress.departamento ? `, Depto ${firstAddress.departamento}` : ''}${firstAddress.localidadNombre ? `, ${firstAddress.localidadNombre}` : ''}${firstAddress.provinciaNombre ? `, ${firstAddress.provinciaNombre}` : ''}${firstAddress.cp ? `, CP ${firstAddress.cp}` : ''}` // Agregado CP
+                                ? `${firstAddress.calle} ${firstAddress.numero || ''}` +
+                                `${firstAddress.piso ? `, Piso ${firstAddress.piso}` : ''}` +
+                                `${firstAddress.departamento ? `, Depto ${firstAddress.departamento}` : ''}` +
+                                `${firstAddress.localidad?.nombre ? `, ${firstAddress.localidad.nombre}` : ''}` +
+                                `${firstAddress.localidad?.provincia?.nombre ? `, ${firstAddress.localidad.provincia.nombre}` : ''}` +
+                                `${firstAddress.cp ? `, CP ${firstAddress.cp}` : ''}`
                                 : 'No especificado'}
                         </p>
                         <button className={styles.editButton} onClick={() => setEditPersonalDataModal(true)}>Editar</button>

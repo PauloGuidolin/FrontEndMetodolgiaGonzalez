@@ -1,91 +1,83 @@
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios'; // Importar InternalAxiosRequestConfig
 
+// Obtenemos la URL base del servidor desde las variables de entorno
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
+// Verificamos si la URL base está configurada
+if (!API_BASE_URL) {
+    console.error("La variable de entorno VITE_API_BASE_URL no está definida.");
+}
 
-// Función para obtener el token JWT almacenado (ej. en localStorage)
-// Deberás implementar esta función en tu módulo de autenticación
-const getAuthToken = (): string | null => {
-  // Ejemplo: leer del localStorage
-  // Asegúrate de usar una clave consistente
-  return localStorage.getItem('jwt_token');
-};
-
-// Creamos una instancia de Axios. Esto es útil para configurar una URL base
-// y otros ajustes por defecto para todas las solicitudes que usen esta instancia.
+// 1. Crear una instancia de Axios
 const api: AxiosInstance = axios.create({
-  // La URL base se añadirá automáticamente a las URLs relativas en las solicitudes
-  // No necesitamos la URL base aquí, ya que cada servicio API específico la añade
-  // desde las variables de entorno antes de pasársela a httpService.
-  // baseURL: import.meta.env.VITE_API_BASE_URL, // Opcional: podrías poner la URL base aquí
-  headers: {
-    'Content-Type': 'application/json',
-  },
+    baseURL: API_BASE_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true,
 });
 
-// --- Interceptor de Solicitudes ---
-// Este interceptor se ejecuta ANTES de que se envíe cada solicitud.
-// Es el lugar ideal para añadir headers comunes como el de Authorization.
-// Corregimos el tipo del parámetro 'config' a InternalAxiosRequestConfig
+// 2. Interceptor para agregar el token JWT a las solicitudes salientes
+// Cambiar el tipo de 'config' a InternalAxiosRequestConfig
 api.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => { // Usamos InternalAxiosRequestConfig
-    const token = getAuthToken(); // Intentamos obtener el token JWT
-    if (token) {
-      // Si hay un token, lo añadimos al header Authorization
-      // Aseguramos que config.headers exista (aunque InternalAxiosRequestConfig lo garantiza)
-      config.headers['Authorization'] = `Bearer ${token}`; // Acceso directo a headers
+    (config: InternalAxiosRequestConfig) => { // <-- CAMBIO AQUÍ: Usar InternalAxiosRequestConfig
+        const token = localStorage.getItem('jwt_token');
+        if (token) {
+            // Asegurarse de que config.headers sea un objeto antes de asignar
+            // Y asignar directamente a config.headers.Authorization
+            config.headers.Authorization = `Bearer ${token}`; // <-- CAMBIO AQUÍ: Asignación directa
+        }
+        return config;
+    },
+    (error: AxiosError) => {
+        return Promise.reject(error);
     }
-    // Puedes añadir otros headers, lógica de logging, etc. aquí
-    return config; // Retorna la configuración modificada (que es InternalAxiosRequestConfig)
-  },
-  (error: AxiosError) => {
-    // Maneja errores de solicitud (ej. problemas de red antes de enviar)
-    console.error('Request Interceptor Error:', error);
-    return Promise.reject(error); // Propaga el error
-  }
 );
 
-// --- Interceptor de Respuestas ---
-// Este interceptor se ejecuta DESPUÉS de recibir una respuesta,
-// ya sea exitosa (2xx) o con error (no 2xx).
+// 3. Interceptor para manejar respuestas y errores globales (ej. 401 Unauthorized)
 api.interceptors.response.use(
-  (response: AxiosResponse) => {
-    // Puedes añadir lógica de logging, transformación de respuesta, etc. aquí
-    return response; // Retorna la respuesta sin cambios
-  },
-  (error: AxiosError) => {
-    // Maneja errores de respuesta HTTP (ej. 401, 404, 500)
-    console.error('Response Interceptor Error:', error.response || error.message);
+    (response: AxiosResponse) => {
+        return response;
+    },
+    (error: AxiosError) => {
+        if (error.response) {
+            console.error("Error de respuesta de la API:", error.response.status, error.response.data);
 
-    // --- Manejo de error 401 Unauthorized ---
-    if (error.response?.status === 401) {
-      console.error("Unauthorized request. Consider redirecting to login.");
-      // Aquí puedes añadir lógica para redirigir al usuario a la página de login
-      // o disparar un evento global para que el router lo maneje.
-      // Ejemplo simple (ajusta la ruta):
-      // window.location.href = '/login';
-      // O puedes lanzar un error específico:
-      // return Promise.reject(new Error("Unauthorized"));
+            if (error.response.status === 401 || error.response.status === 403) {
+                console.warn("Unauthorized/Forbidden: Session expired or invalid token. Attempting logout.");
+                localStorage.removeItem('jwt_token');
+                // Opcional: Podrías añadir un dispatch a un store de Zustand para notificar la desautenticación
+                // y que la UI reaccione globalmente (ej. redirigir a login).
+                // Pero el store de autenticación ya maneja esto cuando fetchUser falla.
+            }
+        } else if (error.request) {
+            console.error("Error de red: No se recibió respuesta del servidor.", error.request);
+        } else {
+            console.error("Error de configuración de solicitud:", error.message);
+        }
+        return Promise.reject(error);
     }
-
-    // Propaga el error para que pueda ser manejado por la función que llamó al servicio API
-    return Promise.reject(error);
-  }
 );
 
-// Exporta las funciones para los métodos HTTP comunes usando la instancia de Axios
-// Ahora estas funciones son más simples ya que los interceptores manejan headers y errores comunes
+/**
+ * Exportamos la instancia de Axios configurada (api) y también helpers individuales (http)
+ * para mayor comodidad.
+ */
+export { api };
+
 export const http = {
-  get: <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>
-    api.get<T>(url, config).then(response => response.data), // Extraemos directamente response.data
-  post: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
-    api.post<T>(url, data, config).then(response => response.data),
-  put: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
-    api.put<T>(url, data, config).then(response => response.data),
-  delete: <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>
-    api.delete<T>(url, config).then(response => response.data),
-  // Puedes añadir otros métodos como patch si los necesitas
-  // patch: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
-  //   api.patch<T>(url, data, config).then(response => response.data),
+    get: <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>
+        api.get<T>(url, config).then(response => response.data),
+
+    post: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
+        api.post<T>(url, data, config).then(response => response.data),
+
+    put: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
+        api.put<T>(url, data, config).then(response => response.data),
+
+    patch: <T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> =>
+        api.patch<T>(url, data, config).then(response => response.data),
+
+    delete: <T>(url: string, config?: AxiosRequestConfig): Promise<T> =>
+        api.delete<T>(url, config).then(response => response.data),
 };
-
-

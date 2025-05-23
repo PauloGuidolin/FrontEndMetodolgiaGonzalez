@@ -3,13 +3,11 @@ import styles from "./EditPersonalData.module.css";
 
 import { useAuthStore } from "../../../../store/authStore";
 import { toast } from "react-toastify";
-import { UserDTO } from "../../../dto/UserDTO";
+import { UserDTO } from "../../../dto/UserDTO"; // Asegúrate de que esta ruta sea correcta para tu UserDTO completo
 import { DomicilioDTO } from "../../../dto/DomicilioDTO";
 import { UserProfileUpdateDTO } from "../../../dto/UserProfileUpdateDTO";
 import { AddressForm } from "../AddressForm/AddressForm"; // Asegúrate de que esta ruta sea correcta
-import { Sexo } from "../../../../types/ISexo";
-
-
+import { Sexo } from "../../../../types/ISexo"; // Asegúrate de que esta ruta sea correcta
 
 interface EditPersonalDataProps {
     closeEditPersonalData: () => void;
@@ -18,13 +16,13 @@ interface EditPersonalDataProps {
 
 export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalData, user }) => {
 
-    // Estados para los datos personales
+    // Estados para los datos personales, inicializados con los valores del usuario o cadenas vacías/null
     const [firstname, setFirstname] = useState(user.firstname || '');
     const [lastname, setLastname] = useState(user.lastname || '');
-    const [dni, setDni] = useState(user.dni?.toString() || ''); // DNI como string para el input
-    
-    // CORRECCIÓN CLAVE: Permite que el estado 'sexo' sea Sexo, una cadena vacía O null.
-    // Esto coincide con el tipo `Sexo | null | undefined` que puede venir de `user.sexo`.
+    // DNI como string para el input, convierte number o null a string vacío
+    const [dni, setDni] = useState(user.dni?.toString() || ''); 
+
+    // Estado 'sexo': puede ser Sexo, una cadena vacía (para no seleccionado) o null
     const [sexo, setSexo] = useState<Sexo | '' | null>(user.sexo || '');
 
     const [telefono, setTelefono] = useState(user.telefono || '');
@@ -35,7 +33,8 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
     const [year, setYear] = useState('');
 
     // Estado para las direcciones (array de DomicilioDTO)
-    const [addresses, setAddresses] = useState<DomicilioDTO[]>(user.addresses || []);
+    // Se copia el array de direcciones para que las modificaciones en el formulario no afecten el user original directamente
+    const [addresses, setAddresses] = useState<DomicilioDTO[]>(user.addresses ? [...user.addresses] : []);
 
     // Estados para la imagen de perfil
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -43,7 +42,7 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
 
     const { updateUser, updateUserImage, loadingUser } = useAuthStore();
 
-    // Efecto para cargar la fecha de nacimiento y la imagen inicial al montar o si el usuario cambia
+    // Efecto para inicializar la fecha de nacimiento y la imagen al montar o si el usuario prop cambia
     useEffect(() => {
         console.log("useEffect: user data changed or component mounted", user);
         if (user.fechaNacimiento) {
@@ -68,12 +67,13 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
             console.log("useEffect: No hay imagen de perfil, usando placeholder.");
         }
         // También inicializa el estado de las direcciones si el user cambia
-        setAddresses(user.addresses || []);
+        setAddresses(user.addresses ? JSON.parse(JSON.stringify(user.addresses)) : []); // Asegura una copia profunda para evitar mutaciones
         console.log("useEffect: Direcciones inicializadas:", user.addresses);
 
         // Actualiza el estado de sexo directamente desde user.sexo
         setSexo(user.sexo || ''); // Usa user.sexo si existe, de lo contrario una cadena vacía.
-
+        // Asegúrate de que user.dni se convierta a string para el input
+        setDni(user.dni?.toString() || '');
     }, [user]);
 
     // Manejo de la imagen de perfil
@@ -103,11 +103,10 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
         const newAddress: DomicilioDTO = {
             calle: '',
             numero: 0,
-            piso: undefined,
-            departamento: undefined,
             cp: 0,
-            localidadNombre: '',
-            provinciaNombre: ''
+            piso: null,
+            departamento: null,
+            localidad: null // Inicializa localidad como null
         };
         setAddresses([...addresses, newAddress]);
         console.log("handleAddAddress: Nueva dirección añadida.", newAddress);
@@ -121,19 +120,18 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
 
     // --- Función para guardar todos los cambios ---
     const handleSave = async () => {
-        console.log("handleSave se ha ejecutado!"); // DEBUG: Punto de entrada
+        console.log("handleSave se ha ejecutado!");
         try {
-            let fullFechaNacimiento: string | undefined = undefined;
+            let fullFechaNacimiento: string | null = null;
 
-            // Solo procede si los 3 campos de fecha tienen algún valor
-            if (day || month || year) { // Si alguno de los campos tiene valor, se intenta validar
+            // Lógica para calcular fullFechaNacimiento
+            if (day.trim() || month.trim() || year.trim()) {
                 const numDay = parseInt(day.trim(), 10);
                 const numMonth = parseInt(month.trim(), 10);
                 const numYear = parseInt(year.trim(), 10);
 
-                console.log(`DEBUG FECHA: parsedDay=${numDay}, parsedMonth=${numMonth}, parsedYear=${numYear}`); // DEBUG: Valores parseados
+                console.log(`DEBUG FECHA: parsedDay=${numDay}, parsedMonth=${numMonth}, parsedYear=${numYear}`);
 
-                // Verifica que sean números válidos y estén dentro de rangos razonables
                 if (isNaN(numDay) || isNaN(numMonth) || isNaN(numYear) ||
                     numDay < 1 || numDay > 31 ||
                     numMonth < 1 || numMonth > 12 ||
@@ -143,14 +141,11 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
                     return;
                 }
 
-                // Crea un objeto Date. JavaScript es flexible con el mes (0-11)
                 const date = new Date(numYear, numMonth - 1, numDay);
 
-                // Validación estricta para asegurar que Date() no "ajustó" la fecha (ej. 31 de Febrero)
                 if (date.getFullYear() === numYear &&
                     date.getMonth() === (numMonth - 1) &&
                     date.getDate() === numDay) {
-                    // Formatea para el backend (YYYY-MM-DD)
                     const formattedMonth = numMonth.toString().padStart(2, '0');
                     const formattedDay = numDay.toString().padStart(2, '0');
                     fullFechaNacimiento = `${numYear}-${formattedMonth}-${formattedDay}`;
@@ -160,83 +155,144 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
                     console.log("VALIDACION FECHA: La fecha ingresada no es válida (ej. 31 de febrero). Retornando.");
                     return;
                 }
-            } else if (!day && !month && !year) {
-                // Si todos los campos están vacíos, significa que el usuario no quiere establecer la fecha
-                // o que la está borrando. En este caso, fullFechaNacimiento permanece undefined/null.
-                fullFechaNacimiento = undefined; // O null, según lo que espere tu backend para "no fecha"
-                console.log("VALIDACION FECHA: Todos los campos de fecha están vacíos. Se enviará como undefined.");
             } else {
-                // Si algunos campos de fecha están llenos y otros no
-                toast.error("Fecha de nacimiento incompleta. Por favor, complete los tres campos (día, mes, año) o déjelos todos vacíos.");
-                console.log("VALIDACION FECHA: Campos de fecha incompletos. Retornando.");
-                return;
+                console.log("VALIDACION FECHA: Todos los campos de fecha están vacíos. Se enviará como null.");
             }
 
-            const finalUpdateData: UserProfileUpdateDTO = {};
+            // --- INICIO DE LA SECCIÓN CRÍTICA DE CAMBIOS ---
 
-            // Compara cada campo y añade solo si ha cambiado
-            if (firstname !== user.firstname) {
-                finalUpdateData.firstname = firstname;
-                console.log("CAMBIO detectado: firstname de", user.firstname, "a", firstname);
+            // Inicializa finalUpdateData con los valores originales del usuario.
+            // Esto asegura que si un campo no se modifica, su valor original se conserve.
+            // Se usa un operador spread condicional para incluir la propiedad solo si tiene un valor no nulo/indefinido en 'user'.
+            // Para 'addresses', se hace una copia profunda para asegurar que no se muten los datos originales si no hay cambios detectados.
+            const finalUpdateData: UserProfileUpdateDTO = {
+                ...(user.firstname && { firstname: user.firstname }),
+                ...(user.lastname && { lastname: user.lastname }),
+                ...(user.dni !== undefined && user.dni !== null && { dni: user.dni }),
+                ...(user.sexo && { sexo: user.sexo }),
+                ...(user.fechaNacimiento && { fechaNacimiento: user.fechaNacimiento }),
+                ...(user.telefono && { telefono: user.telefono }),
+                addresses: user.addresses ? JSON.parse(JSON.stringify(user.addresses)) : [],
+            };
+
+
+            // --- Lógica para DETECTAR y APLICAR CAMBIOS a finalUpdateData ---
+
+            // Nombre
+            if (firstname.trim() !== (user.firstname || '')) {
+                finalUpdateData.firstname = firstname.trim();
+                console.log("CAMBIO detectado: firstname de", user.firstname, "a", finalUpdateData.firstname);
+            } else if (!user.firstname && finalUpdateData.firstname !== undefined) {
+                 delete finalUpdateData.firstname;
             }
-            if (lastname !== user.lastname) {
-                finalUpdateData.lastname = lastname;
-                console.log("CAMBIO detectado: lastname de", user.lastname, "a", lastname);
+
+
+            // Apellido
+            if (lastname.trim() !== (user.lastname || '')) {
+                finalUpdateData.lastname = lastname.trim();
+                console.log("CAMBIO detectado: lastname de", user.lastname, "a", finalUpdateData.lastname);
+            } else if (!user.lastname && finalUpdateData.lastname !== undefined) {
+                delete finalUpdateData.lastname;
             }
-            // DNI: considera si el valor es numérico y si ha cambiado.
-            // Si el input está vacío ('') y el user.dni existía, lo convierte a null.
-            if (dni !== user.dni?.toString()) { // Compara como string para el input
-                if (dni === '') {
-                    finalUpdateData.dni = null;
+
+            // DNI
+            const currentDniAsString = dni.trim();
+            const originalDniAsString = user.dni?.toString() || '';
+
+            if (currentDniAsString !== originalDniAsString) {
+                if (currentDniAsString === '') {
+                    finalUpdateData.dni = null; // Si se vacía el campo, enviar null
                     console.log("CAMBIO detectado: dni a null (se vació el campo)");
-                } else if (!isNaN(Number(dni)) && dni.trim() !== '') {
-                    finalUpdateData.dni = Number(dni);
-                    console.log("CAMBIO detectado: dni de", user.dni, "a", Number(dni));
+                } else if (!isNaN(Number(currentDniAsString))) {
+                    finalUpdateData.dni = Number(currentDniAsString);
+                    console.log("CAMBIO detectado: dni de", user.dni, "a", finalUpdateData.dni);
                 } else {
                     toast.error("DNI inválido. Debe ser un número o estar vacío.");
                     console.log("VALIDACION DNI: DNI inválido detectado. Retornando.");
                     return;
                 }
+            } else if ((user.dni === null || user.dni === undefined) && finalUpdateData.dni !== undefined) {
+                // Si no hay cambio, y el DNI original era null o undefined, elimina la propiedad
+                delete finalUpdateData.dni;
+                console.log("NO CAMBIO: dni es idéntico y originalmente null/undefined.");
+            } else {
+                 console.log("NO CAMBIO: dni es idéntico y tenía valor.");
             }
 
-            // Compara el valor actual de 'sexo' con el valor original de 'user.sexo'
-            // Ambos son ya del tipo Sexo (o undefined/null/vacío)
-            if (sexo !== user.sexo) {
-                // Si el sexo es una cadena vacía, se envía como null al backend. De lo contrario, se envía el valor de Sexo.
-                finalUpdateData.sexo = sexo === '' ? null : sexo;
-                console.log("CAMBIO detectado: sexo de", user.sexo, "a", sexo);
-            }
-            // Solo actualiza fechaNacimiento si el valor calculado es diferente al original del usuario
-            if (fullFechaNacimiento !== user.fechaNacimiento) {
-                finalUpdateData.fechaNacimiento = fullFechaNacimiento;
-                console.log("CAMBIO detectado: fechaNacimiento de", user.fechaNacimiento, "a", fullFechaNacimiento);
-            }
-            if (telefono !== user.telefono) {
-                finalUpdateData.telefono = telefono;
-                console.log("CAMBIO detectado: telefono de", user.telefono, "a", telefono);
+
+            // Sexo
+            const currentSexoValue = sexo === '' ? null : sexo;
+            const originalSexoValue = user.sexo === undefined ? null : user.sexo;
+
+            if (currentSexoValue !== originalSexoValue) {
+                finalUpdateData.sexo = currentSexoValue;
+                console.log("CAMBIO detectado: sexo de", originalSexoValue, "a", currentSexoValue);
+            } else if ((user.sexo === null || user.sexo === undefined) && finalUpdateData.sexo !== undefined) {
+                // Si no hay cambio, y el sexo original era null o undefined, elimina la propiedad
+                delete finalUpdateData.sexo;
+                console.log("NO CAMBIO: sexo es idéntico y originalmente null/undefined.");
+            } else {
+                console.log("NO CAMBIO: sexo es idéntico y tenía valor.");
             }
 
-            // Compara y añade las direcciones si han cambiado
-            if (JSON.stringify(addresses) !== JSON.stringify(user.addresses)) {
+            // Fecha de Nacimiento
+            const originalFechaNacimiento = user.fechaNacimiento || null;
+            const currentFechaNacimiento = fullFechaNacimiento;
+
+            if (currentFechaNacimiento !== originalFechaNacimiento) {
+                finalUpdateData.fechaNacimiento = currentFechaNacimiento;
+                console.log("CAMBIO detectado: fechaNacimiento de", originalFechaNacimiento, "a", finalUpdateData.fechaNacimiento);
+            } else if ((user.fechaNacimiento === null || user.fechaNacimiento === undefined) && finalUpdateData.fechaNacimiento !== undefined) {
+                // Si no hay cambio, y la fecha original era null o undefined, elimina la propiedad
+                delete finalUpdateData.fechaNacimiento;
+                console.log("NO CAMBIO: fechaNacimiento es idéntico y originalmente null/undefined.");
+            } else {
+                console.log("NO CAMBIO: fechaNacimiento es idéntico y tenía valor.");
+            }
+
+            // Teléfono
+            if (telefono.trim() !== (user.telefono || '')) {
+                finalUpdateData.telefono = telefono.trim();
+                console.log("CAMBIO detectado: telefono de", user.telefono, "a", finalUpdateData.telefono);
+            } else if (!user.telefono && finalUpdateData.telefono !== undefined) {
+                delete finalUpdateData.telefono;
+            }
+
+            // Direcciones
+            if (JSON.stringify(addresses) !== JSON.stringify(user.addresses || [])) {
                 console.log("CAMBIO detectado: addresses.");
-                // Filtra direcciones vacías (ej. si el usuario añade una y no la completa)
+                // Filtra direcciones vacías o incompletas si es necesario antes de enviar
                 const validAddresses = addresses.filter(addr =>
-                    addr.calle && addr.numero !== 0 && addr.localidadNombre && addr.provinciaNombre && addr.cp !== 0
+                    addr.calle.trim() !== '' &&
+                    addr.numero > 0 &&
+                    addr.cp > 0 &&
+                    (addr.localidad?.id !== 0 && addr.localidad?.nombre.trim() !== '') &&
+                    (addr.localidad?.provincia?.id !== 0 && addr.localidad?.provincia?.nombre.trim() !== '')
                 );
                 finalUpdateData.addresses = validAddresses;
                 console.log("CAMBIO: addresses finales a enviar:", validAddresses);
             } else {
-                console.log("NO CAMBIO detectado: addresses. JSON.stringify es idéntico.");
+                // Si no hay cambio en las direcciones, y el usuario original no tenía ninguna,
+                // asegura que la propiedad 'addresses' no se envíe en el DTO si no es necesario.
+                // Si tu backend espera un array vacío explícitamente para "borrar todas", esto no aplicaría.
+                if (!user.addresses || user.addresses.length === 0) {
+                     delete finalUpdateData.addresses;
+                     console.log("NO CAMBIO: addresses es idéntico y originalmente vacío/null.");
+                } else {
+                    console.log("NO CAMBIO: addresses es idéntico y tenía valores.");
+                }
             }
+            // --- FIN DE LA SECCIÓN CRÍTICA DE CAMBIOS ---
 
-            console.log("Datos a enviar (finalUpdateData):", finalUpdateData); // DEBUG: Muestra el objeto que se intentará enviar
 
-            // Si no hay cambios en los datos personales Y no se seleccionó una nueva imagen
+            console.log("Datos a enviar (finalUpdateData):", finalUpdateData);
+
+            // Si no hay cambios en los datos personales (después de posibles `delete finalUpdateData.propiedad`) Y no se seleccionó una nueva imagen
             if (Object.keys(finalUpdateData).length === 0 && !selectedImage) {
                 toast.info("No hay cambios para guardar.");
                 console.log("INFO: No hay cambios para guardar. Cerrando modal.");
                 closeEditPersonalData();
-                return; // Sal de la función
+                return;
             }
 
             // Realizar la actualización del perfil si hay cambios en los datos personales
@@ -261,8 +317,7 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
             console.log("EXITO: Perfil actualizado exitosamente. Cerrando modal.");
             closeEditPersonalData();
         } catch (error: any) {
-            console.error("Error al guardar los datos personales (CATCH BLOCK):", error); // DEBUG: Aquí se captura el error
-            // Intenta extraer el mensaje de error de la respuesta del backend
+            console.error("Error al guardar los datos personales (CATCH BLOCK):", error);
             const errorMessage = error.response?.data?.message || error.message || "Error desconocido al actualizar el perfil.";
             toast.error(errorMessage);
             console.log("ERROR: Mensaje de error mostrado en toast:", errorMessage);

@@ -1,11 +1,11 @@
+import { LocalidadDTO } from "./location";
 
 export interface DomicilioDTO {
-    id?: number; // Opcional, ya que puede ser una nueva dirección sin ID
+    id?: number;
     calle: string;
     numero: number;
-    piso?: string | null; // Puede ser opcional y nulo
-    departamento?: string | null; // Puede ser opcional y nulo
+    piso?: string | null;
+    departamento?: string | null;
     cp: number;
-    localidadNombre: string;
-    provinciaNombre: string;
+    localidad: LocalidadDTO | null; // <--- ¡CAMBIADO A UN OBJETO LocalidadDTO!
 }

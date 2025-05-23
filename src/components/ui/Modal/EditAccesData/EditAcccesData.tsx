@@ -43,17 +43,17 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ closeEditAccesData, user }) =
         }
 
         const updateData: UpdateCredentialsRequest = {
-            email: email !== user.email ? email : undefined, // Solo envía el email si ha cambiado
+            currentEmail: email !== user.email ? email : undefined, // Solo envía el email si ha cambiado
             currentPassword: currentPassword, // Siempre se envía si se está actualizando la contraseña
             newPassword: newPassword || undefined, // Solo envía newPassword si hay una
         };
 
         // Eliminar propiedades undefined si tu backend lo prefiere (excepto currentPassword si es necesario)
-        if (updateData.email === undefined) delete updateData.email;
+        if (updateData.newEmail === undefined) delete updateData.newEmail;
         if (updateData.newPassword === undefined) delete updateData.newPassword;
 
         // Si no hay cambios en email ni nueva contraseña
-        if (!updateData.email && !updateData.newPassword) {
+        if (!updateData.currentEmail && !updateData.newPassword) {
             toast.info("No hay cambios en el email o la contraseña.");
             closeEditAccesData();
             return;
