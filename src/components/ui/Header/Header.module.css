@@ -174,31 +174,25 @@
 /* Pantallas pequeñas (ej. móviles) */
 @media (max-width: 768px) {
     .containerPrincipal {
-        flex-direction: column; /* Apila las secciones verticalmente */
+        flex-direction: row; /* Apila las secciones verticalmente */
         align-items: center; /* Centra los elementos */
-        padding: 10px;
+        justify-content: space-between;
+        height: 100px;
+        width: 90vw;
     }
 
     .containerLogo .LogoBoton {
         width: 100px;
         height: 60px;
-        margin-bottom: 10px;
     }
 
     .containerTitles {
-        flex-wrap: wrap; /* Permite que los títulos se envuelvan en varias líneas */
-        justify-content: center; /* Centra los títulos */
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-
-    .containerTitles h3 {
-        font-size: 1em;
+        display: none;
     }
 
     .containerSearch {
         flex-direction: row; /* Vuelve a poner búsqueda y compra en fila */
-        justify-content: space-around; /* Distribuye el espacio */
+        justify-content: start; /* Distribuye el espacio */
         width: 100%;
         margin-top: 10px;
         gap: 10px;
@@ -260,6 +254,10 @@
 
     .containerLogin p { /* Oculta los separadores en móviles muy pequeños si molestan */
         display: none;
+    }
+
+    .containerRight{
+        margin-right: 10px;
     }
 }
 
