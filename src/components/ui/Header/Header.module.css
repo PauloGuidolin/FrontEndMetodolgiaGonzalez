@@ -41,7 +41,7 @@
     height: 10vh;
     width: 30vw;
     align-items: end;
-    justify-content: end;
+    justify-content: center;
 }
 
 .containerTitles h3 {
@@ -60,7 +60,6 @@
 
 .containerTitles h3::after {
     content: '';
-    position: absolute;
     bottom: 0;
     left: 0;
     width: 0; /* Inicialmente no hay ancho */
@@ -74,19 +73,19 @@
 }
 
 .containerDropDown {
-    position: absolute;
-    top: calc(100% + 5px); /* Posiciona el dropdown justo debajo del h3 con un pequeño espacio */
-    left: 50%; /* Centra el dropdown relativo al h3 */
-    transform: translateX(-50%); /* Ajusta el centro horizontal */
+    position: fixed;
+    left: 0;
     z-index: 999; /* Asegura que el dropdown esté por encima de otros elementos */
     /* Añadir estilos para el dropdown box, ej: background, border, box-shadow */
-    background-color: #fff;
+    background-color: #dddddd;
     border: 1px solid #e0e0e0;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     border-radius: 5px;
     padding: 10px;
+    margin-top: 15px;
     min-width: 150px; /* Ancho mínimo para los dropdowns */
     box-sizing: border-box;
+    width: 100vw;
 }
 
 .containerRight {
@@ -175,31 +174,25 @@
 /* Pantallas pequeñas (ej. móviles) */
 @media (max-width: 768px) {
     .containerPrincipal {
-        flex-direction: column; /* Apila las secciones verticalmente */
+        flex-direction: row; /* Apila las secciones verticalmente */
         align-items: center; /* Centra los elementos */
-        padding: 10px;
+        justify-content: space-between;
+        height: 100px;
+        width: 90vw;
     }
 
     .containerLogo .LogoBoton {
         width: 100px;
         height: 60px;
-        margin-bottom: 10px;
     }
 
     .containerTitles {
-        flex-wrap: wrap; /* Permite que los títulos se envuelvan en varias líneas */
-        justify-content: center; /* Centra los títulos */
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-
-    .containerTitles h3 {
-        font-size: 1em;
+        display: none;
     }
 
     .containerSearch {
         flex-direction: row; /* Vuelve a poner búsqueda y compra en fila */
-        justify-content: space-around; /* Distribuye el espacio */
+        justify-content: start; /* Distribuye el espacio */
         width: 100%;
         margin-top: 10px;
         gap: 10px;
@@ -223,26 +216,48 @@
 
 /* Pantallas extra pequeñas (ej. móviles muy pequeños) */
 @media (max-width: 480px) {
-    .containerTitleUp h3 {
-        font-size: 0.75em;
-    }
 
     .containerTitles {
-        gap: 10px;
+        display: none;
     }
 
-    .containerTitles h3 {
-        font-size: 0.9em;
+    .containerTitleUp{
+        width: 100vw;
+    }
+    .containerPrincipal{
+        display: flex;
+        flex-direction: row;
+        width: 100vw;
+        height: auto;
+        align-items: end;
     }
 
-    .containerLogin, .containerPurchase {
+    .containerLogin {
         flex-direction: column; /* Apila los elementos de login y compra */
         gap: 5px;
+        align-items: end;
+    }
+
+    .containerPurchase{
+        display: flex;
         align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: auto;
+        .containerSearch{
+            height: 10px;
+            input{
+                width: 120px;
+            }
+        }
     }
 
     .containerLogin p { /* Oculta los separadores en móviles muy pequeños si molestan */
         display: none;
+    }
+
+    .containerRight{
+        margin-right: 10px;
     }
 }
 

@@ -115,86 +115,92 @@ export const Header = () => {
                         )}
                     </h3>
 
-                    <h3
-                        onMouseEnter={() => setDropSport(true)}
-                        onMouseLeave={() => setDropSport(false)}
-                    >
-                        Deporte
-                        {dropSport && (
-                            <div className={styles.containerDropDown}>
-                                <DropDownSport />
-                            </div>
-                        )}
-                    </h3>
-                </div>
-                <div className={styles.containerSearch}>
-                    <div className={styles.containerLogin}>
-                        {isAuthenticated ? (
-                            <>
-                                {/* CAMBIO CLAVE: Envuelve la imagen/icono y el saludo en un div con onClick */}
-                                <div className={styles.profileSection} onClick={handleProfileClick}>
-                                    {/* MODIFICACIÓN: Acceder a user?.profileImage?.url */}
-                                    {user?.profileImage?.url ? (
-                                        <img
-                                            src={user.profileImage.url} // <-- Usar .url
-                                            alt="Foto de perfil"
-                                            className={styles.profileImage}
-                                            onError={(e) => {
-                                                const target = e.target as HTMLImageElement;
-                                                target.onerror = null; // Evita bucles infinitos de error
-                                                target.src = 'https://placehold.co/100x100/E2E8F0/FFFFFF?text=Error'; // Placeholder si la imagen falla
-                                                console.error("Error loading profile image:", user?.profileImage?.url);
-                                            }}
-                                        />
-                                    ) : (
-                                        <FaUserCircle className={styles.profileIcon} />
-                                    )}
-                                    
-                                   
-                                    {/* Alternativamente, podrías mostrar el nombre y apellido si los prefieres: */}
-                                    {/* {user?.firstname && user.lastname && <h4 className={styles.userName}>{`${user.firstname} ${user.lastname}`}</h4>} */}
-                                </div>
-                                <p>|</p>
-                                <h4 onClick={handleLogout} style={{ cursor: "pointer" }}>
-                                    Cerrar Sesión
-                                </h4>
-                                <p>|</p>
-                                <Link to="/HelpScreen">
-                                    <h4>Ayuda</h4>
-                                </Link>
-                                {/* MODIFICACIÓN: `role` en UserDTO es un string literal type ('ADMIN' | 'CLIENTE' | 'EMPLEADO') */}
-                                {user?.role === 'ADMIN' && (
-                                    <>
-                                        <p>|</p>
-                                        <Link to="/admin-panel">
-                                            <h4>Panel Admin</h4>
-                                        </Link>
-                                    </>
-                                )}
-                            </>
-                        ) : (
-                            <>
-                                <h4 onClick={openLoginModal} style={{ cursor: "pointer" }}>
-                                    Iniciar Sesión
-                                </h4>
-                                <p>|</p>
-                                <Link to="/HelpScreen">
-                                    <h4>Ayuda</h4>
-                                </Link>
-                            </>
-                        )}
-                    </div>
-                    <div className={styles.containerPurchase}>
-                        <h3>Busqueda</h3>
-                        <h3
-                            className={styles.botonCarrito}
-                            onClick={() => navigate("/CartScreen")}
-                        >
-                            Boton de carrito
-                        </h3>
-                    </div>
-                </div>
+          <h3
+            onMouseEnter={() => setDropSport(true)}
+            onMouseLeave={() => setDropSport(false)}
+          >
+            Deporte
+            {dropSport && (
+              <div className={styles.containerDropDown}>
+                <DropDownSport />
+              </div>
+            )}
+          </h3>
+        </div>
+        <div className={styles.containerRight}>
+          {/* Lógica condicional para mostrar Iniciar Sesión/Cerrar Sesión y Perfil */}
+          <div className={styles.containerLogin}>
+            {isAuthenticated ? (
+              // Si el usuario está autenticado, muestra el perfil y el botón de cerrar sesión
+              <>
+                {/* Imagen de perfil: Si user.imagenUser.url existe, úsala; de lo contrario, usa un ícono */}
+                {/* Puedes cambiar el FaUserCircle por una imagen PNG/JPG por defecto */}
+                {user?.imagenUser?.denominacion ? (
+                  <img
+                    src={user.imagenUser.denominacion}
+                    alt="Foto de perfil"
+                    className={styles.profileImage}
+                  />
+                ) : (
+                  // Si no hay imagen, muestra un ícono de usuario por defecto
+                  <FaUserCircle className={styles.profileIcon} />
+                )}
+
+                {/* Saludo al usuario: muestra su email o nombre si está disponible */}
+                {user?.email && (
+                  <h4 className={styles.userName}>{user.email}</h4>
+                )}
+
+                {/* Separador */}
+                <p>|</p>
+
+                {/* Botón de Cerrar Sesión */}
+                <h4 onClick={handleLogout} style={{ cursor: "pointer" }}>
+                  Cerrar Sesión
+                </h4>
+                <p>|</p>
+                <Link to="/HelpScreen">
+                  <h4>Ayuda</h4>
+                </Link>
+
+                {/* Botón para Panel de Administración (solo si el rol es ADMIN) */}
+                {user?.rol === "ADMIN" && ( // Verifica el rol del usuario
+                  <>
+                    <p>|</p>
+                    {/* Asegúrate de que esta ruta '/admin-panel' exista en tu router */}
+                    <Link to="/admin-panel">
+                      <h4>Panel Admin</h4>
+                    </Link>
+                  </>
+                )}
+              </>
+            ) : (
+              // Si el usuario NO está autenticado, muestra los botones de Iniciar Sesión y Ayuda
+              <>
+                <h4 onClick={openLoginModal} style={{ cursor: "pointer" }}>
+                  Iniciar Sesión
+                </h4>
+                <p>|</p>
+                <Link to="/HelpScreen">
+                  <h4>Ayuda</h4>
+                </Link>
+              </>
+            )}
+          </div>
+          <div className={styles.containerPurchase}>
+            {/* Hay que pasar el siguiente input a FORM y manejar el search con una function */}
+            <div className={styles.containerSearch}>
+              <FaSearch className={styles.searchIcon} />
+              <input type="text" placeholder="Buscar" />
             </div>
+
+            <div className={styles.iconBag}>
+              <AiOutlineShopping className={styles.icon} onClick={() => navigate("/CartScreen")}/>
+            </div>
+
+          </div>
+        </div>
+      </div>
 
             <LoginModal
                 isOpen={isLoginModalOpen}

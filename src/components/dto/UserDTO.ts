@@ -10,6 +10,7 @@ import { ProfileImage } from "../../types/ProfileImage";
 
 export interface UserDTO {
     id: number;
+    imagenUser: ImagenDTO;
     username: string; // Corresponde a `userName` en la entidad Usuario
     firstname: string; // Corresponde a `nombre`
     lastname: string;  // Corresponde a `apellido`

@@ -1,52 +1,54 @@
 .containerPrincipal {
   display: flex;
-  justify-content: space-between;
-  align-items: start;
-  flex-direction: column;
-  background-color: #f8f8f8;
-  position: relative;
-  top: 100%;
-  left: -230px;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
   right: 0;
   z-index: 1000;
   animation: fadeSlide 0.3s ease-out;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
   width: 100%;
-  gap: 20px;
   margin-top: 10px;
 }
 
-.containerTable {
-  border-collapse: collapse;
-  width: 70%;
-  font-family: "Georgia", serif;
+.containerInfo{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100vh;
 }
 
-.containerTable th,
-.containerTable td {
-  text-align: left;
-  padding: 0.5rem 1.5rem;
-  font-size: 1.2rem;
-  white-space: nowrap;
-  border: #f8f8f8;
-}
-
-.containerTable th {
-  font-size: 1.6rem;
-  font-weight: bold;
-}
-
-.containerImg {
+.containerTable{
   width: 100%;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 }
 
-.containerImg img {
-  max-width: 100%;
-  height: auto;
-  object-fit: contain;
+.containerColumn1{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: start;
+}
+
+.containerColumn2{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: start;
+}
+
+.containerColumn3{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: start;
+  margin-right: 20px;
+}
+
+img{
+  width: 100%;
 }
 
 /* Animación fade + slide hacia abajo */
