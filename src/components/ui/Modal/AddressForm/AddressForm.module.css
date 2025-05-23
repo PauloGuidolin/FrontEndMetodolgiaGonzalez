@@ -1,0 +1,57 @@
+/* src/components/ui/Modal/EditPersonalData/AddressForm.module.css */
+
+.addressBlock {
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.addressBlock h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.inputText,
+.selectInput {
+    width: calc(100% - 20px); /* Ajusta según tu padding */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; /* Incluye padding y borde en el width */
+    font-size: 1rem;
+}
+
+.selectInput {
+    background-color: white;
+    cursor: pointer;
+}
+
+.selectInput:disabled {
+    background-color: #e9e9e9;
+    cursor: not-allowed;
+}
+
+.removeAddressBtn {
+    background-color: #dc3545; /* Rojo */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin-top: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.removeAddressBtn:hover {
+    background-color: #c82333;
+}
+
+.removeAddressBtn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}

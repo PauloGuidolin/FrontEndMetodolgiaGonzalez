@@ -1,3 +1,4 @@
+import { UserDTO } from "../components/dto/UserDTO";
 import { Sexo } from "./ISexo"; // Asumo que ISexo define 'MASCULINO', 'FEMENINO', 'OTRO'
 
 /**
@@ -28,5 +29,5 @@ export interface RegisterRequestFrontend {
  */
 export interface AuthResponseFrontend {
     token: string;
-    // user?: IUsuario; // Descomenta si tu AuthResponse.java en el backend incluye un campo 'user'
+    user: UserDTO;
 }

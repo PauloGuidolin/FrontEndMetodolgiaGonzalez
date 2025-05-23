@@ -1,58 +1,151 @@
-/*Este CSS hace un fondo gris para que no se pueda hacer click fuera del modal*/
-.background{
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 900;
+/* src/components/ui/Modal/EditAccesData/EditAcccesData.module.css */
+
+/* Este CSS hace un fondo gris para que no se pueda hacer click fuera del modal */
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.6); /* Un poco más oscuro para un mejor contraste */
+    z-index: 900;
+    display: flex; /* Para centrar el modal si fuera necesario con flexbox */
+    justify-content: center;
+    align-items: center;
 }
 
-.containerPrincipal{
-    background-color: #e0e0e0;
+.containerPrincipal {
+    background-color: #ffffff; /* Fondo blanco para un look más limpio */
+    border-radius: 12px; /* Bordes más redondeados */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada para profundidad */
     display: flex;
     flex-direction: column;
-    position: fixed;
-    gap: 2rem;
+    position: fixed; /* Mantenemos fixed y transform para centrado preciso */
+    gap: 1.8rem; /* Espaciado entre secciones */
     top: 50%;
     left: 50%;
-    transform: translate(-50% , -50%);
+    transform: translate(-50%, -50%);
     z-index: 1000;
-    padding: 15px;
-    width: 500px;
-    h3{
-        font-size: 2rem;
-    }
+    padding: 30px; /* Más padding para airear el contenido */
+    width: clamp(320px, 90vw, 500px); /* Ancho responsivo: min 320px, max 500px, 90vw para pantallas pequeñas */
+    max-height: 90vh; /* Limita la altura para evitar que se desborde en pantallas pequeñas */
+    overflow-y: auto; /* Permite scroll si el contenido es demasiado largo */
 }
 
-.containerData{
+.containerPrincipal h3 { /* Selector ajustado, ya que el anidamiento directo en CSS plano no funciona como en SCSS */
+    font-size: 2.2rem; /* Título un poco más grande */
+    color: #333; /* Color de texto más suave */
+    margin-bottom: 1rem; /* Espacio debajo del título */
+    text-align: center;
+}
+
+.containerData {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
-    font-size: 1.8rem;
-    input{
-        width: 100%;
-        font-size: 1rem;
-    }
+    gap: 1rem; /* Espaciado entre campos */
+    font-size: 1.1rem; /* Tamaño de fuente para las etiquetas */
 }
 
-.containerButtons{
+.containerData label {
+    color: #555; /* Color de etiqueta más suave */
+    font-weight: 600; /* Un poco más de peso */
+    margin-bottom: 0.2rem; /* Espacio entre label e input */
+}
+
+.containerData input {
+    width: calc(100% - 20px); /* Ajustar ancho para considerar padding */
+    padding: 12px 10px; /* Más padding interno */
+    font-size: 1.1rem; /* Tamaño de fuente para el input */
+    border: 1px solid #ccc; /* Borde más sutil */
+    border-radius: 8px; /* Bordes redondeados para inputs */
+    outline: none; /* Elimina el borde de enfoque por defecto */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease; /* Transición suave para el foco */
+}
+
+.containerData input:focus {
+    border-color: #007bff; /* Color azul al enfocar */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Sombra de enfoque */
+}
+
+.containerData input:disabled {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
+.containerButtons {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    button{
-        font-size: 1.2rem;
-        background-color: black;
-        color: white;
-        padding: 0.6rem 1.2rem;
-        font-size: 1rem;
-        border: none;
-        cursor: pointer;
-        width: 45%;
-        font-weight: bold;
+    gap: 1rem; /* Espacio entre los botones */
+    margin-top: 1.5rem; /* Margen superior para separarlo de los campos */
+}
+
+.containerButtons button {
+    font-size: 1.1rem; /* Ajuste de tamaño de fuente */
+    padding: 0.8rem 1.5rem; /* Más padding para botones */
+    border: none;
+    cursor: pointer;
+    border-radius: 8px; /* Bordes redondeados para botones */
+    transition: background-color 0.3s ease, transform 0.2s ease; /* Transiciones suaves */
+    width: 48%; /* Ajusta el ancho para que quepan bien con gap */
+}
+
+.containerButtons button:first-child { /* Botón Cancelar */
+    background-color: #dc3545; /* Rojo para cancelar */
+    color: white;
+}
+
+.containerButtons button:first-child:hover {
+    background-color: #c82333; /* Rojo más oscuro al hover */
+    transform: translateY(-2px); /* Pequeño efecto de levantamiento */
+}
+
+.containerButtons button:last-child { /* Botón Aceptar */
+    background-color: #007bff; /* Azul para aceptar */
+    color: white;
+}
+
+.containerButtons button:last-child:hover {
+    background-color: #0056b3; /* Azul más oscuro al hover */
+    transform: translateY(-2px); /* Pequeño efecto de levantamiento */
+}
+
+.containerButtons button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none; /* Sin efecto de levantamiento al estar deshabilitado */
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 600px) {
+    .containerPrincipal {
+        width: 95vw; /* Ocupa casi todo el ancho en pantallas pequeñas */
+        padding: 20px;
+        gap: 1.5rem;
     }
-    button:hover{
-        background-color: #333;
+
+    .containerPrincipal h3 {
+        font-size: 1.8rem;
+    }
+
+    .containerData label {
+        font-size: 1rem;
+    }
+
+    .containerData input {
+        font-size: 1rem;
+        padding: 10px;
+    }
+
+    .containerButtons {
+        flex-direction: column; /* Botones apilados en pantallas muy pequeñas */
+        gap: 0.8rem;
+    }
+
+    .containerButtons button {
+        width: 100%; /* Cada botón ocupa todo el ancho */
+        font-size: 1rem;
+        padding: 0.7rem;
     }
 }
