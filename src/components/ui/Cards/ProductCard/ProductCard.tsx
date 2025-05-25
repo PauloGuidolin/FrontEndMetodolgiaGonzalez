@@ -1,4 +1,4 @@
-// Archivo: src/components/ProductCard/ProductCard.tsx
+// src/components/ProductCard/ProductCard.tsx
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +7,8 @@ import { ProductoDTO } from '../../../dto/ProductoDTO';
 import { ImagenDTO } from '../../../dto/ImagenDTO';
 import { CategoriaDTO } from '../../../dto/CategoriaDTO';
 import { ProductoDetalleDTO } from '../../../dto/ProductoDetalleDTO';
-// MODIFICACIÓN: Actualizar las rutas de importación de DTOs
+
+
 
 
 interface ProductCardProps {
@@ -20,7 +21,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const handleCardClick = () => {
         // product.id es de tipo number en ProductoDTO
         if (product.id !== undefined && product.id !== null) {
-            navigate(`/product/${product.id}`);
+            navigate(`/product/${product.id}`); // Navega a la ruta de detalle
         } else {
             console.warn(`Product ${product.denominacion || 'Unknown Product'} has no ID, cannot navigate.`);
         }
@@ -30,20 +31,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     const hasPromotion = product.tienePromocion ?? false;
 
     // Extraer colores únicos de los detalles para mostrar
-    // Usar product.productos_detalles según el nombre del campo en el DTO
     const uniqueColors = Array.from(new Set(Array.isArray(product.productos_detalles) ? product.productos_detalles.map((detail: ProductoDetalleDTO) => detail.color).filter(Boolean) : []));
 
     // Extraer tallas únicas de los detalles para mostrar
-    // Usar product.productos_detalles según el nombre del campo en el DTO
     const uniqueSizes = Array.from(new Set(Array.isArray(product.productos_detalles) ? product.productos_detalles.map((detail: ProductoDetalleDTO) => detail.talle).filter(Boolean) : []));
 
     // Obtener la URL de la primera imagen
-    // MODIFICACIÓN: Acceder a la propiedad 'url' del objeto ImagenDTO
     const firstImageUrl = Array.isArray(product.imagenes) && product.imagenes.length > 0 && product.imagenes[0]
-        ? (product.imagenes[0] as ImagenDTO).url // <-- Acceder a .url para obtener la URL
+        ? (product.imagenes[0] as ImagenDTO).url // Acceder a .url para obtener la URL
         : 'https://placehold.co/600x400/E2E8F0/FFFFFF?text=Sin+Imagen'; // Placeholder si no hay imagen
 
-    // Logs de depuración para verificar los datos recibidos en el frontend
+    // Logs de depuración (puedes eliminarlos en producción)
     console.log(`Card for product ${product.denominacion || product.id}:`);
     console.log("   precioOriginal:", product.precioOriginal);
     console.log("   precioFinal:", product.precioFinal);
@@ -82,8 +80,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                             const categoryName = categoria.denominacion;
 
                              if (!categoryName || typeof categoryName !== 'string') {
-                                 console.warn("Skipping rendering for invalid category item in ProductCard:", categoria);
-                                 return null;
+                                console.warn("Skipping rendering for invalid category item in ProductCard:", categoria);
+                                return null; // No renderizar si la categoría es inválida
                              }
 
                             return (
@@ -105,7 +103,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                 <div className={styles.priceContainer}>
                     {/* Muestra precio original (del DTO) si tiene promoción y es un número válido */}
                     {hasPromotion && typeof product.precioOriginal === 'number' && product.precioOriginal > 0 && (
-                             <span className={styles.originalPrice}>${product.precioOriginal.toFixed(2)}</span>
+                               <span className={styles.originalPrice}>${product.precioOriginal.toFixed(2)}</span>
                     )}
                     {/* Muestra el precio final (del DTO), usando precioOriginal como fallback si precioFinal es null */}
                     {/* Asegurarse de que el precio final sea un número válido antes de toFixed */}
@@ -116,9 +114,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
                         }
                     </span>
                 </div>
-
             </div>
-
         </div>
     );
 };

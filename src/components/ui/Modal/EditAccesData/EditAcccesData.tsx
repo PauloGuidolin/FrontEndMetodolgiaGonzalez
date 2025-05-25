@@ -1,5 +1,3 @@
-// src/components/ui/Modal/EditAccesData/EditAcccesData.tsx
-
 import { FC, useState, useEffect } from "react";
 import styles from './EditAcccesData.module.css';
 
@@ -7,8 +5,8 @@ import { useAuthStore } from "../../../../store/authStore";
 import { toast } from "react-toastify";
 import { UserDTO } from "../../../dto/UserDTO";
 import { UpdateCredentialsRequest } from "../../../dto/UpdateCredentialsRequest";
+import Swal from 'sweetalert2';
 
-// Define la interfaz de props
 interface EditAcccesDataProps {
     closeEditAccesData: () => void;
     user: UserDTO;
@@ -20,10 +18,8 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ closeEditAccesData, user }) =
     const [newPassword, setNewPassword] = useState('');
     const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
-    // MODIFICACIÓN: Solo desestructuramos `updateUserCredentials`
-    const { updateUserCredentials, loadingUser } = useAuthStore(); // Asume que ya implementaste o implementarás `updateUserCredentials` en authStore
+    const { updateUserCredentials, loadingUser, logout } = useAuthStore();
 
-    // useEffect para pre-llenar el email
     useEffect(() => {
         if (user?.email) {
             setEmail(user.email);
@@ -31,37 +27,76 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ closeEditAccesData, user }) =
     }, [user]);
 
     const handleSave = async () => {
-        if (newPassword && newPassword !== confirmNewPassword) {
+        const emailChanged = email !== user.email;
+        const passwordChanged = newPassword.length > 0;
+
+        if (passwordChanged && newPassword !== confirmNewPassword) {
             toast.error("La nueva contraseña y la confirmación no coinciden.");
             return;
         }
 
-        // Si se va a cambiar la contraseña o el email, se requiere la contraseña actual
-        if ((newPassword || email !== user.email) && !currentPassword) {
+        if ((emailChanged || passwordChanged) && !currentPassword) {
             toast.error("Por favor, introduce tu contraseña actual para confirmar los cambios.");
             return;
         }
 
-        const updateData: UpdateCredentialsRequest = {
-            currentEmail: email !== user.email ? email : undefined, // Solo envía el email si ha cambiado
-            currentPassword: currentPassword, // Siempre se envía si se está actualizando la contraseña
-            newPassword: newPassword || undefined, // Solo envía newPassword si hay una
-        };
-
-        // Eliminar propiedades undefined si tu backend lo prefiere (excepto currentPassword si es necesario)
-        if (updateData.newEmail === undefined) delete updateData.newEmail;
-        if (updateData.newPassword === undefined) delete updateData.newPassword;
-
-        // Si no hay cambios en email ni nueva contraseña
-        if (!updateData.currentEmail && !updateData.newPassword) {
+        if (!emailChanged && !passwordChanged) {
             toast.info("No hay cambios en el email o la contraseña.");
             closeEditAccesData();
             return;
         }
 
+        let confirmationText = '';
+        let showConfirmation = false;
+
+        if (emailChanged && passwordChanged) {
+            confirmationText = 'Si cambias tu email y contraseña, tu sesión actual se cerrará y deberás iniciar sesión de nuevo con las nuevas credenciales.';
+            showConfirmation = true;
+        } else if (emailChanged) {
+            confirmationText = 'Si cambias tu email, tu sesión actual se cerrará y deberás iniciar sesión de nuevo con el nuevo email.';
+            showConfirmation = true;
+        } else if (passwordChanged) {
+            confirmationText = 'Si cambias tu contraseña, tu sesión actual se cerrará y deberás iniciar sesión de nuevo con la nueva contraseña.';
+            showConfirmation = true;
+        }
+
+        if (showConfirmation) {
+            const result = await Swal.fire({
+                title: '¿Estás seguro?',
+                text: confirmationText,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Sí, continuar',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (!result.isConfirmed) {
+                return; // Si el usuario cancela, no hacemos nada
+            }
+        }
+
+        const updateData: UpdateCredentialsRequest = {
+            currentPassword: currentPassword,
+        };
+
+        if (emailChanged) {
+            updateData.newEmail = email;
+        }
+
+        if (passwordChanged) {
+            updateData.newPassword = newPassword;
+        }
+
         try {
             await updateUserCredentials(updateData);
             toast.success("Datos de acceso actualizados exitosamente.");
+
+            // Si hubo algún cambio en email o contraseña, cerramos la sesión
+            if (emailChanged || passwordChanged) {
+                logout();
+            }
             closeEditAccesData();
         } catch (error: any) {
             console.error("Error al guardar los datos de acceso:", error);

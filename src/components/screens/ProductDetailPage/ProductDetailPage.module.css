@@ -1,0 +1,431 @@
+/* src/components/screens/ProductDetailPage/ProductDetailPage.module.css */
+
+.productDetailPage {
+    font-family: 'Poppins', sans-serif; /* Fuente un poco más moderna */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    box-sizing: border-box; /* Asegura que el padding no añada al ancho */
+}
+
+.loadingMessage,
+.errorMessage,
+.notFoundMessage {
+    text-align: center;
+    padding: 30px; /* Más padding */
+    font-size: 1.3em; /* Un poco más grande */
+    color: #333;
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.errorMessage {
+    color: #d9534f; /* Rojo para errores */
+    background-color: #fdd; /* Fondo rojo claro */
+}
+
+.breadcrumb {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 25px; /* Más espacio */
+    padding-left: 5px; /* Pequeño padding para alinear con el contenido */
+}
+
+.productContent {
+    display: flex;
+    gap: 30px; /* Ajusta el espacio entre las secciones */
+    margin-bottom: 50px;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+}
+
+.productImages {
+    /* Este contenedor ahora alberga las miniaturas y la imagen principal lado a lado */
+    display: flex;
+    gap: 15px; /* Espacio entre la galería de miniaturas y la imagen principal */
+    flex: 1.2; /* Permite que tome más espacio que el productInfo si hay */
+    min-width: 380px; /* Asegura un tamaño mínimo para el conjunto de imágenes */
+}
+
+.thumbnailGallery {
+    display: flex;
+    flex-direction: column; /* Las miniaturas se apilan verticalmente */
+    gap: 10px;
+    width: 90px; /* Un poco más de ancho para las miniaturas */
+}
+
+.thumbnail {
+    width: 90px; /* Miniaturas cuadradas */
+    height: 90px;
+    object-fit: cover; /* Recorta la imagen para que cubra el área */
+    cursor: pointer;
+    border: 2px solid transparent; /* Borde transparente por defecto */
+    border-radius: 8px; /* Bordes más suaves */
+    transition: border-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Sutil sombra */
+}
+
+.thumbnail:hover {
+    border-color: #a0a0a0; /* Borde al pasar el ratón */
+    transform: translateY(-2px); /* Pequeño levantamiento */
+}
+
+.thumbnail.active { /* Clase para la miniatura seleccionada */
+    border-color: #007bff; /* Borde azul brillante */
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.2); /* Sombra más pronunciada */
+    transform: scale(1.02); /* Ligeramente más grande */
+}
+
+.mainImage {
+    flex: 1; /* Ocupa el espacio restante */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #e0e0e0; /* Borde más suave */
+    border-radius: 8px; /* Bordes suaves */
+    overflow: hidden; /* Importante para que la imagen no se salga */
+    background-color: #fdfdfd; /* Fondo ligeramente claro */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Sombra más notoria */
+}
+
+.mainImage img {
+    max-width: 100%;
+    max-height: 500px; /* Aumenta ligeramente la altura máxima de la imagen principal */
+    object-fit: contain; /* Asegura que la imagen se ajuste sin recortarse */
+    display: block; /* Elimina espacio extra debajo de la imagen */
+}
+
+.productInfo {
+    flex: 1; /* Ahora toma el espacio restante */
+    min-width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Aumenta el espacio entre elementos de información */
+    padding: 10px 0; /* Un poco de padding vertical */
+}
+
+.productInfo h1 {
+    font-size: 2.5em; /* Título más grande */
+    margin-bottom: 5px; /* Menos margen inferior para que se sienta más unido */
+    color: #222;
+    font-weight: 700; /* Negrita más fuerte */
+}
+
+.productDescription {
+    font-size: 1.05em; /* Un poco más grande */
+    color: #555;
+    line-height: 1.7; /* Mayor legibilidad */
+}
+
+.productPrice {
+    font-size: 2.2em; /* Precio final más grande */
+    font-weight: bold;
+    color: #28a745; /* Color para el precio final */
+    display: flex;
+    align-items: baseline;
+    gap: 12px; /* Espacio entre precios */
+}
+
+.originalPrice {
+    font-size: 0.7em; /* Relativamente más pequeño que el final */
+    color: #999;
+    text-decoration: line-through;
+    font-weight: normal;
+}
+
+.finalPrice {
+    font-size: 1em; /* Se mantiene en relación al productPrice */
+    color: #28a745;
+}
+
+
+.productOptions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 25px; /* Más espacio entre las opciones de selección */
+    margin-top: 20px;
+}
+
+.productOptions div { /* Contenedor para label y select */
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.productOptions label {
+    font-weight: 600; /* Negrita un poco más sutil */
+    color: #444;
+    font-size: 0.95em;
+}
+
+.productOptions select {
+    padding: 10px 15px; /* Más padding */
+    border: 1px solid #bbb; /* Borde más definido */
+    border-radius: 6px; /* Bordes más suaves */
+    font-size: 1.05em;
+    min-width: 180px;
+    background-color: #fefefe;
+    cursor: pointer;
+}
+
+.productOptions select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.stockInfo {
+    font-size: 1.05em;
+    font-weight: 600; /* Un poco más de negrita */
+    margin-top: 15px;
+    color: #333;
+}
+
+.noStock {
+    color: #dc3545; /* Rojo para "no hay stock" */
+    font-weight: bold;
+}
+
+.quantitySelector {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quantityInput {
+    width: 70px; /* Más ancho */
+    padding: 10px; /* Más padding */
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 1.2em; /* Más grande */
+}
+
+.addToCartButton {
+    background-color: #007bff;
+    color: white;
+    padding: 15px 30px; /* Más padding */
+    border: none;
+    border-radius: 8px; /* Bordes más suaves */
+    font-size: 1.2em; /* Texto más grande */
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 25px;
+    font-weight: 600;
+}
+
+.addToCartButton:hover:not(:disabled) {
+    background-color: #0056b3;
+    transform: translateY(-2px); /* Pequeño levantamiento al pasar el ratón */
+}
+
+.addToCartButton:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.7; /* Opacidad para indicar que está deshabilitado */
+}
+
+.arrow {
+    font-weight: bold;
+    font-size: 1.3em; /* Un poco más grande */
+}
+
+.paymentShippingInfo {
+    margin-top: 40px; /* Más margen superior */
+    padding-top: 25px; /* Más padding superior */
+    border-top: 1px solid #eee;
+    font-size: 0.95em;
+    color: #777;
+}
+
+.paymentShippingInfo p {
+    margin-bottom: 8px; /* Más espacio entre párrafos */
+}
+
+.similarProducts {
+    margin-top: 80px; /* Más espacio superior */
+}
+
+.similarProducts h2 {
+    text-align: center;
+    margin-bottom: 35px; /* Más margen inferior */
+    color: #333;
+    font-size: 2em; /* Título más grande */
+    font-weight: 700;
+}
+
+.similarProductsPlaceholder {
+    display: flex;
+    justify-content: center;
+    gap: 25px; /* Más espacio entre tarjetas */
+    flex-wrap: wrap;
+}
+
+.similarProductCard {
+    border: 1px solid #e0e0e0; /* Borde más suave */
+    border-radius: 10px; /* Bordes más suaves */
+    padding: 18px; /* Más padding */
+    text-align: center;
+    width: 240px; /* Un poco más ancho */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Sombra más notoria */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.similarProductCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.12);
+}
+
+.similarProductCard img {
+    max-width: 100%;
+    height: 160px; /* Un poco más de altura */
+    object-fit: cover;
+    border-radius: 6px; /* Bordes suaves */
+    margin-bottom: 12px;
+}
+
+.similarProductCard p {
+    font-weight: 600; /* Negrita más fuerte */
+    color: #333;
+    font-size: 1.05em;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 992px) { /* Tabletas grandes y monitores pequeños */
+    .productContent {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .productImages {
+        flex-direction: row; /* Miniaturas y principal en fila */
+        width: 100%;
+        max-width: 600px; /* Limita el ancho del contenedor de imágenes */
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .thumbnailGallery {
+        width: 100px; /* Un poco más grandes */
+        height: auto;
+    }
+
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+    }
+
+    .mainImage {
+        height: 450px; /* Ajusta la altura de la imagen principal */
+    }
+
+    .productInfo {
+        min-width: unset;
+        width: 90%;
+        max-width: 600px;
+        text-align: center; /* Centra el texto en tabletas */
+    }
+
+    .productInfo h1,
+    .productPrice,
+    .productOptions,
+    .quantitySelector,
+    .addToCartButton,
+    .paymentShippingInfo {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    .productOptions select {
+        width: 80%; /* Hacer los selects más anchos */
+        max-width: 250px;
+    }
+}
+
+
+@media (max-width: 768px) { /* Tabletas pequeñas y móviles grandes */
+    .productImages {
+        flex-direction: column; /* Apila miniaturas y principal de nuevo */
+        align-items: center;
+        gap: 15px;
+    }
+    .thumbnailGallery {
+        flex-direction: row; /* Miniaturas en fila horizontal */
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .thumbnail {
+        width: 70px;
+        height: 70px;
+    }
+    .mainImage {
+        height: 350px;
+        width: 100%;
+        max-width: 400px; /* Limita en móviles */
+    }
+    .productInfo h1 {
+        font-size: 2em;
+    }
+    .productPrice {
+        font-size: 1.8em;
+    }
+    .addToCartButton {
+        padding: 12px 25px;
+        font-size: 1.1em;
+    }
+    .similarProducts h2 {
+        font-size: 1.6em;
+    }
+    .similarProductCard {
+        width: 180px;
+    }
+}
+
+@media (max-width: 480px) { /* Móviles pequeños */
+    .productDetailPage {
+        padding: 15px;
+    }
+    .productContent {
+        gap: 20px;
+    }
+    .productImages {
+        gap: 10px;
+    }
+    .thumbnail {
+        width: 60px;
+        height: 60px;
+    }
+    .mainImage {
+        height: 300px;
+    }
+    .productInfo h1 {
+        font-size: 1.6em;
+    }
+    .productPrice {
+        font-size: 1.4em;
+    }
+    .productDescription {
+        font-size: 0.95em;
+    }
+    .addToCartButton {
+        font-size: 1em;
+        padding: 10px 20px;
+    }
+    .similarProducts h2 {
+        font-size: 1.4em;
+    }
+    .similarProductCard {
+        width: 150px;
+        padding: 10px;
+    }
+    .similarProductCard img {
+        height: 120px;
+    }
+}

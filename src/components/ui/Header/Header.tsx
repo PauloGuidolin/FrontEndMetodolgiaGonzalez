@@ -1,4 +1,3 @@
-// src/components/ui/Header/Header.tsx
 import styles from "./Header.module.css";
 import { useState, useEffect } from "react";
 import { DropDownClothes } from "../Modal/DropDownClothes/DropDownClothes";
@@ -8,11 +7,9 @@ import RegisterModal from "../Modal/Register/RegisterModal";
 import { DropDownShoes } from "../Modal/DropDownShoes/DropDownShoes";
 import { DropDownSport } from "../Modal/DropDownSport/DropDownSport";
 
-// Importa un ícono de React Icons para el perfil
-import { FaUserCircle } from 'react-icons/fa';
-import { useAuthStore } from "../../../store/authStore"; // Esta importación es correcta
-// No es necesario importar los DTOs de auth aquí, ya que el store los maneja internamente.
-// La única excepción sería si estuvieras tipando props directamente con ellos.
+import { FaSearch, FaUserCircle } from 'react-icons/fa';
+import { useAuthStore } from "../../../store/authStore";
+import { AiOutlineShopping } from "react-icons/ai";
 
 export const Header = () => {
     const [dropClothes, setDropClothes] = useState(false);
@@ -24,15 +21,26 @@ export const Header = () => {
 
     const navigate = useNavigate();
 
-    // Extraemos el estado y las acciones del store
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-    const user = useAuthStore((state) => state.user); // user ahora es de tipo UserDTO | null
+    const user = useAuthStore((state) => state.user);
     const logout = useAuthStore((state) => state.logout);
     const checkAuth = useAuthStore((state) => state.checkAuth);
 
     useEffect(() => {
         checkAuth();
     }, [checkAuth]);
+
+    // >>>>> CONSOLE.LOGS PARA DEPURACIÓN <<<<<
+    useEffect(() => {
+        console.log("Header - Estado de autenticación:", isAuthenticated);
+        if (isAuthenticated && user) {
+            console.log("Header - Objeto 'user' completo:", user);
+            // Ahora se accede a profileImage.url, que es donde el backend envía la URL
+            console.log("Header - URL de imagen de perfil (profileImage.url):", user.profileImage?.url);
+        } else {
+            console.log("Header - Usuario no autenticado o el objeto 'user' es null/undefined.");
+        }
+    }, [isAuthenticated, user]);
 
     const openLoginModal = () => {
         console.log("Se hizo clic en Iniciar Sesion");
@@ -67,12 +75,11 @@ export const Header = () => {
         navigate("/");
     };
 
-    // Manejador para el clic en el perfil/imagen
     const handleProfileClick = () => {
         if (isAuthenticated) {
-            navigate("/UserProfile"); // Redirige a la página de perfil si el usuario está autenticado
+            navigate("/UserProfile");
         } else {
-            openLoginModal(); // Abre el modal de inicio de sesión si no está autenticado
+            openLoginModal();
         }
     };
 
@@ -115,92 +122,85 @@ export const Header = () => {
                         )}
                     </h3>
 
-          <h3
-            onMouseEnter={() => setDropSport(true)}
-            onMouseLeave={() => setDropSport(false)}
-          >
-            Deporte
-            {dropSport && (
-              <div className={styles.containerDropDown}>
-                <DropDownSport />
-              </div>
-            )}
-          </h3>
-        </div>
-        <div className={styles.containerRight}>
-          {/* Lógica condicional para mostrar Iniciar Sesión/Cerrar Sesión y Perfil */}
-          <div className={styles.containerLogin}>
-            {isAuthenticated ? (
-              // Si el usuario está autenticado, muestra el perfil y el botón de cerrar sesión
-              <>
-                {/* Imagen de perfil: Si user.imagenUser.url existe, úsala; de lo contrario, usa un ícono */}
-                {/* Puedes cambiar el FaUserCircle por una imagen PNG/JPG por defecto */}
-                {user?.imagenUser?.denominacion ? (
-                  <img
-                    src={user.imagenUser.denominacion}
-                    alt="Foto de perfil"
-                    className={styles.profileImage}
-                  />
-                ) : (
-                  // Si no hay imagen, muestra un ícono de usuario por defecto
-                  <FaUserCircle className={styles.profileIcon} />
-                )}
+                    <h3
+                        onMouseEnter={() => setDropSport(true)}
+                        onMouseLeave={() => setDropSport(false)}
+                    >
+                        Deporte
+                        {dropSport && (
+                            <div className={styles.containerDropDown}>
+                                <DropDownSport />
+                            </div>
+                        )}
+                    </h3>
+                </div>
+                <div className={styles.containerRight}>
+                    <div className={styles.containerLogin}>
+                        {isAuthenticated ? (
+                            <>
+                                <div className={styles.profileContainer} onClick={handleProfileClick} style={{ cursor: "pointer" }}>
+                                    {/* >>>>> LÍNEAS CORREGIDAS AQUÍ <<<<< */}
+                                    {user?.profileImage?.url ? ( // Accede a user.profileImage.url
+                                        <img
+                                            src={user.profileImage.url} // Usa user.profileImage.url como la fuente de la imagen
+                                            alt="Foto de perfil"
+                                            className={styles.profileImage}
+                                            // Manejador de errores para depurar si la imagen no se carga
+                                            onError={(e) => {
+                                                console.error("Error al cargar la imagen de perfil en el Header. URL:", user.profileImage?.url);
+                                                e.currentTarget.onerror = null;
+                                                // Opcional: e.currentTarget.src = "/path/to/local/default-profile.png";
+                                            }}
+                                        />
+                                    ) : (
+                                        <FaUserCircle className={styles.profileIcon} />
+                                    )}
+                                </div>
 
-                {/* Saludo al usuario: muestra su email o nombre si está disponible */}
-                {user?.email && (
-                  <h4 className={styles.userName}>{user.email}</h4>
-                )}
+                                <p>|</p>
 
-                {/* Separador */}
-                <p>|</p>
+                                <h4 onClick={handleLogout} style={{ cursor: "pointer" }}>
+                                    Cerrar Sesión
+                                </h4>
+                                <p>|</p>
+                                <Link to="/HelpScreen">
+                                    <h4>Ayuda</h4>
+                                </Link>
 
-                {/* Botón de Cerrar Sesión */}
-                <h4 onClick={handleLogout} style={{ cursor: "pointer" }}>
-                  Cerrar Sesión
-                </h4>
-                <p>|</p>
-                <Link to="/HelpScreen">
-                  <h4>Ayuda</h4>
-                </Link>
+                                {user?.role === "ADMIN" && (
+                                    <>
+                                        <p>|</p>
+                                        <Link to="/admin-panel">
+                                            <h4>Panel Admin</h4>
+                                        </Link>
+                                    </>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <h4 onClick={openLoginModal} style={{ cursor: "pointer" }}>
+                                    Iniciar Sesión
+                                </h4>
+                                <p>|</p>
+                                <Link to="/HelpScreen">
+                                    <h4>Ayuda</h4>
+                                </Link>
+                            </>
+                        )}
+                    </div>
+                    <div className={styles.containerPurchase}>
+                        <div className={styles.containerSearch}>
+                            <FaSearch className={styles.searchIcon} />
+                            <input type="text" placeholder="Buscar" />
+                        </div>
 
-                {/* Botón para Panel de Administración (solo si el rol es ADMIN) */}
-                {user?.rol === "ADMIN" && ( // Verifica el rol del usuario
-                  <>
-                    <p>|</p>
-                    {/* Asegúrate de que esta ruta '/admin-panel' exista en tu router */}
-                    <Link to="/admin-panel">
-                      <h4>Panel Admin</h4>
-                    </Link>
-                  </>
-                )}
-              </>
-            ) : (
-              // Si el usuario NO está autenticado, muestra los botones de Iniciar Sesión y Ayuda
-              <>
-                <h4 onClick={openLoginModal} style={{ cursor: "pointer" }}>
-                  Iniciar Sesión
-                </h4>
-                <p>|</p>
-                <Link to="/HelpScreen">
-                  <h4>Ayuda</h4>
-                </Link>
-              </>
-            )}
-          </div>
-          <div className={styles.containerPurchase}>
-            {/* Hay que pasar el siguiente input a FORM y manejar el search con una function */}
-            <div className={styles.containerSearch}>
-              <FaSearch className={styles.searchIcon} />
-              <input type="text" placeholder="Buscar" />
+                        <div className={styles.iconBag}>
+                            <AiOutlineShopping className={styles.icon} onClick={() => navigate("/CartScreen")} />
+                        </div>
+
+                    </div>
+                </div>
             </div>
-
-            <div className={styles.iconBag}>
-              <AiOutlineShopping className={styles.icon} onClick={() => navigate("/CartScreen")}/>
-            </div>
-
-          </div>
-        </div>
-      </div>
 
             <LoginModal
                 isOpen={isLoginModalOpen}
