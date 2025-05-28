@@ -1,264 +1,279 @@
-
 .containerTitleUp {
-    background-color: black;
-    color: white;
-    display: flex;
-    justify-content: center; /* Centra horizontalmente el texto */
-    align-items: center; /* Centra verticalmente el texto */
-    width: 100%;
-    padding: 8px 0; /* Un poco de padding arriba y abajo */
-    font-size: 0.85em; /* Tamaño de fuente más pequeño para el título superior */
-    text-align: center;
+  background-color: black;
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 8px 0;
+  font-size: 0.85em;
+  text-align: center;
 }
 
 .containerPrincipal {
-    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-    display: flex; /* Usamos flexbox para mayor control y responsividad */
-    justify-content: space-between; /* Espacio entre las secciones */
-    align-items: center; /* Alinea los elementos verticalmente al centro */ 
-    padding: 10px;
-    width: 98vw;
-    box-sizing: border-box; /* Incluye padding en el ancho total */
-    border-bottom: 1px solid #e0e0e0; /* Un borde sutil en la parte inferior */
+  font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end; /* Alinea todos los elementos del header al final verticalmente */
+  padding: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  border-bottom: 1px solid #e0e0e0;
+  position: relative;
+  z-index: 10;
+  min-height: 70px; /* Asegura una altura mínima para el header */
 }
 
-.containerLogo .LogoBoton { /* Corregido: .LogoBoton dentro de .containerLogo */
-    width: 120px; /* Tamaño un poco más pequeño para el logo */
-    height: 70px; /* Ajusta la altura proporcionalmente */
-    object-fit: contain; /* Asegura que la imagen no se distorsione */
-    cursor: pointer;
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+.containerLogo .LogoBoton {
+  width: 120px;
+  height: 70px;
+  object-fit: contain;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }
 
 .containerLogo .LogoBoton:hover {
-    transform: scale(0.98); /* Ligero encogimiento al pasar el ratón */
-    opacity: 0.85;
+  transform: scale(0.98);
+  opacity: 0.85;
+}
+
+.megaMenuArea {
+  display: flex;
+  flex: 1; 
+  height: 100%; 
+  justify-content: center; /* Mantiene los h3 centrados horizontalmente */
+  align-items: flex-end; /* Mantiene los h3 pegados abajo verticalmente */
 }
 
 .containerTitles {
-    display: flex;
-    gap: 30px;
-    height: 10vh;
-    width: 30vw;
-    align-items: end;
-    justify-content: center;
+  display: flex;
+  gap: 20px;
+  /* align-items: end; y justify-content: center; pueden ser redundantes aquí, pero no causan problemas */
 }
 
 .containerTitles h3 {
-    margin: 0; /* Elimina el margen por defecto de los h3 */
-    padding-bottom: 5px; /* Espacio para la línea inferior */
-    font-size: 1.1em; /* Tamaño de fuente para las categorías */
-    color: #333;
-    position: relative; /* Necesario para el pseudo-elemento */
+  margin: 0;
+  padding-bottom: 5px;
+  font-size: 1.1em;
+  color: #333;
+  position: relative;
 }
 
 .containerTitles h3:hover {
-    cursor: pointer;
-    /* Usamos un pseudo-elemento para la línea inferior para una animación más suave */
-    color: #000; /* Color del texto al pasar el ratón */
+  cursor: pointer;
+  color: #000;
 }
 
 .containerTitles h3::after {
-    content: '';
-    bottom: 0;
-    left: 0;
-    width: 0; /* Inicialmente no hay ancho */
-    height: 2px; /* Grosor de la línea */
-    background-color: #000; /* Color de la línea */
-    transition: width 0.3s ease-in-out; /* Animación de ancho */
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: #000;
+  transition: width 0.3s ease-in-out;
 }
 
 .containerTitles h3:hover::after {
-    width: 100%; /* La línea se extiende al 100% al pasar el ratón */
+  width: 100%;
 }
 
-.containerDropDown {
-    position: fixed;
-    left: 0;
-    z-index: 999; /* Asegura que el dropdown esté por encima de otros elementos */
-    /* Añadir estilos para el dropdown box, ej: background, border, box-shadow */
-    background-color: #dddddd;
-    border: 1px solid #e0e0e0;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-    padding: 10px;
-    margin-top: 15px;
-    min-width: 150px; /* Ancho mínimo para los dropdowns */
-    box-sizing: border-box;
-    width: 100vw;
+/* MODIFICADO: Ajuste del 'top' para superponer el dropdown */
+.megaDropDownWrapper {
+  position: absolute;
+  /* CAMBIO CLAVE: Usa calc(100% - Xpx) para que el dropdown suba Xpx y se solape */
+  top: calc(100% - 10px); /* Ajusta este valor (10px) si necesitas más o menos solapamiento */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
+  max-width: none;
+  
+  background-color: #dddddd;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  border-radius: 5px;
+  padding: 20px 0; 
+  
+  z-index: 9; /* Sigue estando por debajo del header principal (z-index: 10) pero por encima del contenido */
+
+  display: flex;
+  justify-content: center; 
+  align-items: flex-start;
 }
 
 .containerRight {
-    display: flex;
-    flex-direction: column; /* Apila los elementos verticalmente */
-    gap: 15px; /* Espacio entre los grupos de búsqueda/compra */
-    align-items: flex-end; /* Alinea los elementos a la derecha */
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: flex-end;
+  margin-bottom: 5px;
 }
 
 .containerLogin {
-    display: flex;
-    gap: 10px; /* Espacio entre los elementos de login/perfil */
-    align-items: center; /* Alinea verticalmente */
-    font-size: 0.9em; /* Tamaño de fuente ligeramente más pequeño */
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  font-size: 0.9em;
 }
 
 .containerLogin h4 {
-    margin: 0;
-    color: #555;
-    transition: color 0.2s ease-in-out;
+  margin: 0;
+  color: #555;
+  transition: color 0.2s ease-in-out;
 }
 
 .containerLogin h4:hover {
-    cursor: pointer;
-    color: #000; /* Oscurece el texto al pasar el ratón */
-    text-decoration: underline; /* Subrayado al pasar el ratón */
+  cursor: pointer;
+  color: #000;
+  text-decoration: underline;
 }
 
 .containerLogin p {
-    margin: 0;
-    color: #ccc; /* Color para el separador */
+  margin: 0;
+  color: #ccc;
 }
 
 .profileImage {
-    width: 35px; /* Tamaño de la imagen de perfil */
-    height: 35px;
-    border-radius: 50%; /* Para que sea redonda */
-    object-fit: cover; /* Para que la imagen no se distorsione */
-    border: 1px solid #ddd; /* Borde sutil para la imagen */
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid #ddd;
 }
 
 .profileIcon {
-    font-size: 35px; /* Tamaño del ícono de perfil */
-    color: #777; /* Color del ícono */
+  font-size: 35px;
+  color: #777;
 }
 
 .userName {
-    font-weight: 600; /* Un poco más de negrita para el nombre/email */
-    color: #333;
+  font-weight: 600;
+  color: #333;
 }
 
 .containerPurchase {
-    display: flex;
-    gap: 20px;
-    align-items: center;
+  display: flex;
+  gap: 20px;
+  align-items: center;
 }
 
 .containerPurchase h3 {
-    margin: 0;
-    font-size: 1em; /* Tamaño de fuente para Búsqueda y Carrito */
-    color: #555;
-    transition: color 0.2s ease-in-out;
+  margin: 0;
+  font-size: 1em;
+  color: #555;
+  transition: color 0.2s ease-in-out;
 }
 
 .containerPurchase h3:hover {
-    color: #000;
+  color: #000;
 }
 
 .botonCarrito {
-    cursor: pointer;
-    /* Si tienes un ícono de carrito, aquí puedes estilizarlo */
-    /* Por ejemplo, si fuera un <i> o un <span> */
-    font-size: 1.1em; /* Ajusta el tamaño si es texto */
-    font-weight: bold;
-    color: #000; /* Color inicial del botón de carrito */
-    transition: color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  color: #000;
+  transition: color 0.3s ease-in-out, transform 0.2s ease-in-out;
 }
 
 .botonCarrito:hover {
-    color: #007bff; /* Un color de acento, o el color de tu marca */
-    transform: scale(1.05); /* Ligeramente más grande al pasar el ratón */
+  color: #007bff;
+  transform: scale(1.05);
 }
 
 /* --- Media Queries para Responsividad --- */
 
-/* Pantallas pequeñas (ej. móviles) */
 @media (max-width: 768px) {
-    .containerPrincipal {
-        flex-direction: row; /* Apila las secciones verticalmente */
-        align-items: center; /* Centra los elementos */
-        justify-content: space-between;
-        height: 100px;
-        width: 90vw;
-    }
+  .containerPrincipal {
+    flex-direction: row; 
+    align-items: center; 
+    justify-content: space-between;
+    height: 100px;
+    width: 90vw;
+    margin: 0 auto;
+  }
 
-    .containerLogo .LogoBoton {
-        width: 100px;
-        height: 60px;
-    }
+  .containerLogo .LogoBoton {
+    width: 100px;
+    height: 60px;
+  }
 
-    .containerTitles {
-        display: none;
-    }
+  .megaMenuArea {
+    display: none;
+  }
+  
+  .megaDropDownWrapper {
+    display: none !important;
+  }
 
-    .containerSearch {
-        flex-direction: row; /* Vuelve a poner búsqueda y compra en fila */
-        justify-content: start; /* Distribuye el espacio */
-        width: 100%;
-        margin-top: 10px;
-        gap: 10px;
-    }
+  .containerSearch {
+    flex-direction: row; 
+    justify-content: start; 
+    width: 100%;
+    margin-top: 10px;
+    gap: 10px;
+  }
 
-    .containerLogin {
-        font-size: 0.8em;
-        gap: 5px;
-    }
+  .containerLogin {
+    font-size: 0.8em;
+    gap: 5px;
+  }
 
-    .profileImage, .profileIcon {
-        width: 30px;
-        height: 30px;
-        font-size: 30px;
-    }
+  .profileImage, .profileIcon {
+    width: 30px;
+    height: 30px;
+    font-size: 30px;
+  }
 
-    .containerPurchase h3, .botonCarrito {
-        font-size: 0.9em;
-    }
+  .containerPurchase h3, .botonCarrito {
+    font-size: 0.9em;
+  }
 }
 
-/* Pantallas extra pequeñas (ej. móviles muy pequeños) */
 @media (max-width: 480px) {
+  .megaMenuArea {
+    display: none;
+  }
 
-    .containerTitles {
-        display: none;
-    }
+  .containerTitleUp{
+    width: 100vw;
+  }
+  .containerPrincipal{
+    display: flex;
+    flex-direction: row;
+    width: 100vw;
+    height: auto;
+    align-items: end;
+  }
 
-    .containerTitleUp{
-        width: 100vw;
-    }
-    .containerPrincipal{
-        display: flex;
-        flex-direction: row;
-        width: 100vw;
-        height: auto;
-        align-items: end;
-    }
+  .containerLogin {
+    flex-direction: column;
+    gap: 5px;
+    align-items: end;
+  }
 
-    .containerLogin {
-        flex-direction: column; /* Apila los elementos de login y compra */
-        gap: 5px;
-        align-items: end;
-    }
+  .containerPurchase{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: auto;
+  }
+  .containerPurchase .containerSearch {
+      height: 10px;
+  }
+  .containerPurchase .containerSearch input {
+      width: 120px;
+  }
 
-    .containerPurchase{
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: auto;
-        .containerSearch{
-            height: 10px;
-            input{
-                width: 120px;
-            }
-        }
-    }
+  .containerLogin p {
+    display: none;
+  }
 
-    .containerLogin p { /* Oculta los separadores en móviles muy pequeños si molestan */
-        display: none;
-    }
-
-    .containerRight{
-        margin-right: 10px;
-    }
+  .containerRight{
+    margin-right: 10px;
+  }
 }
 
 .containerSearch {
@@ -269,18 +284,18 @@
   padding: 10px;
   border-radius: 10px;
   gap: 5px;
-  input {
-    flex: 1;
-    border: none;
-    background-color: rgb(221, 221, 221);
-    color: #000;
-    font-size: 15px;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-  }
-  input:focus {
-    outline: none;
-    box-shadow: none;
-  }
+}
+.containerSearch input {
+  flex: 1;
+  border: none;
+  background-color: rgb(221, 221, 221);
+  color: #000;
+  font-size: 15px;
+  font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+}
+.containerSearch input:focus {
+  outline: none;
+  box-shadow: none;
 }
 
 .searchIcon {
@@ -298,5 +313,5 @@
 }
 
 .icon:hover{
-    cursor: pointer;
+  cursor: pointer;
 }
