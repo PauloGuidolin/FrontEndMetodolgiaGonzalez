@@ -1,7 +1,18 @@
-.mainContent {
-  margin: 70px;
-  padding: 60px;
+.principalConteiner {
+  display: flex;
+  flex-direction: column;
+  /* CAMBIO CLAVE: Usa min-height para que pueda crecer */
+  min-height: 100vh;
+  /* Asegura que ocupe al menos el 100% de la altura de la ventana */
 }
+
+.mainContent {
+  padding: 60px;
+  /* CAMBIO CLAVE: Elimina height: 100vh; para que crezca con el contenido */
+  /* height: 100vh; */
+  flex-grow: 1; /* Permite que este div ocupe todo el espacio disponible */
+}
+
 .Title {
   text-align: center;
   font-size: 30px;
@@ -10,10 +21,11 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
-  margin: 20px auto; /* Centra el contenedor horizontalmente */
-  padding: 20px; /* Añade un poco de espacio interno */
+  margin: 20px auto;
+  padding: 20px;
   max-width: 80vw;
-  max-height: 100vh;
+  /* CAMBIO CLAVE: Elimina max-height: 100vh; para que pueda crecer */
+  /* max-height: 100vh; */
 }
 .conteinerQuestions1 p,
 .conteinerQuestions2 p,
@@ -65,20 +77,27 @@
 .conteinerQuestions1 > div > div,
 .conteinerQuestions2 > div > div,
 .conteinerQuestions3 > div > div {
-  padding: 0 15px; /* Ajusta el padding vertical a 0 inicialmente */
+  padding: 0 15px;
   background-color: transparent;
-  opacity: 0; /* Inicialmente invisible */
-  height: 0; /* Inicialmente altura 0 */
-  overflow: hidden; /* Oculta el contenido que excede la altura */
-  transition: opacity 1s ease-in-out, height 0.5s ease-in-out; /* Transición de opacidad y altura */
-  margin-top: -10px; /* Ajusta el margen superior para compensar el espacio */
+  opacity: 0;
+  height: 0;
+  overflow: hidden; /* Mantén hidden para que la transición de altura se vea bien */
+  transition: opacity 1s ease-in-out, height 0.5s ease-in-out;
+  margin-top: -10px;
 }
 
 .conteinerQuestions1 > div > div.open,
 .conteinerQuestions2 > div > div.open,
 .conteinerQuestions3 > div > div.open {
-  opacity: 1; /* Totalmente visible */
-  height: auto; /* La altura se ajusta al contenido */
-  padding: 15px; /* Restaura el padding vertical al abrirse */
-  margin-top: 0; /* Restaura el margen superior */
+  opacity: 1;
+  /* CAMBIO CLAVE: La altura debe ser 'auto' o el scrollHeight para la animación */
+  /* Aquí el JS ya maneja el scrollHeight, así que 'auto' es el valor final deseado */
+  height: auto;
+  padding: 15px;
+  margin-top: 0;
+}
+
+/* Si tienes una clase 'animating' para la transición temporal, asegúrate de que esté definida */
+.animating {
+  transition: height 0.3s ease-in-out, opacity 0.3s ease-in-out;
 }

@@ -1,59 +1,155 @@
-table {
-  width: 75vw;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-th,
-td {
-  padding: 10px;
-  text-align: left;
-  border-right: 4.5px solid white;
-}
-
-th {
-  border-bottom: 4.5px solid white;
-}
-
+/* Estilos generales para el contenedor principal del pie de página */
 .containerPrincipal {
   display: flex;
   background-color: black;
   color: white;
   font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-  height: 25vh;
+  min-height: 25vh; /* Usar min-height para permitir que el contenido se expanda si es necesario */
+  align-items: flex-start; /* Alinea los ítems al inicio del eje cruzado (arriba) */
+  flex-wrap: wrap; /* Permite que los elementos se envuelvan si no hay suficiente espacio en una sola línea */
 }
 
-.containerSocial {
+/* Contenedor de las columnas de contenido (Categoría, Info Empresa, Nuestro Mundo) */
+.columnsContainer {
   display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 20px;
-  width: 25vw;
+  flex: 3; /* Ocupa 3/4 del espacio disponible en el containerPrincipal en escritorio */
+  /* En un layout horizontal, esto se traduce aproximadamente a un ancho del 75vw */
 }
 
+/* Estilos para cada columna individual de contenido */
+.column {
+  flex: 1; /* Cada columna toma una porción igual del espacio dentro de columnsContainer */
+  padding: 10px;
+  border-right: 3px solid white; /* Borde vertical para separar las columnas en escritorio */
+}
+
+.column:last-child {
+  border-right: none; /* La última columna no tiene borde a la derecha */
+}
+
+/* Estilos para los encabezados de las columnas (h3) */
+.columnHeader {
+  border-bottom: 3px solid white; /* Línea inferior para el encabezado */
+  padding-bottom: 10px; /* Espacio entre el texto del encabezado y la línea */
+  margin-top: 0; /* Elimina el margen superior por defecto del h3 */
+  margin-bottom: 15px; /* Espacio entre el encabezado y la lista de ítems */
+}
+
+/* Estilos para las listas (ul) dentro de las columnas */
+.column ul {
+  list-style: none; /* Eliminar los puntos de la lista */
+  padding: 0; /* Eliminar el padding por defecto de la lista */
+  margin: 0; /* Eliminar el margen por defecto de la lista */
+}
+
+/* Estilos para los ítems de la lista (li) */
+.column li {
+  padding: 5px 0; /* Padding vertical para los ítems de la lista */
+}
+
+/* Contenedor de los iconos sociales */
+.containerSocial {
+  border-left: 3px solid  white ;
+  display: flex;
+  flex-direction: row; /* Iconos en fila por defecto para escritorio */
+  align-items: center; /* Centra los iconos verticalmente */
+  justify-content: center; /* Centra los iconos horizontalmente */
+  gap: 20px; /* Espacio entre los iconos */
+  flex: 1; /* Ocupa 1/4 del espacio disponible en el containerPrincipal en escritorio */
+  /* En un layout horizontal, esto se traduce aproximadamente a un ancho del 25vw */
+}
+
+/* Estilos para cada icono individual */
 .icon {
   width: 48px;
   height: 48px;
   background-color: #888;
-  border-radius: 50%;
+  border-radius: 50%; /* Hace que el fondo sea circular */
   display: flex;
   justify-content: center;
   align-items: center;
-  color: black;
-  font-size: 20px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-size: 20px; /* Tamaño del icono */
+  transition: background-color 0.3s ease, transform 0.2s ease; /* Transición suave al pasar el mouse */
   cursor: pointer;
-  a{
-    color: black;
-  }
+}
+
+.icon a {
+  color: black; /* Color del icono */
+  text-decoration: none; /* Elimina el subrayado de los enlaces */
 }
 
 .icon:hover {
-  background-color: #555;
-  transform: scale(1.1);
+  background-color: #555; /* Cambio de color al pasar el mouse */
+  transform: scale(1.1); /* Ligero aumento de tamaño al pasar el mouse */
 }
 
-.icon a:hover {
-  color: black;          /* Nos aseguramos que siga siendo negro al pasar el mouse */
+
+/* --- Media Query para pantallas de celular (ancho máximo de 768px) --- */
+@media (max-width: 768px) {
+  .containerPrincipal {
+    flex-direction: column; /* Apila el contenedor de columnas y los iconos sociales */
+    height: auto; /* La altura se ajusta automáticamente al contenido */
+    padding-bottom: 20px; /* Espacio inferior para el móvil */
+  }
+
+  .columnsContainer {
+    flex-direction: column; /* Apila las columnas de contenido (Categoría, Info, Mundo) */
+    width: 100%; /* Ocupa todo el ancho disponible */
+    flex: none; /* Deshabilita la proporción flex definida para escritorio */
+  }
+
+  .column {
+    width: 100%; /* Cada columna ocupa todo el ancho */
+    border-right: none; /* Elimina el borde vertical */
+    /*border-bottom: 1px solid white; /* Añade un separador horizontal entre columnas apiladas */
+    padding: 15px 10px; /* Ajusta el padding para el diseño móvil */
+  }
+
+  .column:last-child {
+    border-bottom: none; /* La última columna apilada no tiene borde inferior */
+  }
+
+  .columnHeader {
+    border-bottom: 2px solid white; /* Línea inferior más gruesa para el encabezado en móvil */
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+
+  .containerSocial {
+    width: 100%; /* Los iconos sociales ocupan todo el ancho */
+    margin-top: 20px; /* Espacio superior para separar de las columnas de contenido */
+    flex-wrap: wrap; /* Permite que los iconos se ajusten a la siguiente línea */
+    justify-content: center; /* Centra los iconos horizontalmente */
+    height: auto; /* La altura se ajusta al contenido */
+    flex-direction: row; /* Mantiene los iconos en fila, aunque se puedan envolver */
+    flex: none; /* Deshabilita la proporción flex definida para escritorio */
+    border-left: 3px solid black;
+  }
+}
+
+/* --- Media Query para Tablet y Laptop (ancho mínimo de 769px) --- */
+@media (min-width: 769px) {
+  .containerPrincipal {
+    flex-direction: row; /* Vuelve al diseño horizontal principal */
+    height: 25vh; /* Vuelve a la altura fija */
+  }
+
+  .columnsContainer {
+    flex-direction: row; /* Vuelve a mostrar las columnas de contenido horizontalmente */
+  }
+
+  .column {
+    border-right: 3px solid white; /* Restaura el borde vertical para escritorio */
+    /* Otros estilos de .column ya están definidos en la base y no necesitan ser redefinidos aquí */
+  }
+
+  .column:last-child {
+    border-right: none; /* Asegura que la última columna no tenga borde a la derecha */
+  }
+
+  .containerSocial {
+    width: 25vw; /* Restaura el ancho de los iconos sociales para escritorio */
+    margin-top: 0;
+    height: 100%;
+  }
 }
