@@ -1,236 +1,228 @@
-import React, { useState } from "react"; // Importa useState
+import React, { useState } from "react";
 import styles from "./CartScreen.module.css";
+import { toast } from "react-toastify";
 
-// Importa el nuevo modal y sus tipos (si los creaste en el mismo lugar)
-
-
-import { Color } from "../../../types/IColor";
-import { Talle } from "../../../types/ITalle";
-import { Sexo } from "../../../types/ISexo";
-import { ICategoria } from "../../../types/ICategoria";
-import { IImagen } from "../../../types/IImagen";
-import { IProductoDetalle } from "../../../types/IProductoDetalle";
-import { IProducto } from "../../../types/IProducto";
-import { IDescuento } from "../../../types/IDescuento";
-import CartCard from "../../ui/Cards/CartCard/CartCard";
 import { Header } from "../../ui/Header/Header";
 import { Footer } from "../../ui/Footer/Footer";
+import CartCard from "../../ui/Cards/CartCard/CartCard";
 import CheckoutModal from "../../ui/Modal/CheckoutModal/CheckoutModal";
 
-// ¡OJO! Estos son datos de ejemplo. Deberás conectar esto con tu estado real del carrito.
-const ejemploCarrito: {
-  productoDetalle: IProductoDetalle;
-  cantidad: number;
-}[] = [
-  {
-    productoDetalle: {
-      id: 1,
-      producto: {
-        id: 101,
-        denominacion: "Zapatillas Superstar II",
-        precioVenta: 50000,
-        sexo: Sexo.MASCULINO,
-        tienePromocion: false,
-        categorias: [{ id: 1, denominacion: "Calzado" } as ICategoria],
-        imagenes: [{ id: 10, denominacion: "../../../../images/zapaAdidas.avif" } as IImagen],
-        productos_detalles: [],
-        descuentos: [],
-      } as IProducto,
-      color: Color.MARRON,
-      talle: Talle.M,
-      precioCompra: 30000,
-      stockActual: 5,
-      stockMaximo: 10,
-      cantidad: 1,
-    },
-    cantidad: 1,
-  },
-  {
-    productoDetalle: {
-      id: 2,
-      producto: {
-        id: 102,
-        denominacion: "Remera Algodón",
-        precioVenta: 15000,
-        sexo: Sexo.FEMENINO,
-        tienePromocion: true,
-        categorias: [{ id: 2, denominacion: "Ropa" } as ICategoria],
-        imagenes: [{ id: 11, denominacion: "../../../../images/camperonBoca.png" } as IImagen],
-        productos_detalles: [],
-        descuentos: [
-          {
-            id: 100,
-            denominacion: "Promo Verano",
-            precioPromocional: 12000, // Usar este precio si tienePromocion es true y hay descuentos
-          } as IDescuento,
-        ],
-      } as IProducto,
-      color: Color.AZUL,
-      talle: Talle.S,
-      precioCompra: 9000,
-      stockActual: 10,
-      stockMaximo: 20,
-      cantidad: 2,
-    },
-    cantidad: 2,
-  },
-   { // Otro ítem para probar con el mismo producto pero diferente detalle (si aplica) o solo para tener más items
-    productoDetalle: {
-      id: 3, // Importante: un ID de detalle de producto único
-      producto: {
-        id: 103,
-        denominacion: "Pantalón Deportivo",
-        precioVenta: 30000,
-        sexo: Sexo.MASCULINO,
-        tienePromocion: false,
-        categorias: [{ id: 2, denominacion: "Ropa" } as ICategoria],
-        imagenes: [{ id: 12, denominacion: "../../../../images/pantalon.avif" } as IImagen], // Reemplaza con una imagen real
-        productos_detalles: [],
-        descuentos: [],
-      } as IProducto,
-      color: Color.NEGRO,
-      talle: Talle.L,
-      precioCompra: 18000,
-      stockActual: 8,
-      stockMaximo: 15,
-      cantidad: 1,
-    },
-    cantidad: 1,
-  },
-];
+
+import { useCartStore } from "../../../store/cartStore";
+import { useAuthStore } from "../../../store/authStore";
+import { CreateOrdenCompraDTO } from "../../dto/OrdenCompraDTO";
+
+import { useNavigate } from "react-router-dom";
+import { orderService } from "../../../https/orderApi";
+import RegisterModal from "../../ui/Modal/Register/RegisterModal";
+import LoginModal from "../../ui/Modal/LogIn/LoginModal";
 
 const CartScreen: React.FC = () => {
-  // Estado para controlar la visibilidad del modal de checkout
-  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+    const cartItems = useCartStore((state) => state.items);
+    const updateQuantity = useCartStore((state) => state.updateQuantity);
+    const removeFromCart = useCartStore((state) => state.removeFromCart);
+    const getTotalPrice = useCartStore((state) => state.getTotalPrice);
+    const clearCart = useCartStore((state) => state.clearCart);
 
-  // Función para abrir el modal
-  const openCheckoutModal = () => {
-    setIsCheckoutModalOpen(true);
-  };
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const user = useAuthStore((state) => state.user);
 
-  // Función para cerrar el modal
-  const closeCheckoutModal = () => {
-    setIsCheckoutModalOpen(false);
-  };
+    const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // Nuevo estado para el LoginModal
+    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false); // Nuevo estado para el RegisterModal
+    const navigate = useNavigate();
 
-
-  // Aquí iría el estado real del carrito y las funciones para actualizarlo
-  // Por ahora, usamos el ejemploCarrito
-  const handleQuantityChange = (
-    productoDetalleId: number,
-    newQuantity: number
-  ) => {
-    console.log(`Cambiar cantidad de ${productoDetalleId} a ${newQuantity}`);
-    // Lógica para actualizar la cantidad en el carrito (ej: actualizando un estado)
-    // Debes asegurarte de que newQuantity no sea menor a 1 si quieres evitar cantidad 0 aquí
-    // Si newQuantity es 0, probablemente llamarías a handleRemove
-  };
-
-  const handleRemove = (productoDetalleId: number) => {
-    console.log(`Eliminar producto con ID ${productoDetalleId}`);
-    // Lógica para eliminar el item del carrito (ej: filtrando un estado)
-  };
-
-  // Calcular el subtotal 
-  const subtotal = ejemploCarrito.reduce(
-    (acc, item) => {
-        const producto = item.productoDetalle.producto;
-        let precioUnitario = 0; // Inicializamos con un valor seguro
-
-        if (producto) { // Nos aseguramos de que producto no sea null/undefined
-            if (producto.tienePromocion && producto.descuentos && producto.descuentos.length > 0) {
-                // Si tiene promoción y descuentos, usamos el precio promocional
-                // Usamos ?? 0 para asegurar que precioPromocional sea un número (aunque debería serlo por el tipo)
-                precioUnitario = producto.descuentos[0].precioPromocional ?? 0;
-            } else {
-                // Si no tiene promoción o no hay descuentos válidos, usamos el precio de venta
-                // Usamos || 0 para asegurar que precioVenta sea un número si es undefined/null
-                precioUnitario = producto.precioVenta || 0;
-            }
+    const openCheckoutModal = () => {
+        if (cartItems.length === 0) {
+            toast.info("Tu carrito está vacío.");
+            return;
         }
-        // Si producto es null/undefined, precioUnitario se queda en 0, lo cual es correcto para el cálculo.
 
-        // Sumamos al acumulador
-        return acc + precioUnitario * item.cantidad;
-    },
-    0 // Inicializamos el acumulador en 0
-  );
+        if (isAuthenticated && user) {
+            setIsCheckoutModalOpen(true);
+        } else {
+            toast.info("Debes iniciar sesión para proceder con el pago.");
+            setIsLoginModalOpen(true); // Abre el modal de login si no está autenticado
+        }
+    };
 
-   // Formatear el subtotal para mostrar en la pantalla principal
-  const formattedSubtotal = subtotal.toLocaleString("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
+    const closeCheckoutModal = () => {
+        setIsCheckoutModalOpen(false);
+    };
 
+    // Funciones para manejar los modales de Login/Register
+    const openLoginModal = () => {
+        setIsLoginModalOpen(true);
+        setIsRegisterModalOpen(false); // Asegúrate de que el modal de registro esté cerrado
+    };
 
-  return (
-    <div>
-      <div>
-        <Header />
-      </div>
-      <div className={styles.cartContainer}>
-        <div className={styles.cartContent}>
-          <div className={styles.productList}>
-            {/* Mapea sobre el carrito de ejemplo */}
-            {ejemploCarrito.map((item) => (
-              <CartCard
-                key={item.productoDetalle.id} // Usa el ID del detalle para la key
-                productDetail={item.productoDetalle}
-                quantity={item.cantidad}
-                onQuantityChange={(newQuantity) =>
-                  handleQuantityChange(item.productoDetalle.id!, newQuantity)
-                }
-                onRemove={() => handleRemove(item.productoDetalle.id!)}
-              />
-            ))}
-            {ejemploCarrito.length === 0 && (
-              <p className={styles.emptyCart}>Tu carrito está vacío.</p>
+    const closeLoginModal = () => {
+        setIsLoginModalOpen(false);
+    };
+
+    const openRegisterModal = () => {
+        setIsRegisterModalOpen(true);
+        setIsLoginModalOpen(false); // Asegúrate de que el modal de login esté cerrado
+    };
+
+    const closeRegisterModal = () => {
+        setIsRegisterModalOpen(false);
+    };
+
+    // Callback que se ejecuta cuando el login es exitoso desde el LoginModal
+    const onLoginSuccess = () => {
+        closeLoginModal(); // Cierra el modal de login
+        setIsCheckoutModalOpen(true); // Abre el modal de checkout automáticamente
+    };
+
+    const handleQuantityChange = (
+        productoDetalleId: number,
+        newQuantity: number
+    ) => {
+        if (newQuantity < 1) {
+            removeFromCart(productoDetalleId);
+            return;
+        }
+
+        const itemInCart = cartItems.find(item => item.productDetail.id === productoDetalleId);
+        if (itemInCart && newQuantity > itemInCart.productDetail.stockActual) {
+            toast.warn(`No hay suficiente stock para ${itemInCart.product.denominacion} (color: ${itemInCart.productDetail.color}, talle: ${itemInCart.productDetail.talle}). Stock disponible: ${itemInCart.productDetail.stockActual}`);
+            return;
+        }
+
+        updateQuantity(productoDetalleId, newQuantity);
+    };
+
+    const handleRemove = (productoDetalleId: number) => {
+        removeFromCart(productoDetalleId);
+    };
+
+    const subtotal = getTotalPrice();
+
+    const formattedSubtotal = subtotal.toLocaleString("es-AR", {
+        style: "currency",
+        currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+
+    const isCheckoutDisabled = cartItems.length === 0 || !isAuthenticated; // Se mantiene la deshabilitación basada en la autenticación para el botón principal
+
+    const handleConfirmOrder = async (orderData: CreateOrdenCompraDTO) => {
+        try {
+            if (!orderData.usuarioId) {
+                toast.error("Error: ID de usuario no disponible para la orden.");
+                throw new Error("ID de usuario no disponible");
+            }
+
+            console.log("Enviando orden:", orderData);
+
+            const newOrder = await orderService.createDTO(orderData);
+            console.log("Orden creada exitosamente:", newOrder);
+            toast.success("Orden de compra creada exitosamente.");
+
+            clearCart();
+            closeCheckoutModal();
+
+            navigate('/order-confirmation', { state: { orderId: newOrder.id } });
+
+        } catch (error) {
+            console.error("Error al confirmar la orden en CartScreen:", error);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            toast.error(`Error al procesar tu orden: ${errorMessage}. Por favor, intenta de nuevo.`);
+            throw error;
+        }
+    };
+
+    return (
+        <div>
+            <div>
+                <Header />
+            </div>
+            <div className={styles.cartContainer}>
+                <div className={styles.cartContent}>
+                    <div className={styles.productList}>
+                        {cartItems.map((item) => (
+                            <CartCard
+                                key={item.productDetail.id}
+                                product={item.product}
+                                productDetail={item.productDetail}
+                                quantity={item.quantity}
+                                onQuantityChange={(newQuantity) =>
+                                    handleQuantityChange(item.productDetail.id!, newQuantity)
+                                }
+                                onRemove={() => handleRemove(item.productDetail.id!)}
+                            />
+                        ))}
+                        {cartItems.length === 0 && (
+                            <p className={styles.emptyCart}>Tu carrito está vacío.</p>
+                        )}
+                    </div>
+                    <div className={styles.orderSummary}>
+                        <h2>Resumen del Pedido</h2>
+                        <div className={styles.summaryItem}>
+                            <span>Subtotal:</span>
+                            <span>{formattedSubtotal}</span>
+                        </div>
+                        <div className={styles.summaryItem}>
+                            <span>Envío:</span>
+                            <span>Costo a calcular</span>
+                        </div>
+                        <div className={styles.summaryItem}>
+                            <span>Descuentos:</span>
+                            <span>$0.00</span>
+                        </div>
+                        <div className={styles.summaryTotal}>
+                            <span>Total Estimado:</span>
+                            <span>{formattedSubtotal}</span>
+                        </div>
+                        <button
+                            className={styles.checkoutButton}
+                            onClick={openCheckoutModal}
+                            disabled={cartItems.length === 0} // Deshabilitar si el carrito está vacío
+                        >
+                            Proceder al pago
+                        </button>
+                        {!isAuthenticated && cartItems.length > 0 && (
+                            <p className={styles.authMessage}>
+                                Inicia sesión para continuar con el pago.
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+            <div>
+                <Footer />
+            </div>
+
+            <CheckoutModal
+                isOpen={isCheckoutModalOpen}
+                onClose={closeCheckoutModal}
+                subtotal={subtotal}
+                user={isAuthenticated ? user : null}
+                onConfirmOrder={handleConfirmOrder}
+            />
+
+            {/* Renderiza el LoginModal */}
+            <LoginModal
+                isOpen={isLoginModalOpen}
+                onClose={closeLoginModal}
+                onRegisterClick={openRegisterModal} // Permite cambiar a RegisterModal
+                onLoginSuccess={onLoginSuccess} // Pasa el callback para reabrir CheckoutModal
+            />
+
+            {/* Renderiza el RegisterModal si lo tienes */}
+            {/* Si aún no tienes RegisterModal, puedes quitar esta parte por ahora */}
+            {isRegisterModalOpen && (
+                <RegisterModal
+                    isOpen={isRegisterModalOpen}
+                    onClose={closeRegisterModal}
+                    onLoginClick={openLoginModal} // Permite cambiar a LoginModal
+                    // onRegisterSuccess={...} // Si quieres auto-login o cerrar ambos modales, similar a onLoginSuccess
+                />
             )}
-          </div>
-          <div className={styles.orderSummary}>
-            <h2>Resumen del Pedido</h2>
-            <div className={styles.summaryItem}>
-              <span>Subtotal:</span>
-              <span>{formattedSubtotal}</span> {/* Muestra el subtotal formateado */}
-            </div>
-            <div className={styles.summaryItem}>
-              <span>Envío:</span>
-              <span>Costo a calcular</span>
-            </div>
-             {/* Aquí podrías calcular y mostrar los descuentos aplicados al total si los hay */}
-             <div className={styles.summaryItem}>
-               <span>Descuentos:</span>
-               {/* Esto requeriría lógica adicional para calcular descuentos sobre el total, no solo por item */}
-               <span>$0.00</span>
-             </div>
-            <div className={styles.summaryTotal}>
-              <span>Total Estimado:</span>
-               <span>{formattedSubtotal}</span> {/* Por ahora, igual al subtotal */}
-            </div>
-            <button
-              className={styles.checkoutButton}
-              disabled={ejemploCarrito.length === 0}
-              onClick={openCheckoutModal} // Agrega el handler para abrir el modal
-            >
-              Proceder al pago
-            </button>
-          </div>
         </div>
-      </div>
-      <div>
-        <Footer />
-      </div>
-
-      {/* Renderiza el modal, pasando el estado y el handler para cerrarlo */}
-      <CheckoutModal
-        isOpen={isCheckoutModalOpen}
-        onClose={closeCheckoutModal}
-        subtotal={subtotal} // Pasamos el subtotal al modal
-      />
-    </div>
-  );
+    );
 };
 
 export default CartScreen;

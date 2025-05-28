@@ -1,21 +1,21 @@
 import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import styles from './LoginModal.module.css'; // Asegúrate que la ruta sea correcta
-import { useAuthStore } from '../../../../store/authStore'; // Asegúrate que la ruta sea correcta
+import styles from './LoginModal.module.css';
+import { useAuthStore } from '../../../../store/authStore';
 import { toast } from 'react-toastify';
-import { LoginRequestFrontend } from '../../../../types/auth'; // Asegúrate que la ruta sea correcta
+import { LoginRequestFrontend } from '../../../../types/auth';
 
 
 interface LoginModalProps {
     isOpen: boolean;
     onClose: () => void;
     onRegisterClick: () => void;
+    onLoginSuccess?: () => void; // ¡NUEVA PROP!
 }
 
-const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onRegisterClick }) => {
-    // console.log para depuración: ahora mostrará el estado correcto para este modal
-    console.log('LoginModal isOpen prop:', isOpen); 
+const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onRegisterClick, onLoginSuccess }) => {
+    console.log('LoginModal isOpen prop:', isOpen);
 
     const login = useAuthStore((state) => state.login);
     const loading = useAuthStore((state) => state.loadingLogin);
@@ -38,7 +38,10 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onRegisterClic
             try {
                 await login(values);
                 toast.success('¡Inicio de sesión exitoso!');
-                onClose(); // Cierra el modal al iniciar sesión
+                onClose(); // Cierra el modal de login
+                if (onLoginSuccess) {
+                    onLoginSuccess(); // Llama al callback si está definido
+                }
             } catch (error: any) {
                 const errorMessage = error.response?.data?.message || 'Error al iniciar sesión. Verifica tus credenciales.';
                 toast.error(errorMessage);
@@ -47,17 +50,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose, onRegisterClic
         },
     });
 
-    // IMPORTANTE: NO uses un "return null;" aquí. La visibilidad se controla con CSS.
-    // Aunque si el modal no se ve, la causa podría ser el CSS.
-    // Si decides usar el return null para no renderizar el modal en el DOM:
-    /*
-    if (!isOpen) {
-        return null;
-    }
-    */
-    
     return (
-        // *** CAMBIO CLAVE AQUÍ: AÑADE LA CLASE 'active' CONDICIONALMENTE ***
         <div className={`${styles.modalOverlay} ${isOpen ? styles.active : ''}`}>
             <div className={styles.modalContent}>
                 <div className={styles.modalHeader}>

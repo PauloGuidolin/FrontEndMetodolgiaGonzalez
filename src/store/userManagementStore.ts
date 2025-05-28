@@ -1,19 +1,20 @@
 // Archivo: src/store/userManagementStore.ts
 
 import { create } from 'zustand'; // Importa la función create de Zustand
-import { IUsuario } from '../types/IUsuario'; // Importa la interfaz de Usuario (asegúrate de la ruta)
+
 import { userManagementService } from '../https/userManagementApi';
+import { UserDTO } from '../components/dto/UserDTO';
 
 
 // Definimos la interfaz para el estado de nuestro store de gestión de usuarios
 interface UserManagementState {
   // Estado para la lista general de usuarios
-  users: IUsuario[];
+  users: UserDTO[];
   loading: boolean;
   error: string | null;
 
   // Estado para un usuario individual seleccionado o buscado
-  selectedUser: IUsuario | null;
+  selectedUser: UserDTO | null;
   loadingUser: boolean;
   errorUser: string | null;
 
@@ -27,7 +28,7 @@ interface UserManagementState {
 
   // Acciones CRUD para gestionar usuarios (probablemente para ADMIN)
   // Nota: La creación de usuarios regulares se maneja en authStore.ts
-  updateUser: (user: IUsuario) => Promise<IUsuario>;
+  updateUser: (user: UserDTO) => Promise<UserDTO>;
   deleteUser: (id: number | string) => Promise<void>;
 
   // Acción para limpiar el usuario seleccionado
@@ -79,7 +80,7 @@ export const useUserManagementStore = create<UserManagementState>((set, get) => 
   },
 
   // Implementación de la acción updateUser
-  updateUser: async (user: IUsuario) => {
+  updateUser: async (user: UserDTO) => {
        // Opcional: Puedes poner un estado de carga/error específico para operaciones CRUD
        // set({ loading: true, error: null });
       try {

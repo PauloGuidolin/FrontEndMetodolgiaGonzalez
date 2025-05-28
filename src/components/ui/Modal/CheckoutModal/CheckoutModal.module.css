@@ -1,230 +1,366 @@
+/* Variables para colores comunes si los usarías en otros componentes */
+:root {
+    --adidas-blue: #007bff; /* Color azul para botones/enlaces */
+    --adidas-blue-dark: #0056b3;
+    --text-color-dark: #333;
+    --text-color-medium: #555;
+    --text-color-light: #888;
+    --border-color-light: #eee;
+    --background-light: #f9f9f9;
+    --white: #ffffff;
+}
+
 /* Estilos para el overlay (fondo oscuro semi-transparente) */
 .modalOverlay {
-    position: fixed; /* Se mantiene fijo en la ventana */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro con transparencia */
-    display: flex; /* Para centrar el contenido */
-    justify-content: center; /* Centrado horizontal */
-    align-items: center; /* Centrado vertical */
-    z-index: 1000; /* Asegura que esté por encima de otros elementos */
-    padding: 20px; /* Un poco de padding para evitar que el contenido toque los bordes en pantallas pequeñas */
-    overflow-y: auto; /* Permite scroll si el contenido es muy largo */
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+    overflow-y: auto;
+    /* Efecto de transición para una apertura suave */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modalOverlay.isOpen {
+    /* Clase añadida dinámicamente cuando el modal está abierto */
+    opacity: 1;
+    visibility: visible;
 }
 
 /* Estilos para el contenido principal del modal */
 .modalContent {
-    background-color: #fff; /* Fondo blanco */
-    padding: 30px; /* Espacio interior */
-    border-radius: 8px; /* Bordes redondeados */
-    max-width: 900px; /* Ancho máximo */
-    width: 95%; /* Ocupa casi todo el ancho disponible */
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* Sombra sutil */
-    position: relative; /* Para el botón de cerrar si se añade */
-    max-height: 90vh; /* Altura máxima, permite scroll si es necesario */
-    overflow-y: auto; /* Habilita el scroll dentro del modal si el contenido es largo */
+    background-color: var(--white);
+    padding: 30px; /* Reducido para hacerlo más compacto */
+    border-radius: 8px;
+    max-width: 800px; /* Ancho máximo reducido */
+    width: 95%;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 25px; /* Espacio reducido entre secciones */
+    transform: translateY(-20px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modalOverlay.isOpen .modalContent {
+    transform: translateY(0);
+    opacity: 1;
 }
 
 .modalHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px solid #eee; /* Línea separadora */
-    padding-bottom: 15px;
-    margin-bottom: 20px;
+    border-bottom: 1px solid var(--border-color-light);
+    padding-bottom: 15px; /* Reducido */
+    margin-bottom: 0;
 }
 
 .modalHeader h2 {
     margin: 0;
-    font-size: 1.5em;
-    color: #333;
+    font-size: 1.8em; /* Título ligeramente más pequeño */
+    color: var(--text-color-dark);
+    font-weight: 700;
+}
+
+.closeButton {
+    background: none;
+    border: none;
+    font-size: 2.2em; /* Icono de cerrar ligeramente más pequeño */
+    cursor: pointer;
+    padding: 0;
+    color: var(--text-color-light);
+    transition: color 0.2s ease;
+}
+
+.closeButton:hover {
+    color: var(--text-color-dark);
 }
 
 /* Estilos para el cuerpo del modal (flexbox para columnas) */
-.modalBody {
+.modalBodyWrapper {
     display: flex;
-    gap: 40px; /* Espacio entre las columnas (Envío/Pago y Resumen) */
-    flex-wrap: wrap; /* Permite que las columnas se apilen en pantallas pequeñas */
+    gap: 30px; /* Espacio reducido entre las columnas */
+    flex-wrap: wrap;
+    flex-grow: 1;
 }
 
 /* Estilos para la sección de Envío/Pago (columna izquierda) */
-.shippingSection {
-    flex: 2; /* Ocupa más espacio si hay suficiente */
-    min-width: 300px; /* Ancho mínimo para evitar que se vea aplastado */
+.checkoutFormsSection {
+    flex: 1; /* Ahora ambas columnas tendrán un flex-grow similar */
+    min-width: 300px; /* Ancho mínimo ajustado */
+    display: flex;
+    flex-direction: column;
 }
 
-.shippingSection h3 {
+.personalInfoSection,
+.shippingAddressSection,
+.paymentMethodSection {
+    background-color: var(--white);
+    padding: 20px; /* Reducido */
+    border-radius: 8px;
+    border: 1px solid var(--border-color-light);
+    margin-bottom: 20px; /* Reducido */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.personalInfoSection h3,
+.shippingAddressSection h3,
+.paymentMethodSection h3 {
     margin-top: 0;
-    margin-bottom: 15px;
-    color: #555;
-    font-size: 1.2em;
+    margin-bottom: 15px; /* Reducido */
+    color: var(--text-color-dark);
+    font-size: 1.3em; /* Subtítulos ligeramente más pequeños */
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-color-light);
+    padding-bottom: 10px; /* Reducido */
 }
 
 .formGroup {
-    margin-bottom: 15px;
+    margin-bottom: 15px; /* Reducido */
 }
 
 .formGroup label {
-    display: block; /* Etiqueta encima del input */
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #444;
+    display: block;
+    margin-bottom: 5px; /* Reducido */
+    font-weight: 600;
+    color: var(--text-color-medium);
+    font-size: 0.9em; /* Etiquetas ligeramente más pequeñas */
 }
 
-.inputField {
-    width: 100%; /* Ocupa todo el ancho del contenedor */
-    padding: 10px;
+.inputField,
+.selectField {
+    width: 100%;
+    padding: 10px 12px; /* Reducido */
     border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-    box-sizing: border-box; /* Incluye padding y borde en el ancho */
+    border-radius: 5px;
+    font-size: 0.95em; /* Fuente ligeramente más pequeña */
+    color: var(--text-color-dark);
+    box-sizing: border-box;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.inputField:focus,
+.selectField:focus {
+    outline: none;
+    border-color: var(--adidas-blue);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
 }
 
 .inputField::placeholder {
-    color: #999;
+    color: var(--text-color-light);
 }
 
-.paymentTitle {
-    margin-top: 25px;
+.addressSelection p {
+    margin-bottom: 10px; /* Reducido */
+    color: var(--text-color-medium);
+    font-size: 0.95em;
 }
 
 .paymentMethods {
-    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* Reducido */
 }
 
 .radioGroup {
-    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    background-color: var(--background-light);
+    border: 1px solid var(--border-color-light);
+    border-radius: 5px;
+    padding: 12px; /* Reducido */
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.radioGroup:hover {
+    border-color: var(--adidas-blue);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
 }
 
 .radioGroup input[type="radio"] {
-    margin-right: 10px;
+    margin-right: 10px; /* Reducido */
+    transform: scale(1.1); /* Ligeramente más pequeño */
 }
 
 .radioGroup label {
-     font-weight: normal; /* Etiquetas de radio button normales */
-     color: #444;
+    font-weight: 500;
+    color: var(--text-color-dark);
+    margin-bottom: 0;
+    cursor: pointer;
+    font-size: 0.95em;
 }
 
-
 .confirmButton {
-    display: block; /* Botón ocupa todo el ancho */
+    display: block;
     width: 100%;
-    padding: 12px;
-    background-color: #007bff; /* Color azul */
-    color: white;
+    padding: 12px; /* Reducido */
+    background-color: var(--adidas-blue);
+    color: var(--white);
     border: none;
-    border-radius: 4px;
-    font-size: 1.1em;
+    border-radius: 5px;
+    font-size: 1.1em; /* Ligeramente más pequeño */
+    font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    margin-top: 25px; /* Reducido */
+    letter-spacing: 0.5px;
 }
 
 .confirmButton:hover {
-    background-color: #0056b3; /* Azul más oscuro al pasar el mouse */
+    background-color: var(--adidas-blue-dark);
+    transform: translateY(-2px);
+}
+
+.confirmButton:active {
+    transform: translateY(0);
 }
 
 /* Estilos para el Resumen del Pedido (columna derecha) */
 .orderSummary {
-    flex: 1; /* Ocupa el espacio restante */
-    min-width: 250px; /* Ancho mínimo */
-    background-color: #f9f9f9; /* Fondo ligeramente gris */
-    padding: 20px;
+    flex: 1.2; /* Ligeramente más grande que la sección de formularios */
+    min-width: 280px; /* Ancho mínimo ajustado */
+    background-color: var(--background-light);
+    padding: 25px; /* Reducido */
     border-radius: 8px;
-    display: flex; /* Usa flexbox para organizar los items */
-    flex-direction: column; /* Los items se apilan verticalmente */
-    height: fit-content; /* Ajusta la altura a su contenido */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
 }
 
 .orderSummary h2 {
     margin-top: 0;
-    margin-bottom: 20px;
-    font-size: 1.3em;
-    color: #333;
+    margin-bottom: 20px; /* Reducido */
+    font-size: 1.5em; /* Ligeramente más pequeño */
+    color: var(--text-color-dark);
+    font-weight: 700;
     text-align: center;
 }
 
 .summaryItem {
-    display: flex; /* Usa flexbox para poner span a la izquierda y derecha */
-    justify-content: space-between; /* Espacio entre los elementos */
-    margin-bottom: 10px;
-    padding-bottom: 10px;
-    border-bottom: 1px dashed #ddd; /* Línea punteada */
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px; /* Reducido */
+    padding-bottom: 12px; /* Reducido */
+    border-bottom: 1px dashed var(--border-color-light);
+    font-size: 0.95em; /* Fuente más pequeña */
+}
+
+.summaryItem:last-of-type {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
 }
 
 .summaryItem span:first-child {
-    font-weight: bold;
-    color: #555;
+    font-weight: 600;
+    color: var(--text-color-medium);
+}
+
+.summaryItem span:last-child {
+    font-weight: 500;
+    color: var(--text-color-dark);
 }
 
 .summaryTotal {
     display: flex;
     justify-content: space-between;
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 2px solid #333; /* Línea sólida más gruesa */
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #333;
-}
-
-.proceedToPaymentButton {
-     display: block; /* Botón ocupa todo el ancho */
-    width: 100%;
-    padding: 12px;
-    background-color: #28a745; /* Color verde */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-top: 20px; /* Espacio arriba del botón */
-}
-
-.proceedToPaymentButton:hover {
-    background-color: #218838; /* Verde más oscuro al pasar el mouse */
+    margin-top: 20px; /* Reducido */
+    padding-top: 20px; /* Reducido */
+    border-top: 2px solid var(--text-color-dark);
+    font-size: 1.3em; /* Ligeramente más pequeño */
+    font-weight: 700;
+    color: var(--text-color-dark);
 }
 
 /* Media query para pantallas más pequeñas: apilar las columnas */
-@media (max-width: 768px) {
-    .modalBody {
+@media (max-width: 850px) {
+    /* Ajustado el breakpoint para un mejor control */
+    .modalContent {
+        padding: 25px;
+    }
+
+    .modalBodyWrapper {
         flex-direction: column;
-        gap: 20px; /* Menos espacio entre las secciones cuando se apilan */
+        gap: 25px;
     }
 
-    .shippingSection,
+    .checkoutFormsSection,
     .orderSummary {
-        min-width: auto; /* Permite que ocupen el ancho disponible */
-        width: 100%; /* Ocupan todo el ancho en pantallas pequeñas */
+        min-width: auto;
+        width: 100%;
     }
 
     .orderSummary {
-         order: -1; /* Coloca el resumen arriba en móviles si se desea, o quita esta línea para que quede abajo */
-         /* Opcional: ajustar padding o margen para móviles */
-         padding: 15px;
+        order: -1;
+        padding: 20px;
     }
 
     .confirmButton {
-        margin-top: 20px; /* Añade espacio arriba si queda justo después de los métodos de pago */
-    }
-
-     .proceedToPaymentButton {
-        margin-top: 15px; /* Menos espacio arriba si va después del resumen */
+        margin-top: 20px;
+        font-size: 1em;
+        padding: 10px;
     }
 }
 
+@media (max-width: 600px) {
+    .modalContent {
+        padding: 15px;
+    }
 
-/* Estilos para el botón de cerrar (si lo incluyes) */
-/*.closeButton {
-    background: none;
-    border: none;
-    font-size: 1.5em;
-    cursor: pointer;
-    padding: 0;
-    color: #aaa;
-    position: absolute;
-    top: 15px;
-    right: 15px;
-}*/
+    .modalHeader h2 {
+        font-size: 1.6em;
+    }
+
+    .closeButton {
+        font-size: 1.8em;
+    }
+
+    .personalInfoSection,
+    .shippingAddressSection,
+    .paymentMethodSection {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .personalInfoSection h3,
+    .shippingAddressSection h3,
+    .paymentMethodSection h3 {
+        font-size: 1.2em;
+        margin-bottom: 10px;
+        padding-bottom: 8px;
+    }
+
+    .inputField,
+    .selectField {
+        padding: 8px 10px;
+        font-size: 0.9em;
+    }
+
+    .orderSummary h2 {
+        font-size: 1.3em;
+    }
+
+    .summaryItem {
+        font-size: 0.9em;
+    }
+
+    .summaryTotal {
+        font-size: 1.2em;
+    }
+}

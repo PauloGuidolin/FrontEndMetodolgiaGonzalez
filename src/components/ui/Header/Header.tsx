@@ -3,13 +3,16 @@ import { useState, useEffect } from "react";
 import { DropDownClothes } from "../Modal/DropDownClothes/DropDownClothes";
 import { Link, useNavigate } from "react-router-dom";
 import LoginModal from "../Modal/LogIn/LoginModal";
-import RegisterModal from "../Modal/Register/RegisterModal";
+
 import { DropDownShoes } from "../Modal/DropDownShoes/DropDownShoes";
 import { DropDownSport } from "../Modal/DropDownSport/DropDownSport";
-
-import { FaSearch, FaUserCircle } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 import { useAuthStore } from "../../../store/authStore";
 import { AiOutlineShopping } from "react-icons/ai";
+import RegisterModal from "../Modal/Register/RegisterModal";
+
+import Avatar from '@mui/material/Avatar';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 export const Header = () => {
     const [dropClothes, setDropClothes] = useState(false);
@@ -18,6 +21,8 @@ export const Header = () => {
 
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
     const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
+    const [displayedProfileImageUrl, setDisplayedProfileImageUrl] = useState<string>('');
 
     const navigate = useNavigate();
 
@@ -30,22 +35,30 @@ export const Header = () => {
         checkAuth();
     }, [checkAuth]);
 
+    useEffect(() => {
+        if (isAuthenticated && user?.imagenUser?.url) {
+            setDisplayedProfileImageUrl(user.imagenUser.url);
+        } else {
+            setDisplayedProfileImageUrl('');
+        }
+    }, [isAuthenticated, user]);
+
     // >>>>> CONSOLE.LOGS PARA DEPURACIÓN <<<<<
     useEffect(() => {
         console.log("Header - Estado de autenticación:", isAuthenticated);
         if (isAuthenticated && user) {
             console.log("Header - Objeto 'user' completo:", user);
-            // Ahora se accede a profileImage.url, que es donde el backend envía la URL
-            console.log("Header - URL de imagen de perfil (profileImage.url):", user.profileImage?.url);
+            console.log("Header - URL de imagen de perfil (imagenUser.url):", user.imagenUser?.url);
         } else {
             console.log("Header - Usuario no autenticado o el objeto 'user' es null/undefined.");
         }
-    }, [isAuthenticated, user]);
+        console.log("Header - displayedProfileImageUrl (para Avatar de MUI):", displayedProfileImageUrl);
+    }, [isAuthenticated, user, displayedProfileImageUrl]);
 
     const openLoginModal = () => {
         console.log("Se hizo clic en Iniciar Sesion");
         setIsLoginModalOpen(true);
-        setIsRegisterModalOpen(false);
+        setIsRegisterModalOpen(false); // Asegúrate de cerrar el de registro si estaba abierto
     };
 
     const closeLoginModal = () => {
@@ -54,7 +67,7 @@ export const Header = () => {
 
     const openRegisterModal = () => {
         setIsRegisterModalOpen(true);
-        setIsLoginModalOpen(false);
+        setIsLoginModalOpen(false); // Asegúrate de cerrar el de login si estaba abierto
     };
 
     const closeRegisterModal = () => {
@@ -66,8 +79,17 @@ export const Header = () => {
         openRegisterModal();
     };
 
-    const handleCancelRegister = () => {
+    // Nueva función para manejar el éxito del registro: cierra el modal de registro y abre el de login
+    const handleRegisterSuccess = () => {
         closeRegisterModal();
+        openLoginModal();
+    };
+
+    // La función que se llama cuando se hace clic en "Ya tengo una cuenta" desde RegisterModal
+    // o cuando se cierra el RegisterModal sin completar el registro y se quiere volver al Login.
+    const handleBackToLogin = () => {
+        closeRegisterModal();
+        openLoginModal();
     };
 
     const handleLogout = () => {
@@ -139,25 +161,20 @@ export const Header = () => {
                         {isAuthenticated ? (
                             <>
                                 <div className={styles.profileContainer} onClick={handleProfileClick} style={{ cursor: "pointer" }}>
-                                    {/* >>>>> LÍNEAS CORREGIDAS AQUÍ <<<<< */}
-                                    {user?.profileImage?.url ? ( // Accede a user.profileImage.url
-                                        <img
-                                            src={user.profileImage.url} // Usa user.profileImage.url como la fuente de la imagen
-                                            alt="Foto de perfil"
-                                            className={styles.profileImage}
-                                            // Manejador de errores para depurar si la imagen no se carga
-                                            onError={(e) => {
-                                                console.error("Error al cargar la imagen de perfil en el Header. URL:", user.profileImage?.url);
-                                                e.currentTarget.onerror = null;
-                                                // Opcional: e.currentTarget.src = "/path/to/local/default-profile.png";
-                                            }}
-                                        />
-                                    ) : (
-                                        <FaUserCircle className={styles.profileIcon} />
-                                    )}
+                                    <Avatar
+                                        alt="Foto de perfil"
+                                        src={displayedProfileImageUrl}
+                                        sx={{
+                                            width: 24,
+                                            height: 24,
+                                            fontSize: '1.5rem',
+                                            bgcolor: '#CCCCCC',
+                                            color: '#555555'
+                                        }}
+                                    >
+                                        <AccountCircleIcon sx={{ fontSize: '1.5rem' }} />
+                                    </Avatar>
                                 </div>
-
-                                <p>|</p>
 
                                 <h4 onClick={handleLogout} style={{ cursor: "pointer" }}>
                                     Cerrar Sesión
@@ -197,7 +214,6 @@ export const Header = () => {
                         <div className={styles.iconBag}>
                             <AiOutlineShopping className={styles.icon} onClick={() => navigate("/CartScreen")} />
                         </div>
-
                     </div>
                 </div>
             </div>
@@ -210,7 +226,10 @@ export const Header = () => {
             <RegisterModal
                 isOpen={isRegisterModalOpen}
                 onClose={closeRegisterModal}
-                onCancelClick={handleCancelRegister}
+                // Aquí es donde corregimos la prop: 'onLoginClick' en lugar de 'onCancelClick'
+                onLoginClick={handleBackToLogin}
+                // Añadimos la nueva prop para manejar el éxito del registro
+                onRegisterSuccess={handleRegisterSuccess}
             />
         </>
     );

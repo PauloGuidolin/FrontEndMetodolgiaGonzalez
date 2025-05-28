@@ -1,22 +1,23 @@
 import React from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
-import styles from './RegisterModal.module.css'; // Asegúrate que la ruta sea correcta
-import { useAuthStore } from '../../../../store/authStore'; // Asegúrate que la ruta sea correcta
+import styles from './RegisterModal.module.css';
+import { useAuthStore } from '../../../../store/authStore';
 import { toast } from 'react-toastify';
-import { RegisterRequestFrontend } from '../../../../types/auth'; // Asegúrate que la ruta sea correcta
-import { Sexo } from '../../../../types/ISexo'; // Asegúrate que la ruta sea correcta
+import { RegisterRequestFrontend } from '../../../../types/auth';
+import { Sexo } from '../../../../types/ISexo';
 
 
 interface RegisterModalProps {
     isOpen: boolean;
     onClose: () => void;
-    onCancelClick: () => void;
+    // Cambiamos onCancelClick por onLoginClick para mayor claridad en el flujo
+    onLoginClick: () => void; // Permite volver al LoginModal
+    onRegisterSuccess?: () => void; // Opcional: para un callback después de un registro exitoso
 }
 
-const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onCancelClick }) => {
-    // console.log para depuración: ahora mostrará el estado correcto para este modal
-    console.log('RegisterModal isOpen prop:', isOpen); 
+const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onLoginClick, onRegisterSuccess }) => {
+    console.log('RegisterModal isOpen prop:', isOpen);
 
     const register = useAuthStore((state) => state.register);
     const loading = useAuthStore((state) => state.loadingRegister);
@@ -61,7 +62,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onCancel
         initialValues: {
             firstname: '',
             lastname: '',
-            sexo: '' as Sexo, 
+            sexo: '' as Sexo,
             email: '',
             password: '',
             confirmPassword: '',
@@ -78,25 +79,24 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onCancel
                     password: values.password,
                     dni: values.dni,
                 };
-                await register(registerData); 
-                toast.success('¡Registro exitoso! Por favor, inicie sesión.');
-                onClose(); 
+                await register(registerData);
+                toast.success('¡Registro exitoso! Ahora puedes iniciar sesión.');
+                onClose(); // Cierra el modal de registro
+                if (onRegisterSuccess) {
+                    onRegisterSuccess(); // Llama al callback si se proporciona
+                } else {
+                    onLoginClick(); // Por defecto, vuelve al modal de login
+                }
             } catch (error) {
-                toast.error(errorRegister || 'Error al registrar. Inténtalo de nuevo.');
+                // Aquí, el error puede ser el del store (errorRegister) o un error de Axios
+                const errorMessage = errorRegister || (error as any).response?.data?.message || 'Error al registrar. Inténtalo de nuevo.';
+                toast.error(errorMessage);
                 console.error("Registration failed:", error);
             }
         },
     });
 
-    // IMPORTANTE: NO uses un "return null;" aquí. La visibilidad se controla con CSS.
-    /*
-    if (!isOpen) {
-        return null;
-    }
-    */
-
     return (
-        // *** CAMBIO CLAVE AQUÍ: AÑADE LA CLASE 'active' CONDICIONALMENTE ***
         <div className={`${styles.modalOverlay} ${isOpen ? styles.active : ''}`}>
             <div className={styles.modalContent}>
                 <div className={styles.modalHeader}>
@@ -161,7 +161,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onCancel
                                     type="radio"
                                     id="registerGenderFemenino"
                                     name="sexo"
-                                    value={Sexo.FEMENINO} 
+                                    value={Sexo.FEMENINO}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                     checked={formik.values.sexo === Sexo.FEMENINO}
@@ -171,7 +171,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onCancel
                                     type="radio"
                                     id="registerGenderMasculino"
                                     name="sexo"
-                                    value={Sexo.MASCULINO} 
+                                    value={Sexo.MASCULINO}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                     checked={formik.values.sexo === Sexo.MASCULINO}
@@ -181,7 +181,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onCancel
                                     type="radio"
                                     id="registerGenderOtro"
                                     name="sexo"
-                                    value={Sexo.OTRO} 
+                                    value={Sexo.OTRO}
                                     onChange={formik.handleChange}
                                     onBlur={formik.handleBlur}
                                     checked={formik.values.sexo === Sexo.OTRO}
@@ -237,8 +237,9 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose, onCancel
                         <button type="submit" className={styles.registerButton} disabled={loading}>
                             {loading ? 'Registrando...' : 'Registrarse'}
                         </button>
-                        <button type="button" className={styles.cancelButton} onClick={onCancelClick}>
-                            Cancelar
+                        {/* Cambiado de "Cancelar" a "Ya tengo una cuenta" y llama a onLoginClick */}
+                        <button type="button" className={styles.loginLink} onClick={onLoginClick}>
+                            Ya tengo una cuenta
                         </button>
                     </form>
                 </div>

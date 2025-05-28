@@ -1,92 +1,109 @@
 import React from "react";
 import styles from "./CartCard.module.css";
-import { IProductoDetalle } from "../../../../types/IProductoDetalle";
+import { ProductoDTO } from "../../../dto/ProductoDTO";
+import { ProductoDetalleDTO } from "../../../dto/ProductoDetalleDTO";
+
 
 interface CartCardProps {
-  productDetail: IProductoDetalle;
-  quantity: number;
-  onQuantityChange: (newQuantity: number) => void;
-  onRemove: () => void;
+    product: ProductoDTO; 
+    productDetail: ProductoDetalleDTO;
+    quantity: number;
+    onQuantityChange: (newQuantity: number) => void;
+    onRemove: () => void;
 }
 
 const CartCard: React.FC<CartCardProps> = ({
-  productDetail,
-  quantity,
-  onQuantityChange,
-  onRemove,
+    product, // Ahora lo recibimos como prop
+    productDetail,
+    quantity,
+    onQuantityChange,
+    onRemove,
 }) => {
-  const handleQuantityChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    const newQuantity = parseInt(event.target.value);
-    onQuantityChange(newQuantity);
-  };
+    // Para la imagen, usamos el 'url' del ImagenDTO que está en el ProductoDTO
+    const imageUrl = product.imagenes?.[0]?.url || '/images/default_product.jpg'; // Usar una imagen por defecto si no hay
 
-  return (
-    <div className={styles.cartCard}>
-      <div className={styles.imageContainer}>
-        {productDetail.producto?.imagenes &&
-          productDetail.producto.imagenes[0]?.denominacion && (
-            <img
-              src={`URL_BASE_DE_IMAGENES/${productDetail.producto.imagenes[0].denominacion}`}
-              alt={productDetail.producto.denominacion}
-              className={styles.productImage}
-            />
-          )}
-      </div>
-      <div className={styles.productDetails}>
-        <h3 className={styles.productName}>
-          {productDetail.producto?.denominacion}
-        </h3>
-        {productDetail.producto?.categorias &&
-          productDetail.producto.categorias[0]?.denominacion && (
-            <p className={styles.productCategory}>
-              Categoría: {productDetail.producto.categorias[0].denominacion}
-            </p>
-          )}
-        {productDetail.producto?.sexo && (
-          <p className={styles.productGender}>
-            Género: {productDetail.producto.sexo}
-          </p>
-        )}
-        <p className={styles.productColor}>Color: {productDetail.color}</p>
-        <p className={styles.productSize}>Talle: {productDetail.talle}</p>
-        <p className={styles.productPrice}>
-          Precio: $
-          {productDetail.producto?.precioVenta?.toLocaleString("es-AR")}
-        </p>
-        {productDetail.producto?.tienePromocion &&
-          productDetail.producto.descuentos &&
-          productDetail.producto.descuentos[0]?.precioPromocional && (
-            <p className={styles.productDiscount}>
-              Precio con descuento: $
-              {productDetail.producto.descuentos[0].precioPromocional.toLocaleString(
-                "es-AR"
-              )}
-            </p>
-          )}
-      </div>
-      <div className={styles.quantityControls}>
-        <label htmlFor={`quantity-${productDetail.id}`}>Cantidad:</label>
-        <select
-          id={`quantity-${productDetail.id}`}
-          value={quantity}
-          onChange={handleQuantityChange}
-        >
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((qty) => (
-            <option key={qty} value={qty}>
-              {qty}
-            </option>
-          ))}
-        </select>
-      </div>
-      <button className={styles.removeButton} onClick={onRemove}>
-        <span role="img" aria-label="Eliminar">
-          🗑️
-        </span>
-      </button>
-    </div>
-  );
+    // Accedemos a la denominación del producto principal
+    const productName = product.denominacion;
+
+    // Calculamos el precio: si tiene promocion, usamos precioFinal, sino, precioOriginal
+    // Basándonos en tus DTOs de backend, el precioFinal ya debería reflejar la promoción.
+    const displayPrice = product.precioFinal || product.precioOriginal || 0; // Fallback a 0
+
+    const formattedPrice = displayPrice.toLocaleString("es-AR", {
+        style: "currency",
+        currency: "ARS",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+
+    const handleIncrement = () => {
+        // Validación para no superar el stock disponible para ese detalle de producto
+        if (quantity < productDetail.stockActual) {
+            onQuantityChange(quantity + 1);
+        }
+        // Opcional: podrías agregar un toast.warn aquí si el stock es 0 o se alcanzó el límite.
+    };
+
+    const handleDecrement = () => {
+        // onQuantityChange manejará que si la cantidad llega a 0, se elimine el producto.
+        onQuantityChange(quantity - 1);
+    };
+
+    return (
+        <div className={styles.cartCard}>
+            <div className={styles.imageContainer}>
+                <img
+                    src={imageUrl}
+                    alt={productName}
+                    className={styles.productImage}
+                />
+            </div>
+            <div className={styles.productInfo}> {/* Cambiado de productDetails a productInfo para ser más genérico */}
+                <h4 className={styles.productName}>
+                    {productName}
+                </h4>
+                {/* Categoría: Accedemos directamente desde product.categorias */}
+                {product.categorias && product.categorias[0]?.denominacion && (
+                    <p className={styles.details}>
+                        Categoría: {product.categorias[0].denominacion}
+                    </p>
+                )}
+                {/* Sexo: Accedemos directamente desde product.sexo */}
+                {product.sexo && (
+                    <p className={styles.details}>
+                        Género: {product.sexo}
+                    </p>
+                )}
+                {/* Color y Talle: Accedemos desde productDetail */}
+                <p className={styles.details}>Color: {productDetail.color}</p>
+                <p className={styles.details}>Talle: {productDetail.talle}</p>
+                
+                {/* Mostrar precio final (con o sin promoción) */}
+                <p className={styles.productPrice}>
+                    Precio Unitario: {formattedPrice}
+                </p>
+                
+                {/* No necesitamos mostrar "Precio con descuento" por separado si precioFinal ya lo incluye */}
+                {/* Si quisieras mostrar el precio original tachado, tendrías que comparar precioFinal y precioOriginal */}
+                {product.tienePromocion && product.precioFinal !== product.precioOriginal && (
+                    <p className={styles.productOriginalPrice}>
+                        <del>Precio Original: ${product.precioOriginal?.toLocaleString("es-AR")}</del>
+                    </p>
+                )}
+
+                <div className={styles.quantityControl}>
+                    <button onClick={handleDecrement} className={styles.quantityButton} disabled={quantity <= 1}>-</button>
+                    <span className={styles.quantity}>{quantity}</span>
+                    <button onClick={handleIncrement} className={styles.quantityButton} disabled={quantity >= productDetail.stockActual}>+</button>
+                </div>
+            </div>
+            <div className={styles.actions}> {/* Contenedor para el botón de eliminar */}
+                <button onClick={onRemove} className={styles.removeButton}>
+                    <span role="img" aria-label="Eliminar">🗑️</span>
+                </button>
+            </div>
+        </div>
+    );
 };
 
 export default CartCard;

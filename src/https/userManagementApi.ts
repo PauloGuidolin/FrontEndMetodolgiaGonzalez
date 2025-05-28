@@ -1,6 +1,7 @@
 
 
-import { IUsuario } from '../types/IUsuario'; // Importamos la interfaz de Usuario (asegúrate de que la ruta sea correcta)
+
+import { UserDTO } from '../components/dto/UserDTO';
 import { http } from './httpService'; // Importamos el servicio HTTP base
 
 // Obtenemos la URL base del servidor desde las variables de entorno (http://localhost:8080)
@@ -30,10 +31,10 @@ export const userManagementService = {
    * @returns Una Promesa que resuelve con un array de IUsuario.
    * @throws Un error si la solicitud falla.
    */
-  getAll: async (): Promise<IUsuario[]> => {
+  getAll: async (): Promise<UserDTO[]> => {
     const url = USER_MANAGEMENT_ENDPOINT;
     // Este endpoint probablemente requiere autenticación (ADMIN)
-    return http.get<IUsuario[]>(url);
+    return http.get<UserDTO[]>(url);
   },
 
    /**
@@ -43,10 +44,10 @@ export const userManagementService = {
    * @returns Una Promesa que resuelve con un IUsuario.
    * @throws Un error si la solicitud falla o el usuario no se encuentra.
    */
-  getById: async (id: number | string): Promise<IUsuario> => {
+  getById: async (id: number | string): Promise<UserDTO> => {
     const url = `${USER_MANAGEMENT_ENDPOINT}/${id}`;
     // Este endpoint probablemente requiere autenticación (ADMIN)
-    return http.get<IUsuario>(url);
+    return http.get<UserDTO>(url);
   },
 
   /**
@@ -58,11 +59,11 @@ export const userManagementService = {
    * @returns Una Promesa que resuelve con el usuario creado.
    * @throws Un error si la solicitud falla.
    */
-  create: async (userData: Partial<IUsuario>): Promise<IUsuario> => {
+  create: async (userData: Partial<UserDTO>): Promise<UserDTO> => {
       const url = USER_MANAGEMENT_ENDPOINT;
       // Este endpoint probablemente requiere autenticación (ADMIN)
       // Para registro de usuarios regulares, usa authService.register
-      return http.post<IUsuario>(url, userData);
+      return http.post<UserDTO>(url, userData);
   },
 
   /**
@@ -73,10 +74,10 @@ export const userManagementService = {
    * @returns Una Promesa que resuelve con el usuario actualizado.
    * @throws Un error si la solicitud falla.
    */
-  update: async (userData: IUsuario): Promise<IUsuario> => { // Esperamos el objeto completo con ID
+  update: async (userData: UserDTO): Promise<UserDTO> => { // Esperamos el objeto completo con ID
       const url = USER_MANAGEMENT_ENDPOINT;
       // Este endpoint probablemente requiere autenticación (ADMIN)
-      return http.put<IUsuario>(url, userData);
+      return http.put<UserDTO>(url, userData);
   },
 
   /**

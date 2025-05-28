@@ -1,94 +1,75 @@
-// src/https/authApi.ts
-import axios from 'axios';
+// src/https/authApi.ts (REFACCTORIZADO PARA USAR HTTP SERVICE)
 import { AuthResponseFrontend, LoginRequestFrontend, RegisterRequestFrontend } from '../types/auth';
 import { UserDTO } from '../components/dto/UserDTO';
 import { UserProfileUpdateDTO } from '../components/dto/UserProfileUpdateDTO';
 import { UpdateCredentialsRequest } from '../components/dto/UpdateCredentialsRequest';
+import { http } from './httpService'; // ¡Importamos tu httpService!
 
-
-// Usa la variable de entorno para la base de tu API
-// Y concatena la ruta del controlador de autenticación '/auth'
-const BASE_API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
-const AUTH_API_URL = `${BASE_API_URL}/auth`; // <--- ¡Ajuste aquí!
+// La URL base ya está configurada en httpService,
+// solo necesitamos la ruta específica del controlador de autenticación.
+const AUTH_ENDPOINT = '/auth'; // Coincide con @RequestMapping("/auth") en tu backend
 
 export const authService = {
-    login: async (credentials: LoginRequestFrontend): Promise<AuthResponseFrontend> => {
-        const response = await axios.post(`${AUTH_API_URL}/login`, credentials);
-        return response.data; // Ya está tipado por AuthResponse
-    },
+    // login y register no necesitan el token JWT porque lo obtienen al inicio
+    login: async (credentials: LoginRequestFrontend): Promise<AuthResponseFrontend> => {
+        // Usamos http.post, que ya maneja la baseURL y los headers Content-Type
+        const response = await http.post<AuthResponseFrontend>(`${AUTH_ENDPOINT}/login`, credentials);
+        return response; // http.post ya devuelve data directamente
+    },
 
-    register: async (userData: RegisterRequestFrontend): Promise<AuthResponseFrontend> => {
-        const response = await axios.post(`${AUTH_API_URL}/register`, userData);
-        return response.data; // Ya está tipado por AuthResponse
-    },
+    register: async (userData: RegisterRequestFrontend): Promise<AuthResponseFrontend> => {
+        // Usamos http.post
+        const response = await http.post<AuthResponseFrontend>(`${AUTH_ENDPOINT}/register`, userData);
+        return response; // http.post ya devuelve data directamente
+    },
 
-    logout: () => {
-        console.log("Client-side logout initiated.");
-    },
+    logout: () => {
+        console.log("Client-side logout initiated.");
+        // El logout en el frontend normalmente solo limpia el token.
+        // El backend no necesita un endpoint de logout específico a menos que manejes sesiones en el servidor.
+    },
 
-    // --- MÉTODOS PARA EL PERFIL ---
+    // --- MÉTODOS PARA EL PERFIL ---
+    // Estos métodos SÍ se benefician del interceptor de httpService
+    // porque automáticamente añade el token JWT si está en localStorage.
 
-    // Obtener los datos del usuario autenticado
-    getCurrentUser: async (token: string): Promise<UserDTO> => {
-        // Asumiendo que el endpoint para obtener el usuario actual es /api/v1/auth/me
-        const response = await axios.get(`${AUTH_API_URL}/me`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        return response.data; // Ahora tipado como UserDTO
-    },
+    // Obtener los datos del usuario autenticado
+    getCurrentUser: async (): Promise<UserDTO> => {
+        // CORRECTO: http.get automáticamente añadirá el token JWT si existe en localStorage
+        const user = await http.get<UserDTO>(`${AUTH_ENDPOINT}/me`);
+        return user;
+    },
 
-    // Actualizar los datos del usuario (texto/números)
-    // El backend UsuarioService tiene updateProfile() que recibe UserProfileUpdateDTO y devuelve UserDTO
-    updateUser: async (token: string, userData: UserProfileUpdateDTO): Promise<UserDTO> => {
-        // Asumiendo que el endpoint para actualizar el perfil es /api/v1/auth/profile
-        const response = await axios.put(`${AUTH_API_URL}/profile`, userData, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-        return response.data; // Ahora tipado como UserDTO
-    },
+    // Actualizar los datos del usuario (texto/números)
+    updateUser: async (userData: UserProfileUpdateDTO): Promise<UserDTO> => {
+        // CORRECTO: http.put automáticamente añadirá el token JWT y Content-Type: application/json
+        const updatedUser = await http.put<UserDTO>(`${AUTH_ENDPOINT}/profile`, userData);
+        return updatedUser;
+    },
 
-    // Subir y actualizar la imagen de perfil
-    uploadProfileImage: async (token: string, imageFile: File): Promise<UserDTO> => {
-        const formData = new FormData();
-        formData.append('file', imageFile);
+    // Subir y actualizar la imagen de perfil
+    uploadProfileImage: async (imageFile: File): Promise<UserDTO> => {
+        const formData = new FormData();
+        formData.append('file', imageFile);
 
-        // Asumiendo que el endpoint para subir la imagen es /api/v1/auth/profile/upload-image
-        const response = await axios.post(`${AUTH_API_URL}/profile/upload-image`, formData, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        return response.data; // Ahora tipado como UserDTO
-    },
+        // CORRECTO: Axios (y por lo tanto httpService) ajusta automáticamente el Content-Type a 'multipart/form-data'.
+        // http.post automáticamente añadirá el token JWT.
+        const updatedUser = await http.post<UserDTO>(`${AUTH_ENDPOINT}/profile/upload-image`, formData);
+        return updatedUser;
+    },
 
-    // ¡NUEVO MÉTODO: Para actualizar credenciales!
-    updateUserCredentials: async (token: string, data: UpdateCredentialsRequest): Promise<UserDTO> => {
-        // Asume que el endpoint para actualizar credenciales es /api/v1/auth/update-credentials o similar
-        // AJUSTA ESTE ENDPOINT SEGÚN TU BACKEND (ej. /auth/change-password, /auth/update-email-password)
-        const response = await axios.patch(`${AUTH_API_URL}/update-credentials`, data, { // Usamos PATCH para actualizaciones parciales
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-        });
-        return response.data; // Retorna el UserDTO actualizado
-    },
+    // Para actualizar credenciales
+    updateUserCredentials: async (data: UpdateCredentialsRequest): Promise<UserDTO> => {
+        // CORRECTO: http.patch automáticamente añadirá el token JWT y Content-Type: application/json
+        const updatedUser = await http.patch<UserDTO>(`${AUTH_ENDPOINT}/update-credentials`, data);
+        return updatedUser;
+    },
 
-    // *** NUEVO MÉTODO: Para desactivar la cuenta ***
-    deactivateAccount: async (token: string): Promise<void> => {
-        // Asumiendo que el endpoint para desactivar la cuenta es /auth/deactivate
-        // y que el backend identifica al usuario por el token JWT
-        const response = await axios.delete(`${AUTH_API_URL}/deactivate`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
-        // Si el backend devuelve un 200 OK sin cuerpo, response.data estará vacío, lo cual es esperado.
-        return response.data;
+    // Para desactivar la cuenta
+    deactivateAccount: async (): Promise<void> => {
+        // CORRECTO: http.delete automáticamente añadirá el token JWT
+        // Y espera un 200 OK o 204 No Content.
+        await http.delete<void>(`${AUTH_ENDPOINT}/deactivate`);
+        // No devuelve nada, ya que el backend retorna un 200/204 sin cuerpo o un mensaje simple
     },
 };

@@ -1,154 +1,162 @@
-
-
-import { ICliente } from '../types/ICliente'; // Importamos la interfaz de Cliente (asegúrate de que la ruta sea correcta)
+// src/services/userService.ts (Anteriormente clientService.ts - ¡Renombrado!)
+import { DomicilioDTO } from '../components/dto/DomicilioDTO';
+import { UserDTO } from '../components/dto/UserDTO';
 import { http } from './httpService'; // Importamos el servicio HTTP base
 
+
 // Obtenemos la URL base del servidor desde las variables de entorno (http://localhost:8080)
-// Usamos import.meta.env para Vite (ajusta si usas otra herramienta de build)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Verificamos si la URL base está configurada
 if (!API_BASE_URL) {
-  console.error("La variable de entorno VITE_API_BASE_URL no está definida.");
-  // En un proyecto real, considera una forma más robusta de manejar esto (ej. lanzar un error fatal al inicio de la app)
+    console.error("La variable de entorno VITE_API_BASE_URL no está definida.");
 }
 
-// Definimos el endpoint específico para clientes
-// Coincide con @RequestMapping("/clientes") en ClienteController de tu backend
-const CLIENT_ENDPOINT = `${API_BASE_URL}/clientes`;
+// Definimos el endpoint específico para USUARIOS
+// Coincide con @RequestMapping("/usuarios") en UsuarioController de tu backend
+const USER_ENDPOINT = `${API_BASE_URL}/usuarios`;
 
 /**
- * Servicio API para interactuar con los recursos de Cliente.
- * Algunos endpoints pueden requerir autenticación (ej. obtener perfil propio),
- * otros pueden requerir autenticación de ADMIN (ej. obtener todos los clientes).
+ * Servicio API para interactuar con los recursos de Usuario.
+ * Estos endpoints probablemente requieren autenticación (ej. para ver/editar el perfil de un usuario).
  */
-export const clientService = {
+export const userService = { // ¡Nombre del servicio cambiado!
 
-  /**
-   * Obtiene todos los clientes.
-   * Coincide con el endpoint GET /clientes (heredado de BaseController).
-   * @returns Una Promesa que resuelve con un array de ICliente.
-   * @throws Un error si la solicitud falla.
-   */
-  getAll: async (): Promise<ICliente[]> => {
-    const url = CLIENT_ENDPOINT;
-    // Este endpoint probablemente requiere autenticación (ADMIN)
-    return http.get<ICliente[]>(url);
-  },
+    /**
+     * Obtiene todos los usuarios. Requiere ADMIN.
+     * Coincide con el endpoint GET /usuarios (heredado de BaseController).
+     * @returns Una Promesa que resuelve con un array de UserDTO.
+     */
+    getAll: async (): Promise<UserDTO[]> => {
+        const url = USER_ENDPOINT;
+        return http.get<UserDTO[]>(url);
+    },
 
-   /**
-   * Obtiene un cliente por su ID.
-   * Coincide con el endpoint GET /clientes/{id} (heredado de BaseController).
-   * @param id El ID del cliente. Puede ser number o string.
-   * @returns Una Promesa que resuelve con un ICliente.
-   * @throws Un error si la solicitud falla o el cliente no se encuentra.
-   */
-  getById: async (id: number | string): Promise<ICliente> => {
-    const url = `${CLIENT_ENDPOINT}/${id}`;
-    // Este endpoint podría ser accesible para el propio cliente autenticado o para ADMIN
-    return http.get<ICliente>(url);
-  },
+    /**
+     * Obtiene un usuario por su ID.
+     * Coincide con el endpoint GET /usuarios/{id} (heredado de BaseController).
+     * @param id El ID del usuario.
+     * @returns Una Promesa que resuelve con un UserDTO.
+     */
+    getById: async (id: number | string): Promise<UserDTO> => {
+        const url = `${USER_ENDPOINT}/${id}`;
+        return http.get<UserDTO>(url);
+    },
 
-  /**
-   * Busca un cliente por el ID de usuario asociado.
-   * Coincide con el endpoint GET /clientes/usuario/{idUsuario} en ClienteController.
-   * @param idUsuario El ID del usuario.
-   * @returns Una Promesa que resuelve con un ICliente o null si no se encuentra (Status 404).
-   * @throws Un error si la solicitud falla.
-   */
-  getByUsuarioId: async (idUsuario: number | string): Promise<ICliente | null> => {
-       const url = `${CLIENT_ENDPOINT}/usuario/${idUsuario}`;
-       // Este endpoint probablemente requiere autenticación
-       try {
-          const response = await http.get<ICliente>(url);
-          // Tu backend devuelve 404 para "no encontrado" en este caso.
-          // La lógica de httpService maneja 404 lanzando un error.
-          // Capturamos ese error para devolver null.
-           if (response === null) { // Aunque la lógica de 404 ya lanza, esto es una doble verificación
-              return null;
-          }
-          return response;
-      } catch (error) {
-          // Tu backend devuelve 404 para "no encontrado" en este caso.
-          if (error instanceof Error && error.message.includes('Status: 404')) {
-              return null; // Retorna null si el backend devuelve 404
-          }
-          console.error(`Error fetching client by user ID ${idUsuario}:`, error);
-          throw error; // Relanza otros errores
-      }
-   },
+    /**
+     * Obtiene un usuario por su nombre de usuario (email).
+     * Coincide con el endpoint GET /usuarios/by-username/{username} en UsuarioController.
+     * @param username El nombre de usuario (email) del usuario.
+     * @returns Una Promesa que resuelve con un UserDTO o null si no se encuentra.
+     */
+    getByUsername: async (username: string): Promise<UserDTO | null> => {
+        const url = `${USER_ENDPOINT}/by-username/${username}`;
+        try {
+            const response = await http.get<UserDTO>(url);
+            return response;
+        } catch (error) {
+            if (error instanceof Error && error.message.includes('Status: 404')) {
+                return null; // Retorna null si el backend devuelve 404
+            }
+            console.error(`Error fetching user by username ${username}:`, error);
+            throw error;
+        }
+    },
 
-  /**
-   * Busca un cliente por el ID de su imagen asociada.
-   * Coincide con el endpoint GET /clientes/imagen/{idImagen} en ClienteController.
-   * @param idImagen El ID de la imagen asociada.
-   * @returns Una Promesa que resuelve con un ICliente o null si no se encuentra (Status 404).
-   * @throws Un error si la solicitud falla.
-   */
-  getByImagenPersonaId: async (idImagen: number | string): Promise<ICliente | null> => {
-      const url = `${CLIENT_ENDPOINT}/imagen/${idImagen}`;
-      // Este endpoint probablemente requiere autenticación
-      try {
-          const response = await http.get<ICliente>(url);
-           // Tu backend devuelve 404 para "no encontrado" en este caso.
-          // La lógica de httpService maneja 404 lanzando un error.
-          // Capturamos ese error para devolver null.
-           if (response === null) { // Aunque la lógica de 404 ya lanza, esto es una doble verificación
-              return null;
-          }
-          return response;
-      } catch (error) {
-           // Tu backend devuelve 404 para "no encontrado" en este caso.
-           if (error instanceof Error && error.message.includes('Status: 404')) {
-              return null; // Retorna null si el backend devuelve 404
-          }
-           console.error(`Error fetching client by imagen persona ID ${idImagen}:`, error);
-          throw error; // Relanza otros errores
-      }
-  },
+    // Métodos para gestionar direcciones de un usuario (reflejando UsuarioController)
 
-  // --- Métodos CRUD estándar (heredados de BaseController y expuestos por ClienteController) ---
-  // Crear un cliente (registro) se maneja típicamente a través de /auth/register.
-  // Este endpoint POST /clientes podría usarse, por ejemplo, por un ADMIN para crear clientes.
+    /**
+     * Obtiene todas las direcciones asociadas a un usuario.
+     * Coincide con GET /usuarios/{userId}/direcciones en UsuarioController.
+     * @param userId El ID del usuario.
+     * @returns Una Promesa que resuelve con un array de DomicilioDTO.
+     */
+    getAddressesByUserId: async (userId: number | string): Promise<DomicilioDTO[]> => {
+        const url = `${USER_ENDPOINT}/${userId}/direcciones`;
+        try {
+            const response = await http.get<DomicilioDTO[]>(url);
+            return response;
+        } catch (error) {
+            // Maneja el error de 400 (Bad Request) que tu backend podría devolver
+            if (error instanceof Error && error.message.includes('Status: 400')) {
+                return []; // Si el backend devuelve 400 o un error al buscar, devuelve array vacío
+            }
+            console.error(`Error fetching addresses for user ${userId}:`, error);
+            throw error;
+        }
+    },
 
-  /**
-   * Crea un nuevo cliente.
-   * Coincide con el endpoint POST /clientes (heredado de BaseController).
-   * @param clientData Los datos del cliente a crear.
-   * @returns Una Promesa que resuelve con el cliente creado.
-   * @throws Un error si la solicitud falla.
-   */
-  create: async (clientData: Partial<ICliente>): Promise<ICliente> => {
-      const url = CLIENT_ENDPOINT;
-      // Este endpoint probablemente requiere autenticación (ADMIN)
-      // Para registro de clientes regulares, usa authService.register
-      return http.post<ICliente>(url, clientData);
-  },
+    /**
+     * Añade una nueva dirección a un usuario.
+     * Coincide con POST /usuarios/{userId}/direcciones en UsuarioController.
+     * @param userId El ID del usuario.
+     * @param domicilioData Los datos de la nueva dirección.
+     * @returns Una Promesa que resuelve con la DomicilioDTO creada.
+     */
+    addAddressToUser: async (userId: number | string, domicilioData: Partial<DomicilioDTO>): Promise<DomicilioDTO> => {
+        const url = `${USER_ENDPOINT}/${userId}/direcciones`;
+        const newAddress = await http.post<DomicilioDTO>(url, domicilioData);
+        return newAddress;
+    },
 
-  /**
-   * Actualiza un cliente existente.
-   * Coincide con el endpoint PUT /clientes (heredado de BaseController).
-   * Nota: Tu PUT en BaseController espera el ID de la entidad en el cuerpo de la solicitud, no en la URL.
-   * @param clientData Los datos del cliente a actualizar (debe incluir el ID).
-   * @returns Una Promesa que resuelve con el cliente actualizado.
-   * @throws Un error si la solicitud falla.
-   */
-  update: async (clientData: ICliente): Promise<ICliente> => { // Esperamos el objeto completo con ID
-      const url = CLIENT_ENDPOINT;
-      // Este endpoint probablemente requiere autenticación (el propio cliente o ADMIN)
-      return http.put<ICliente>(url, clientData);
-  },
+    /**
+     * Actualiza una dirección existente para un usuario.
+     * Coincide con PUT /usuarios/{userId}/direcciones/{direccionId} en UsuarioController.
+     * @param userId El ID del usuario.
+     * @param direccionId El ID de la dirección a actualizar.
+     * @param updatedDomicilioData Los datos actualizados de la dirección.
+     * @returns Una Promesa que resuelve con la DomicilioDTO actualizada.
+     */
+    updateAddressForUser: async (userId: number | string, direccionId: number | string, updatedDomicilioData: DomicilioDTO): Promise<DomicilioDTO> => {
+        const url = `${USER_ENDPOINT}/${userId}/direcciones/${direccionId}`;
+        const updatedAddress = await http.put<DomicilioDTO>(url, updatedDomicilioData);
+        return updatedAddress;
+    },
 
-  /**
-   * Elimina un cliente por su ID.
-   * Coincide con el endpoint DELETE /clientes/{id} (heredado de BaseController).
-   * @param id El ID del cliente a eliminar.
-   * @returns Una Promesa que resuelve cuando la eliminación es exitosa.
-   * @throws Un error si la solicitud falla.
-   */
-  delete: async (id: number | string): Promise<void> => {
-      const url = `${CLIENT_ENDPOINT}/${id}`;
-      // Este endpoint probablemente requiere autenticación (ADMIN)
-      return http.delete<void>(url);
-  },
+    /**
+     * Elimina una dirección de un usuario.
+     * Coincide con DELETE /usuarios/{userId}/direcciones/{direccionId} en UsuarioController.
+     * @param userId El ID del usuario.
+     * @param direccionId El ID de la dirección a eliminar.
+     * @returns Una Promesa que resuelve cuando la eliminación es exitosa.
+     */
+    removeAddressFromUser: async (userId: number | string, direccionId: number | string): Promise<void> => {
+        const url = `${USER_ENDPOINT}/${userId}/direcciones/${direccionId}`;
+        await http.delete<void>(url);
+    },
+
+    // --- Métodos CRUD estándar (heredados de BaseController y expuestos por UsuarioController) ---
+
+    /**
+     * Crea un nuevo usuario.
+     * Coincide con el endpoint POST /usuarios (heredado de BaseController).
+     * @param userData Los datos del usuario a crear.
+     * @returns Una Promesa que resuelve con el usuario creado (UserDTO).
+     */
+    create: async (userData: Partial<UserDTO>): Promise<UserDTO> => {
+        const url = USER_ENDPOINT;
+        return http.post<UserDTO>(url, userData);
+    },
+
+    /**
+     * Actualiza un usuario existente.
+     * Coincide con el endpoint PUT /usuarios (heredado de BaseController).
+     * @param userData Los datos del usuario a actualizar (debe incluir el ID).
+     * @returns Una Promesa que resuelve con el usuario actualizado (UserDTO).
+     */
+    update: async (userData: UserDTO): Promise<UserDTO> => {
+        const url = USER_ENDPOINT;
+        return http.put<UserDTO>(url, userData);
+    },
+
+    /**
+     * Elimina un usuario por su ID.
+     * Coincide con el endpoint DELETE /usuarios/{id}.
+     * @param id El ID del usuario a eliminar.
+     * @returns Una Promesa que resuelve cuando la eliminación es exitosa.
+     */
+    delete: async (id: number | string): Promise<void> => {
+        const url = `${USER_ENDPOINT}/${id}`;
+        return http.delete<void>(url);
+    },
 };

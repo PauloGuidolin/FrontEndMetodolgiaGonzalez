@@ -131,11 +131,11 @@ export const addressService = {
      * @returns Una Promesa que resuelve con la dirección actualizada.
      * @throws Un error si la solicitud falla.
      */
-    update: async (addressData: DomicilioDTO): Promise<DomicilioDTO> => { // <--- CAMBIADO
-        // Esperamos el objeto completo con ID
-        const url = ADDRESS_ENDPOINT;
-        // Este endpoint probablemente requiere autenticación
-        return http.put<DomicilioDTO>(url, addressData); // <--- CAMBIADO
+     update: async (addressData: DomicilioDTO): Promise<DomicilioDTO> => {
+        // *** ESTE ES EL CAMBIO CRUCIAL: El ID va en la URL ***
+        const url = `${ADDRESS_ENDPOINT}/${addressData.id}`;
+        // El cuerpo de la solicitud sigue siendo el objeto DTO completo
+        return http.put<DomicilioDTO>(url, addressData);
     },
 
     /**

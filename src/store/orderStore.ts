@@ -1,166 +1,219 @@
 // Archivo: src/store/orderStore.ts
 
 import { create } from 'zustand'; // Importa la función create de Zustand
-import { IOrdenCompra } from '../types/IOrdenCompra'; // Importa la interfaz de OrdenCompra (asegúrate de la ruta)
-import { orderService } from '../https/orderApi';
+import { OrdenCompraDTO, CreateOrdenCompraDTO } from '../components/dto/OrdenCompraDTO'; // Importa los DTOs
+import { orderService } from '../https/orderApi'; // Asegúrate de que la ruta sea correcta (anteriormente era services/orderService.ts)
 
 // Definimos la interfaz para el estado de nuestro store de ordenes de compra
 interface OrderState {
-  // Estado para la lista general de ordenes de compra (ej. para un panel de administración)
-  orders: IOrdenCompra[];
-  loading: boolean;
-  error: string | null;
+    // Estado para la lista general de ordenes de compra (ej. para un panel de administración)
+    orders: OrdenCompraDTO[]; // Usar OrdenCompraDTO
+    loading: boolean;
+    error: string | null;
 
-  // Estado para un orden individual seleccionado o buscado
-  selectedOrder: IOrdenCompra | null;
-  loadingOrder: boolean;
-  errorOrder: string | null;
+    // Estado para un orden individual seleccionado o buscado
+    selectedOrder: OrdenCompraDTO | null; // Usar OrdenCompraDTO
+    loadingOrder: boolean;
+    errorOrder: string | null;
 
-  // Estado para ordenes de compra obtenidas por fecha
-  ordersByDate: IOrdenCompra[];
-  loadingOrdersByDate: boolean;
-  errorOrdersByDate: string | null;
-  // dateFilter: string | null; // Opcional: para rastrear la fecha del filtro
+    // Estado para ordenes de compra obtenidas por fecha
+    ordersByDate: OrdenCompraDTO[]; // Usar OrdenCompraDTO
+    loadingOrdersByDate: boolean;
+    errorOrdersByDate: string | null;
+    // dateFilter: string | null; // Opcional: para rastrear la fecha del filtro
 
-  // Acciones (funciones para modificar el estado o realizar operaciones asíncronas)
+    // Estado para órdenes de compra obtenidas por usuario
+    ordersByUser: OrdenCompraDTO[]; // Nuevo estado
+    loadingOrdersByUser: boolean; // Nuevo estado
+    errorOrdersByUser: string | null; // Nuevo estado
 
-  // Acción para obtener todas las ordenes de compra
-  fetchOrders: () => Promise<void>;
+    // Acciones (funciones para modificar el estado o realizar operaciones asíncronas)
 
-  // Acción para obtener una orden de compra individual por ID
-  fetchOrderById: (id: number | string) => Promise<void>;
+    // Acción para obtener todas las ordenes de compra (usando DTOs)
+    fetchOrders: () => Promise<void>;
 
-  // Acción para obtener ordenes de compra por fecha
-  fetchOrdersByDate: (fecha: string) => Promise<void>;
+    // Acción para obtener una orden de compra individual por ID (usando DTOs)
+    fetchOrderById: (id: number | string) => Promise<void>;
 
-  // Acciones CRUD para gestionar ordenes de compra (probablemente para ADMIN o procesos internos)
-  addOrder: (orderData: Partial<IOrdenCompra>) => Promise<IOrdenCompra>;
-  updateOrder: (order: IOrdenCompra) => Promise<IOrdenCompra>;
-  deleteOrder: (id: number | string) => Promise<void>;
+    // Acción para obtener ordenes de compra por fecha
+    fetchOrdersByDate: (fecha: string) => Promise<void>;
 
-  // Acción para limpiar la orden seleccionada
-  clearSelectedOrder: () => void;
+    // Acción para obtener órdenes de compra por ID de usuario
+    fetchOrdersByUserId: (userId: number | string) => Promise<void>;
+
+    // Acciones CRUD para gestionar ordenes de compra
+    // Para crear, usamos CreateOrdenCompraDTO
+    addOrder: (orderData: CreateOrdenCompraDTO) => Promise<OrdenCompraDTO>;
+    // Para actualizar, usamos OrdenCompraDTO completo
+    updateOrder: (id: number | string, orderData: OrdenCompraDTO) => Promise<OrdenCompraDTO>;
+    deleteOrder: (id: number | string) => Promise<void>;
+    activateOrder: (id: number | string) => Promise<OrdenCompraDTO>; // Acción para activar
+
+    // Acción para limpiar la orden seleccionada
+    clearSelectedOrder: () => void;
 }
 
 // Creamos el store usando la función create de Zustand
 export const useOrderStore = create<OrderState>((set, get) => ({
-  // Estado inicial para la lista general de ordenes de compra
-  orders: [],
-  loading: false,
-  error: null,
+    // Estado inicial para la lista general de ordenes de compra
+    orders: [],
+    loading: false,
+    error: null,
 
-  // Estado inicial para orden individual
-  selectedOrder: null,
-  loadingOrder: false,
-  errorOrder: null,
+    // Estado inicial para orden individual
+    selectedOrder: null,
+    loadingOrder: false,
+    errorOrder: null,
 
-  // Estado inicial para ordenes por fecha
-  ordersByDate: [],
-  loadingOrdersByDate: false,
-  errorOrdersByDate: null,
-  // dateFilter: null,
+    // Estado inicial para ordenes por fecha
+    ordersByDate: [],
+    loadingOrdersByDate: false,
+    errorOrdersByDate: null,
 
-  // Implementación de la acción fetchOrders
-  fetchOrders: async () => {
-    set({ loading: true, error: null });
+    // Estado inicial para ordenes por usuario
+    ordersByUser: [],
+    loadingOrdersByUser: false,
+    errorOrdersByUser: null,
 
-    try {
-      const ordersData = await orderService.getAll();
-      set({ orders: ordersData, loading: false });
-    } catch (error) {
-      console.error("Error fetching all orders in store:", error);
-      set({
-        error: `Failed to load orders: ${error instanceof Error ? error.message : String(error)}`,
-        loading: false,
-      });
-    }
-  },
+    // Implementación de la acción fetchOrders (usando getAllDTO)
+    fetchOrders: async () => {
+        set({ loading: true, error: null });
+        try {
+            const ordersData = await orderService.getAllDTO(); // Llama a getAllDTO
+            set({ orders: ordersData, loading: false });
+        } catch (error: any) {
+            console.error("Error fetching all orders in store:", error);
+            const errorMessage = error.response?.data?.message || error.message || "Failed to load orders.";
+            set({
+                error: errorMessage,
+                loading: false,
+            });
+        }
+    },
 
-  // Implementación de la acción fetchOrderById
-  fetchOrderById: async (id: number | string) => {
-      set({ loadingOrder: true, errorOrder: null, selectedOrder: null });
-      try {
-          const orderData = await orderService.getById(id);
-          set({ selectedOrder: orderData, loadingOrder: false });
-      } catch (error) {
-          console.error(`Error fetching order with ID ${id} in store:`, error);
-          set({
-              errorOrder: `Failed to load order: ${error instanceof Error ? error.message : String(error)}`,
-              loadingOrder: false,
-              selectedOrder: null, // Asegura que selectedOrder sea null en caso de error
-          });
-      }
-  },
+    // Implementación de la acción fetchOrderById (usando getByIdDTO)
+    fetchOrderById: async (id: number | string) => {
+        set({ loadingOrder: true, errorOrder: null, selectedOrder: null });
+        try {
+            const orderData = await orderService.getByIdDTO(id); // Llama a getByIdDTO
+            set({ selectedOrder: orderData, loadingOrder: false });
+        } catch (error: any) {
+            console.error(`Error fetching order with ID ${id} in store:`, error);
+            const errorMessage = error.response?.data?.message || error.message || `Failed to load order: ${id}.`;
+            set({
+                errorOrder: errorMessage,
+                loadingOrder: false,
+                selectedOrder: null, // Asegura que selectedOrder sea null en caso de error
+            });
+        }
+    },
 
-   // Implementación de la acción fetchOrdersByDate
-  fetchOrdersByDate: async (fecha: string) => {
-      set({ loadingOrdersByDate: true, errorOrdersByDate: null /*, dateFilter: fecha*/ });
-      try {
-          const ordersData = await orderService.getAllByFechaCompra(fecha);
-          set({ ordersByDate: ordersData, loadingOrdersByDate: false });
-      } catch (error) {
-          console.error(`Error fetching orders by date ${fecha} in store:`, error);
-           set({
-              errorOrdersByDate: `Failed to load orders by date: ${error instanceof Error ? error.message : String(error)}`,
-              loadingOrdersByDate: false,
-              ordersByDate: [], // Limpiar la lista en caso de error
-          });
-      }
-  },
+    // Implementación de la acción fetchOrdersByDate
+    fetchOrdersByDate: async (fecha: string) => {
+        set({ loadingOrdersByDate: true, errorOrdersByDate: null });
+        try {
+            const ordersData = await orderService.getAllByFechaCompra(fecha);
+            set({ ordersByDate: ordersData, loadingOrdersByDate: false });
+        } catch (error: any) {
+            console.error(`Error fetching orders by date ${fecha} in store:`, error);
+            const errorMessage = error.response?.data?.message || error.message || `Failed to load orders by date: ${fecha}.`;
+            set({
+                errorOrdersByDate: errorMessage,
+                loadingOrdersByDate: false,
+                ordersByDate: [], // Limpiar la lista en caso de error
+            });
+        }
+    },
 
-  // Implementación de la acción addOrder
-  addOrder: async (orderData: Partial<IOrdenCompra>) => {
-      // Opcional: Puedes poner un estado de carga/error específico para operaciones CRUD
-      // set({ loading: true, error: null });
-      try {
-          const newOrder = await orderService.create(orderData);
-          // Opcional: Actualizar listas relevantes en el store después de crear
-          // set(state => ({ orders: [...state.orders, newOrder] }));
-          // set({ loading: false });
-          return newOrder; // Devuelve la entidad creada
-      } catch (error) {
-          console.error("Error adding order in store:", error);
-          // Opcional: Establecer un error específico para operaciones CRUD
-          // set({ error: `Failed to add order: ${error instanceof Error ? error.message : String(error)}`, loading: false });
-          throw error; // Relanza el error para manejo en el componente/llamador
-      }
-  },
+    // Implementación de la acción fetchOrdersByUserId (Nueva)
+    fetchOrdersByUserId: async (userId: number | string) => {
+        set({ loadingOrdersByUser: true, errorOrdersByUser: null });
+        try {
+            const ordersData = await orderService.getOrdersByUserIdDTO(userId);
+            set({ ordersByUser: ordersData, loadingOrdersByUser: false });
+        } catch (error: any) {
+            console.error(`Error fetching orders by user ID ${userId} in store:`, error);
+            const errorMessage = error.response?.data?.message || error.message || `Failed to load orders for user: ${userId}.`;
+            set({
+                errorOrdersByUser: errorMessage,
+                loadingOrdersByUser: false,
+                ordersByUser: [],
+            });
+        }
+    },
 
-  // Implementación de la acción updateOrder
-  updateOrder: async (order: IOrdenCompra) => {
-       // Opcional: Estado de carga/error para CRUD
-       // set({ loading: true, error: null });
-      try {
-          const updatedOrder = await orderService.update(order);
-           // Opcional: Actualizar listas relevantes en el store después de actualizar
-           // set(state => ({ orders: state.orders.map(o => o.id === updatedOrder.id ? updatedOrder : o) }));
-           // set({ loading: false });
-           return updatedOrder; // Devuelve la entidad actualizada
-      } catch (error) {
-          console.error("Error updating order in store:", error);
-           // Opcional: Establecer un error específico para operaciones CRUD
-          // set({ error: `Failed to update order: ${error instanceof Error ? error.message : String(error)}`, loading: false });
-          throw error; // Relanza el error
-      }
-  },
+    // Implementación de la acción addOrder (usando createDTO)
+    addOrder: async (orderData: CreateOrdenCompraDTO) => {
+        // set({ loading: true, error: null }); // Opcional: estado de carga/error específico para CRUD
+        try {
+            const newOrder = await orderService.createDTO(orderData); // Llama a createDTO
+            // Opcional: Actualizar la lista de órdenes en el store después de crear
+            // set(state => ({ orders: [...state.orders, newOrder] }));
+            // set({ loading: false });
+            return newOrder;
+        } catch (error) {
+            console.error("Error adding order in store:", error);
+            // set({ error: `Failed to add order: ${error instanceof Error ? error.message : String(error)}`, loading: false });
+            throw error;
+        }
+    },
 
-  // Implementación de la acción deleteOrder
-  deleteOrder: async (id: number | string) => {
-       // Opcional: Estado de carga/error para CRUD
-       // set({ loading: true, error: null });
-      try {
-          await orderService.delete(id);
-          // Opcional: Eliminar la orden de las listas relevantes en el store después de eliminar
-          // set(state => ({ orders: state.orders.filter(o => o.id !== id) }));
-          // set({ loading: false });
-      } catch (error) {
-          console.error(`Error deleting order with ID ${id} in store:`, error);
-           // Opcional: Establecer un error específico para operaciones CRUD
-          // set({ error: `Failed to delete order: ${error instanceof Error ? error.message : String(error)}`, loading: false });
-          throw error; // Relanza el error
-      }
-  },
+    // Implementación de la acción updateOrder (usando updateDTO)
+    updateOrder: async (id: number | string, orderData: OrdenCompraDTO) => {
+        // set({ loading: true, error: null }); // Opcional: estado de carga/error específico para CRUD
+        try {
+            const updatedOrder = await orderService.updateDTO(id, orderData); // Llama a updateDTO
+            // Opcional: Actualizar listas relevantes en el store
+            // set(state => ({
+            //     orders: state.orders.map(o => o.id === updatedOrder.id ? updatedOrder : o),
+            //     selectedOrder: state.selectedOrder?.id === updatedOrder.id ? updatedOrder : state.selectedOrder,
+            // }));
+            // set({ loading: false });
+            return updatedOrder;
+        } catch (error) {
+            console.error("Error updating order in store:", error);
+            // set({ error: `Failed to update order: ${error instanceof Error ? error.message : String(error)}`, loading: false });
+            throw error;
+        }
+    },
 
-  // Implementación de la acción clearSelectedOrder
-  clearSelectedOrder: () => set({ selectedOrder: null, errorOrder: null, loadingOrder: false }),
+    // Implementación de la acción deleteOrder (usando delete del BaseController)
+    deleteOrder: async (id: number | string) => {
+        // set({ loading: true, error: null }); // Opcional: estado de carga/error específico para CRUD
+        try {
+            await orderService.delete(id); // Llama a delete (del BaseController)
+            // Opcional: Eliminar la orden de las listas relevantes en el store
+            // set(state => ({
+            //     orders: state.orders.filter(o => o.id !== id),
+            //     selectedOrder: state.selectedOrder?.id === id ? null : state.selectedOrder,
+            // }));
+            // set({ loading: false });
+        } catch (error) {
+            console.error(`Error deleting order with ID ${id} in store:`, error);
+            // set({ error: `Failed to delete order: ${error instanceof Error ? error.message : String(error)}`, loading: false });
+            throw error;
+        }
+    },
+
+    // Implementación de la acción activateOrder (usando activate del BaseController)
+    activateOrder: async (id: number | string) => {
+        // set({ loading: true, error: null }); // Opcional: estado de carga/error específico para CRUD
+        try {
+            const activatedOrder = await orderService.activate(id); // Llama a activate (del BaseController)
+            // Opcional: Actualizar la orden en las listas relevantes
+            // set(state => ({
+            //     orders: state.orders.map(o => o.id === activatedOrder.id ? activatedOrder : o),
+            //     selectedOrder: state.selectedOrder?.id === activatedOrder.id ? activatedOrder : state.selectedOrder,
+            // }));
+            // set({ loading: false });
+            return activatedOrder;
+        } catch (error) {
+            console.error(`Error activating order with ID ${id} in store:`, error);
+            // set({ error: `Failed to activate order: ${error instanceof Error ? error.message : String(error)}`, loading: false });
+            throw error;
+        }
+    },
+
+    // Implementación de la acción clearSelectedOrder
+    clearSelectedOrder: () => set({ selectedOrder: null, errorOrder: null, loadingOrder: false }),
 }));
