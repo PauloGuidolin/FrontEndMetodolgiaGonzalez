@@ -1,7 +1,9 @@
+// src/components/views/UserProfile/UserProfile.tsx
+
+import React, { useState, useEffect, useCallback } from "react";
 import { Header } from "../../ui/Header/Header";
 import { Footer } from "../../ui/Footer/Footer";
 import styles from "./UserProfile.module.css";
-import { useState, useEffect, useCallback } from "react";
 import { EditPersonalData } from "../../ui/Modal/EditPersonalData/EditPersonalData";
 import EditAcccesData from "../../ui/Modal/EditAccesData/EditAcccesData";
 import { useAuthStore } from "../../../store/authStore";
@@ -36,6 +38,8 @@ export const UserProfile = () => {
     }, [fetchUser]);
 
     useEffect(() => {
+        // Solo intenta cargar el usuario si no está ya cargado, no está cargando y no hay un error previo.
+        // Y si el token existe en localStorage.
         if (!user && !loadingUser && !errorUser) {
             const token = localStorage.getItem("jwt_token");
             if (token) {
@@ -242,13 +246,18 @@ export const UserProfile = () => {
 
                 {openEditPersonalDataModal && (
                     <EditPersonalData
-                        closeEditPersonalData={closeEditPersonalData}
+                        isOpen={openEditPersonalDataModal} // <-- ¡Añadir prop isOpen!
+                        onClose={closeEditPersonalData} // <-- ¡Cambiar nombre de prop!
                         user={user}
                     />
                 )}
 
                 {openEditAccesDataModal && (
-                    <EditAcccesData closeEditAccesData={closeEditAccesData} user={user} />
+                    <EditAcccesData
+                        isOpen={openEditAccesDataModal} // <-- ¡Añadir prop isOpen!
+                        onClose={closeEditAccesData} // <-- ¡Cambiar nombre de prop!
+                        user={user}
+                    />
                 )}
             </div>
             <Footer />

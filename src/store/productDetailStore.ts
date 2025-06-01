@@ -1,28 +1,34 @@
 // src/store/productDetailStore.ts
+
 import { create } from "zustand";
-import { Color } from "../types/IColor";
+
+// Mantener las importaciones de tus interfaces Talle y Color
 import { Talle } from "../types/ITalle";
+import { Color } from "../types/IColor";
+
+import { productDetailService } from "../https/productDetailApi";
+import { productService } from "../https/productApi";
 import { ProductoDTO } from "../components/dto/ProductoDTO";
 import { ProductoDetalleDTO } from "../components/dto/ProductoDetalleDTO";
-import { productDetailService } from "../https/productDetailApi";
-import { productService } from "../https/productApi"; // Importa tu servicio de productos principal
 
 interface ProductDetailState {
-  // ESTADO PARA EL PRODUCTO PADRE (ProductoDTO)
   selectedProduct: ProductoDTO | null;
   loadingProduct: boolean;
-  errorProduct: string | null; // Estado para un detalle individual seleccionado o buscado (ProductoDetalleDTO)
+  errorProduct: string | null;
 
   selectedProductDetail: ProductoDetalleDTO | null;
   loadingDetail: boolean;
-  errorDetail: string | null; // El resto de tus estados para listas de detalles, etc. (manteniendo lo que tenías)
+  errorDetail: string | null;
 
   productDetails: ProductoDetalleDTO[];
   loading: boolean;
   error: string | null;
-  productDetailsByProductId: ProductoDetalleDTO[];
-  loadingByProduct: boolean;
-  errorByProduct: string | null;
+
+  // CAMBIO CLAVE AQUÍ: Deben ser mapas/diccionarios
+  productDetailsByProductId: { [productId: number]: ProductoDetalleDTO[] };
+  loadingByProduct: { [productId: number]: boolean };
+  errorByProduct: { [productId: number]: string | null };
+
   filteredProductDetails: ProductoDetalleDTO[];
   loadingFiltered: boolean;
   errorFiltered: string | null;
@@ -35,13 +41,13 @@ interface ProductDetailState {
 }
 
 interface ProductDetailActions {
-  // ACCIONES PARA EL PRODUCTO PADRE (ProductoDTO)
   fetchProductById: (id: number) => Promise<void>;
-  clearSelectedProduct: () => void; // Acciones para los detalles de producto (ProductoDetalleDTO)
+  clearSelectedProduct: () => void;
 
   fetchProductDetails: () => Promise<void>;
   fetchProductDetailById: (id: number | string) => Promise<void>;
-  fetchProductDetailsByProductId: (productId: number | string) => Promise<void>;
+  // Asegurarse de que esta acción maneja el estado del mapa
+  fetchProductDetailsByProductId: (productId: number) => Promise<void>; // Cambiado a number para consistencia con productId: number en AdminProductScreen
   fetchProductDetailByProductTalleColor: (
     productoId: number | string,
     talle: Talle,
@@ -85,22 +91,23 @@ interface ProductDetailActions {
 export const useProductDetailStore = create<
   ProductDetailState & ProductDetailActions
 >((set) => ({
-  // Se quitó 'get' si no se usa para evitar la advertencia
-  // ESTADO INICIAL PARA EL PRODUCTO PADRE
   selectedProduct: null,
   loadingProduct: false,
-  errorProduct: null, // Estado inicial para detalle individual
+  errorProduct: null,
 
   selectedProductDetail: null,
   loadingDetail: false,
-  errorDetail: null, // Resto de los estados iniciales
+  errorDetail: null,
 
   productDetails: [],
   loading: false,
   error: null,
-  productDetailsByProductId: [],
-  loadingByProduct: false,
-  errorByProduct: null,
+
+  // INICIALIZACIÓN DE LOS MAPAS
+  productDetailsByProductId: {},
+  loadingByProduct: {},
+  errorByProduct: {},
+
   filteredProductDetails: [],
   loadingFiltered: false,
   errorFiltered: null,
@@ -109,12 +116,11 @@ export const useProductDetailStore = create<
   errorTalles: null,
   availableColores: [],
   loadingColores: false,
-  errorColores: null, // IMPLEMENTACIÓN DE ACCIONES PARA EL PRODUCTO PADRE
+  errorColores: null,
 
   fetchProductById: async (id: number) => {
     set({ loadingProduct: true, errorProduct: null, selectedProduct: null });
     try {
-      // CORRECCIÓN APLICADA: Usando getDTOSById
       const product = await productService.getDTOSById(id);
       set({ selectedProduct: product, loadingProduct: false });
     } catch (error: any) {
@@ -134,7 +140,7 @@ export const useProductDetailStore = create<
 
   clearSelectedProduct: () => {
     set({ selectedProduct: null, errorProduct: null, loadingProduct: false });
-  }, // Implementación de la acción fetchProductDetails
+  },
 
   fetchProductDetails: async () => {
     set({ loading: true, error: null });
@@ -153,7 +159,7 @@ export const useProductDetailStore = create<
         loading: false,
       });
     }
-  }, // Implementación de la acción fetchProductDetailById
+  },
 
   fetchProductDetailById: async (id: number | string) => {
     set({
@@ -177,35 +183,36 @@ export const useProductDetailStore = create<
         selectedProductDetail: null,
       });
     }
-  }, // Implementación de la acción fetchProductDetailsByProductId
+  },
 
-  fetchProductDetailsByProductId: async (productId: number | string) => {
-    set({
-      loadingByProduct: true,
-      errorByProduct: null,
-    });
+  // ACTUALIZACIÓN DE LA FUNCIÓN PARA USAR LOS MAPAS
+  fetchProductDetailsByProductId: async (productId: number) => {
+    set((state) => ({
+      loadingByProduct: { ...state.loadingByProduct, [productId]: true },
+      errorByProduct: { ...state.errorByProduct, [productId]: null },
+    }));
     try {
       const productDetailsData = await productDetailService.getAllByProductoId(
         productId
       );
-      set({
-        productDetailsByProductId: productDetailsData,
-        loadingByProduct: false,
-      });
+      set((state) => ({
+        productDetailsByProductId: { ...state.productDetailsByProductId, [productId]: productDetailsData },
+        loadingByProduct: { ...state.loadingByProduct, [productId]: false },
+      }));
     } catch (error) {
       console.error(
         `Error al obtener detalles de producto para el ID de producto ${productId} en el store:`,
         error
       );
-      set({
-        errorByProduct: `Error al cargar los detalles del producto por ID de producto: ${
+      set((state) => ({
+        errorByProduct: { ...state.errorByProduct, [productId]: `Error al cargar los detalles del producto por ID de producto: ${
           error instanceof Error ? error.message : String(error)
-        }`,
-        loadingByProduct: false,
-        productDetailsByProductId: [],
-      });
+        }` },
+        loadingByProduct: { ...state.loadingByProduct, [productId]: false },
+        productDetailsByProductId: { ...state.productDetailsByProductId, [productId]: [] }, // Asegurarse de que sea un array vacío en caso de error
+      }));
     }
-  }, // Implementación de la acción fetchProductDetailByProductTalleColor
+  },
 
   fetchProductDetailByProductTalleColor: async (
     productoId: number | string,
@@ -236,7 +243,7 @@ export const useProductDetailStore = create<
         selectedProductDetail: null,
       });
     }
-  }, // Implementación de la acción fetchProductDetailsByStockGreaterThan
+  },
 
   fetchProductDetailsByStockGreaterThan: async (
     stockMinimo: number | string
@@ -262,7 +269,7 @@ export const useProductDetailStore = create<
         filteredProductDetails: [],
       });
     }
-  }, // Implementación de la acción filterProductDetailsByOptions
+  },
 
   filterProductDetailsByOptions: async (
     productoId?: number | string,
@@ -295,7 +302,7 @@ export const useProductDetailStore = create<
         filteredProductDetails: [],
       });
     }
-  }, // Implementación de la acción fetchAvailableTallesByProductId
+  },
 
   fetchAvailableTallesByProductId: async (productId: number | string) => {
     set({ loadingTalles: true, errorTalles: null, availableTalles: [] });
@@ -316,7 +323,7 @@ export const useProductDetailStore = create<
         availableTalles: [],
       });
     }
-  }, // Implementación de la acción fetchAvailableColoresByProductId
+  },
 
   fetchAvailableColoresByProductId: async (productId: number | string) => {
     set({ loadingColores: true, errorColores: null, availableColores: [] });
@@ -337,7 +344,7 @@ export const useProductDetailStore = create<
         availableColores: [],
       });
     }
-  }, // Implementación de la acción discountStock
+  },
 
   discountStock: async (
     productoDetalleId: number | string,
@@ -345,14 +352,30 @@ export const useProductDetailStore = create<
   ) => {
     try {
       await productDetailService.descontarStock(productoDetalleId, cantidad);
+      // Opcional: Si quieres actualizar el stock de un detalle específico
+      // en el estado después de un descuento exitoso, lo harías aquí.
+      // Por ejemplo:
+      /*
+      set((state) => ({
+        productDetails: state.productDetails.map((detail) =>
+          detail.id === productoDetalleId
+            ? { ...detail, stockActual: detail.stockActual - cantidad }
+            : detail
+        ),
+        // Y si selectedProductDetail es el que se actualizó
+        selectedProductDetail: state.selectedProductDetail?.id === productoDetalleId
+          ? { ...state.selectedProductDetail, stockActual: state.selectedProductDetail.stockActual - cantidad }
+          : state.selectedProductDetail,
+      }));
+      */
     } catch (error) {
       console.error(
         `Error al descontar stock para el detalle de producto ID ${productoDetalleId} en el store:`,
         error
       );
-      throw error;
+      throw error; // Relanza el error para que el componente que llama lo maneje
     }
-  }, // Implementación de la acción checkAvailability
+  },
 
   checkAvailability: async (
     productoId: number | string,
@@ -371,27 +394,35 @@ export const useProductDetailStore = create<
         `Error al verificar la disponibilidad para el ID de producto ${productoId}, talle ${talle}, color ${color} en el store:`,
         error
       );
-      throw error;
+      throw error; // Relanza el error para que el componente que llama lo maneje
     }
-  }, // Implementación de la acción addProductDetail
+  },
 
   addProductDetail: async (productDetailData: Partial<ProductoDetalleDTO>) => {
     try {
       const newProductDetail = await productDetailService.create(
         productDetailData
       );
+      // Si necesitas actualizar productDetailsByProductId después de añadir un detalle,
+      // la lógica aquí es más compleja porque necesitas saber el productId del nuevo detalle.
+      // Es más seguro que el componente AdminProductScreen llame a fetchProductDetailsByProductId
+      // para refrescar los datos después de un add/update/delete.
       return newProductDetail;
     } catch (error) {
       console.error("Error al agregar detalle de producto en el store:", error);
       throw error;
     }
-  }, // Implementación de la acción updateProductDetail
+  },
 
   updateProductDetail: async (productDetail: ProductoDetalleDTO) => {
     try {
       const updatedProductDetail = await productDetailService.update(
         productDetail
       );
+      // Aquí, la actualización del estado local del store es más compleja
+      // debido a que los detalles están anidados por productId.
+      // Lo más robusto es que el componente AdminProductScreen vuelva a llamar a fetchProductDetailsByProductId
+      // para el producto padre correspondiente después de un update.
       return updatedProductDetail;
     } catch (error) {
       console.error(
@@ -400,11 +431,12 @@ export const useProductDetailStore = create<
       );
       throw error;
     }
-  }, // Implementación de la acción deleteProductDetail
+  },
 
   deleteProductDetail: async (id: number | string) => {
     try {
       await productDetailService.delete(id);
+      // De manera similar, para la eliminación, es más robusto que el componente padre refresque los detalles.
     } catch (error) {
       console.error(
         `Error al eliminar detalle de producto con ID ${id} en el store:`,
@@ -412,14 +444,14 @@ export const useProductDetailStore = create<
       );
       throw error;
     }
-  }, // Implementación de la acción clearSelectedProductDetail
+  },
 
   clearSelectedProductDetail: () =>
     set({
       selectedProductDetail: null,
       errorDetail: null,
       loadingDetail: false,
-    }), // Implementación de la acción clearFilteredProductDetails
+    }),
   clearFilteredProductDetails: () =>
     set({
       filteredProductDetails: [],

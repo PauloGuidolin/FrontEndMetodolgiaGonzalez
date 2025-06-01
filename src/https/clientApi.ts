@@ -1,5 +1,5 @@
 // src/services/userService.ts (Anteriormente clientService.ts - ¡Renombrado!)
-import { DomicilioDTO } from '../components/dto/DomicilioDTO';
+import { DomicilioDTO } from '../components/dto/DireccionDTO';
 import { UserDTO } from '../components/dto/UserDTO';
 import { http } from './httpService'; // Importamos el servicio HTTP base
 

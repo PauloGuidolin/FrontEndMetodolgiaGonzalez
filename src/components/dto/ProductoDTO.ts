@@ -17,5 +17,6 @@ export interface ProductoDTO {
     tienePromocion: boolean;
     imagenes: ImagenDTO[];
     productos_detalles: ProductoDetalleDTO[];
+    active: boolean;
     
 }

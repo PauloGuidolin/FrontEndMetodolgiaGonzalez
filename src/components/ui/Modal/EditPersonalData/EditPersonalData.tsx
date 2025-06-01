@@ -4,17 +4,25 @@ import styles from "./EditPersonalData.module.css";
 import { useAuthStore } from "../../../../store/authStore";
 import { toast } from "react-toastify";
 import { UserDTO } from "../../../dto/UserDTO"; // Asegúrate de que la ruta sea correcta
-import { DomicilioDTO } from "../../../dto/DomicilioDTO"; // Asegúrate de que la ruta sea correcta
+import { DireccionDTO } from "../../../dto/DireccionDTO"; // Asegúrate de que la ruta sea correcta
 import { UserProfileUpdateDTO } from "../../../dto/UserProfileUpdateDTO"; // Asegúrate de que la ruta sea correcta
 import { AddressForm } from "../AddressForm/AddressForm"; // Asegúrate de que la ruta sea correcta
 import { Sexo } from "../../../../types/ISexo"; // Asegúrate de que la ruta sea correcta
 
 interface EditPersonalDataProps {
-    closeEditPersonalData: () => void;
+    // Cambiado: Ahora el nombre de la prop es 'onClose' y se añade 'isOpen'
+    isOpen: boolean; // Indica si el modal debe estar abierto
+    onClose: () => void; // Función para cerrar el modal
     user: UserDTO;
 }
 
-export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalData, user }) => {
+// Ahora desestructuramos 'isOpen' y 'onClose'
+export const EditPersonalData: FC<EditPersonalDataProps> = ({ isOpen, onClose, user }) => {
+
+    // Si el modal no está abierto, no renderizamos nada
+    if (!isOpen) {
+        return null;
+    }
 
     // Inicialización de estados con los valores actuales del usuario
     const [firstname, setFirstname] = useState(user.firstname || '');
@@ -32,7 +40,7 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
 
     // Se hace una copia profunda para que las modificaciones en el modal no afecten el objeto 'user' original
     // hasta que se guarde.
-    const [addresses, setAddresses] = useState<DomicilioDTO[]>(user.addresses ? JSON.parse(JSON.stringify(user.addresses)) : []);
+    const [addresses, setAddresses] = useState<DireccionDTO[]>(user.addresses ? JSON.parse(JSON.stringify(user.addresses)) : []);
 
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState<string | null>(user.imagenUser?.url || "/images/default-profile.png");
@@ -94,7 +102,7 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
         }
     };
 
-    const handleAddressChange = (index: number, updatedAddress: DomicilioDTO) => {
+    const handleAddressChange = (index: number, updatedAddress: DireccionDTO) => {
         const newAddresses = addresses.map((addr, i) =>
             i === index ? updatedAddress : addr
         );
@@ -103,10 +111,10 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
     };
 
     const handleAddAddress = () => {
-        const newAddress: DomicilioDTO = {
+        const newAddress: DireccionDTO = {
             calle: '',
             numero: 0,
-            cp: 0,
+            cp: "0",
             piso: null,
             departamento: null,
             localidad: null
@@ -182,7 +190,7 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
                 addresses: addresses.filter(addr =>
                     addr.calle.trim() !== '' &&
                     (addr.numero === undefined || addr.numero === null || addr.numero >= 0) && // Permite 0 para numero
-                    (addr.cp === undefined || addr.cp === null || addr.cp >= 0) && // Permite 0 para CP
+                    (addr.cp === undefined || addr.cp === null || addr.cp >= "0") && // Permite 0 para CP
                     !!addr.localidad?.id // Asegura que la localidad tenga ID
                 ) || null // Asegura que sea un array o null
             };
@@ -204,7 +212,7 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
 
             toast.success("Perfil actualizado exitosamente.");
             console.log("EXITO: Perfil actualizado exitosamente. Cerrando modal.");
-            closeEditPersonalData();
+            onClose(); // Usar la nueva prop onClose
 
         } catch (error: any) {
             console.error("Error al guardar los datos personales (CATCH BLOCK):", error);
@@ -216,7 +224,8 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
 
     return (
         <>
-            <div className={styles.background} onClick={closeEditPersonalData}></div>
+            {/* El background del modal debe usar 'onClose' para cerrar */}
+            <div className={styles.background} onClick={onClose}></div>
             <div className={styles.modal}>
                 <h2 className={styles.modalTitle}>Editar Datos Personales</h2>
 
@@ -373,7 +382,7 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ closeEditPersonalD
                 </button>
 
                 <div className={styles.buttons}>
-                    <button className={styles.cancelBtn} onClick={closeEditPersonalData} disabled={loadingUser}>Cancelar</button>
+                    <button className={styles.cancelBtn} onClick={onClose} disabled={loadingUser}>Cancelar</button> {/* Usa onClose aquí */}
                     <button className={styles.acceptBtn} onClick={handleSave} disabled={loadingUser}>
                         {loadingUser ? 'Guardando...' : 'Aceptar'}
                     </button>

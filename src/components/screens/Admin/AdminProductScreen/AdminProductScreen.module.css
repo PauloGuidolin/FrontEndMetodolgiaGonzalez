@@ -1,0 +1,104 @@
+/* src/components/screens/Admin/AdminProductScreen/AdminProductScreen.module.css */
+
+.container {
+    padding: 24px; /* sx={{ p: 3 }} */
+}
+
+.header {
+    margin-bottom: 16px; /* Ajusta según necesidad, gutterBottom es un espaciado predeterminado */
+    color: #333; /* Un color de texto un poco más oscuro si lo deseas */
+}
+
+.addProductButton {
+    margin-bottom: 16px; /* sx={{ mb: 2 }} */
+}
+
+.tableContainer {
+    /* Estilos para el Paper */
+    box-shadow: 0px 2px 1px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12);
+    border-radius: 4px; /* Borde redondeado por defecto de Paper */
+    overflow-x: auto; /* Para tablas que se desbordan horizontalmente */
+}
+
+.table {
+    min-width: 650px; /* sx={{ minWidth: 650 }} */
+}
+
+/* Estilos para las filas de productos principales */
+.productTableRow {
+    /* Esto es para eliminar el borde inferior por defecto entre las celdas de la fila principal */
+    /* & > *': { borderBottom: 'unset' } */
+    /* En CSS modules, esto puede ser complicado de replicar exactamente si Material-UI lo inyecta */
+    /* Pero puedes intentar esto para la fila: */
+    border-bottom: none;
+}
+
+/* Estilos para la celda expandible */
+.expandTableCell {
+    padding: 0; /* Elimina padding para que el collapse quede bien ajustado */
+}
+
+/* Estilos para el contenedor de detalles */
+.detailsBox {
+    margin: 8px; /* sx={{ margin: 1 }} */
+}
+
+.detailsHeader {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px; /* espacio entre el título y la tabla de detalles */
+}
+
+.addDetailButton {
+    margin-left: 16px; /* sx={{ ml: 2 }} */
+}
+
+.loadingDetailsContainer,
+.errorDetailsContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100px; /* minHeight="100px" */
+    flex-direction: column; /* Para centrar texto y spinner verticalmente */
+    padding: 16px;
+}
+
+.loadingText {
+    margin-left: 8px; /* sx={{ ml: 1 }} */
+}
+
+.errorText {
+    color: #d32f2f; /* Color de error de Material-UI */
+    text-align: center;
+}
+
+.noDetailsText {
+    text-align: center;
+    padding: 16px;
+    color: #757575; /* Un gris más suave */
+}
+
+
+/* Estilos para la tabla de detalles */
+.detailsTable {
+    width: 100%;
+    /* size="small" de Table ya aplica algunos estilos */
+    /* Asegúrate de que los bordes de las celdas de detalle no choquen con los de la tabla principal */
+}
+
+.detailTableCell {
+    /* Estilos generales para celdas de detalle si necesitas ajustar padding, etc. */
+}
+
+.actionsTableCell {
+    text-align: center;
+}
+
+/* Para los contenedores de carga y error a nivel de pantalla completa */
+.fullScreenCenter {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+}

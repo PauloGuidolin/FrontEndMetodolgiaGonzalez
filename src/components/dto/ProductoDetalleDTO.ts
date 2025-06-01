@@ -13,4 +13,6 @@ export interface ProductoDetalleDTO {
     stockMaximo: number;
     color: Color; // Usa el tipo Color que has definido (ej. enum o union string literal)
     talle: Talle; // Usa el tipo Talle que has definido (ej. enum o union string literal)
+    active: boolean;
+    producto?: { id: number }; // <-- ¡AÑADIDO ESTO!
 }

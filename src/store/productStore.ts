@@ -1,72 +1,51 @@
-// Archivo: src/store/productStore.ts
-
 import { create } from 'zustand';
-import { productService } from '../https/productApi'; // Asegúrate de que esta ruta sea correcta
+
 import { ProductoDTO } from '../components/dto/ProductoDTO';
-
-
+import { ProductoRequestDTO } from '../components/dto/ProductoRequestDTO'; // ¡NUEVA IMPORTACIÓN!
+import { productService } from '../https/productApi';
 
 // --- Interfaz para los filtros (DEFINIDA AQUÍ o importada si está en otro archivo) ---
-// Estos deben coincidir con los parámetros que tu backend espera para filtrar (en ProductFilters.java)
-// y con la estructura que tu componente de filtros envía.
-// La propiedad 'categoria' en el frontend ProductFilters debe coincidir con el campo 'categorias' (List<String>)
-// en el backend ProductFilters.java, si estás usando ese DTO para enviar filtros.
 export interface ProductFilters {
-    denominacion?: string | null;
-    categorias?: string[] | null; // <-- CORREGIDO: Ahora es 'categorias'
-    sexo?: string | null; // O el tipo Enum si usas
-    colores?: string[] | null;  // <-- CORREGIDO: Ahora es 'colores'  
-    talles?: string[] | null;   // <-- CORREGIDO: Ahora es 'talles'  
-    minPrice?: number | null;
-    maxPrice?: number | null;
-    discount?: string | null; // Asumiendo que 'discount' existe como String en backend ProductFilters
-    tienePromocion?: boolean | null; // Si usas este en backend ProductFilters
+    denominacion?: string | null;
+    categorias?: string[] | null;
+    sexo?: string | null;
+    colores?: string[] | null;
+    talles?: string[] | null;
+    minPrice?: number | null;
+    maxPrice?: number | null;
+    discount?: string | null;
+    tienePromocion?: boolean | null;
 
-    orderBy?: string | null;
-    orderDirection?: 'asc' | 'desc' | null;
-
-    // ... cualquier otro filtro que uses en ProductFilters.java ...
+    orderBy?: string | null;
+    orderDirection?: 'asc' | 'desc' | null;
+    stockMinimo?: number | null;
 }
-
 
 // Definimos la interfaz para el estado de nuestro store de productos
 interface ProductState {
-    // Estado para la lista general de productos (usada en ProductScreen para filtrar)
-    originalProducts: ProductoDTO[]; // Lista completa de productos sin filtrar (opcional si siempre filtras)
-    filteredProducts: ProductoDTO[]; // Lista de productos después de aplicar filtros (viene del backend)
-    // Estado y acciones de carga/error generales para la lista principal
+    originalProducts: ProductoDTO[];
+    filteredProducts: ProductoDTO[];
     loading: boolean;
     error: string | null;
-    currentFilters: ProductFilters; // Estado para los filtros actuales
+    currentFilters: ProductFilters;
 
-    // --- Estado para la lista de productos promocionales (usada en HomeScreen) ---
-    promotionalProducts: ProductoDTO[]; // Lista de productos promocionales
-    loadingPromotional: boolean; // Estado de carga para promocionales
-    errorPromotional: string | null; // Error para promocionales
-    // --- Fin estado promocionales ---
+    promotionalProducts: ProductoDTO[];
+    loadingPromotional: boolean;
+    errorPromotional: string | null;
 }
 
 // Definimos las acciones de nuestro store
 interface ProductActions {
-    // Acción para obtener todos los productos (inicialmente y al limpiar filtros)
     fetchProducts: () => Promise<void>;
-
-    // --- Acción interna para obtener productos filtrados desde el backend (para ProductScreen) ---
     fetchFilteredProducts: (filters: ProductFilters) => Promise<void>;
-    // --- Fin acción interna ---
-
-    // Acción para actualizar los filtros actuales y disparar la carga de productos filtrados
     setAndFetchFilteredProducts: (filters: ProductFilters) => void;
-
-    // Acción para limpiar los filtros y recargar todos los productos originales
     clearFilters: () => void;
-
-    // --- Acción para obtener productos promocionales (para HomeScreen) ---
     fetchPromotionalProducts: () => Promise<void>;
-    // --- Fin acción promocionales ---
 
-    // Opcional: Si necesitas acciones para gestionar un solo producto, etc.
-    // fetchProductById: (id: string) => Promise<void>;
+    // --- NUEVAS ACCIONES CRUD (AHORA ESPERAN ProductoRequestDTO) ---
+    addProduct: (product: ProductoRequestDTO) => Promise<void>; // <-- CAMBIO AQUÍ
+    updateProduct: (product: ProductoRequestDTO) => Promise<void>; // <-- CAMBIO AQUÍ
+    deleteProduct: (id: number) => Promise<void>;
 }
 
 // Creamos el store usando la función create de Zustand
@@ -76,36 +55,32 @@ export const useProductStore = create<ProductState & ProductActions>((set, get) 
     filteredProducts: [],
     loading: false,
     error: null,
-    // Inicializa los filtros a un objeto vacío o con valores por defecto
     currentFilters: {},
 
-    // Estado inicial para productos promocionales
     promotionalProducts: [],
     loadingPromotional: false,
     errorPromotional: null,
 
-    // Opcional: Estado inicial para detalle de un solo producto
-    // selectedProduct: null,
-    // loadingProduct: false,
-    // errorProduct: null,
-
-
-    // Implementación de la acción fetchProducts (carga todos los productos)
     fetchProducts: async () => {
         set({ loading: true, error: null });
         try {
-            // *** Llama al productService que ahora apunta a /productos/dto ***
             const productsData = await productService.getAllDTO();
             set({
                 originalProducts: productsData,
-                filteredProducts: productsData, // Inicialmente, los filtrados son todos los originales
+                filteredProducts: productsData,
                 loading: false,
-                currentFilters: {}, // Limpiar filtros al cargar todos
+                currentFilters: {},
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error fetching all products in store:", error);
+            let errorMessage = "An unknown error occurred.";
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            } else if (typeof error === 'string') {
+                errorMessage = error;
+            }
             set({
-                error: `Failed to load all products: ${error.message || String(error)}`,
+                error: `Failed to load all products: ${errorMessage}`,
                 loading: false,
                 originalProducts: [],
                 filteredProducts: [],
@@ -113,70 +88,130 @@ export const useProductStore = create<ProductState & ProductActions>((set, get) 
         }
     },
 
-    // Implementación de la acción fetchFilteredProducts (llamada por setAndFetchFilteredProducts)
     fetchFilteredProducts: async (filters: ProductFilters) => {
-        set({ loading: true, error: null }); // Usamos el loading/error general para el fetch principal de ProductScreen
+        set({ loading: true, error: null });
         try {
-            // *** Llama al productService que ahora apunta a /productos/filtrar ***
             const filteredProductsData = await productService.getFilteredProducts(filters);
             set({
-                filteredProducts: filteredProductsData, // Actualizamos solo la lista filtrada
+                filteredProducts: filteredProductsData,
                 loading: false,
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error fetching filtered products in store:", error);
+            let errorMessage = "An unknown error occurred.";
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            } else if (typeof error === 'string') {
+                errorMessage = error;
+            }
             set({
-                error: `Failed to load filtered products: ${error.message || String(error)}`,
+                error: `Failed to load filtered products: ${errorMessage}`,
                 loading: false,
                 filteredProducts: [],
             });
         }
     },
 
-    // Implementación de la acción setAndFetchFilteredProducts
     setAndFetchFilteredProducts: (filters: ProductFilters) => {
-         // Opcional: Limpiar filtros nulos o vacíos antes de setear y enviar
-         const cleanedFilters: ProductFilters = Object.fromEntries(
-             Object.entries(filters).filter(([_, value]) => value !== null && value !== undefined && value !== '')
-         );
-         // Asegúrate de que los arrays vacíos (como colores: []) se mantengan si el backend los espera
-         if (filters.colores !== undefined) cleanedFilters.colores = filters.colores;
-         if (filters.talles !== undefined) cleanedFilters.talles = filters.talles;
-         if (filters.categorias !== undefined) cleanedFilters.categorias = filters.categorias;
+        const cleanedFilters: ProductFilters = Object.fromEntries(
+            Object.entries(filters).filter(([_, value]) => value !== null && value !== undefined && value !== '')
+        );
+        // Asegurarse de mantener arrays vacíos si se enviaron explícitamente para limpiar un filtro
+        if (filters.colores !== undefined) cleanedFilters.colores = filters.colores;
+        if (filters.talles !== undefined) cleanedFilters.talles = filters.talles;
+        if (filters.categorias !== undefined) cleanedFilters.categorias = filters.categorias;
+        if (filters.tienePromocion !== undefined) cleanedFilters.tienePromocion = filters.tienePromocion;
 
 
         set({ currentFilters: cleanedFilters });
-        // Ahora, 'get()' devuelve un objeto que incluye 'fetchFilteredProducts' gracias a la interfaz ProductActions
-        get().fetchFilteredProducts(cleanedFilters); // Pasa los filtros limpiados
+        get().fetchFilteredProducts(cleanedFilters);
     },
 
-    // Implementación de la acción clearFilters
     clearFilters: () => {
-        set({ currentFilters: {} }); // Resetear filtros
-        get().fetchProducts(); // Recargar todos los productos (llama a getAllDTO)
+        set({ currentFilters: {} });
+        get().fetchProducts();
     },
 
-    // --- Implementación de la acción fetchPromotionalProducts ---
     fetchPromotionalProducts: async () => {
         set({ loadingPromotional: true, errorPromotional: null });
         try {
-            // *** Llama al productService que ahora apunta a /productos/dto/promociones ***
             const promotionalData = await productService.getPromotionalDTOs();
             set({
                 promotionalProducts: promotionalData,
                 loadingPromotional: false,
             });
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error fetching promotional products in store:", error);
+            let errorMessage = "An unknown error occurred.";
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            } else if (typeof error === 'string') {
+                errorMessage = error;
+            }
             set({
-                errorPromotional: `Failed to load promotional products: ${error.message || String(error)}`,
+                errorPromotional: `Failed to load promotional products: ${errorMessage}`,
                 loadingPromotional: false,
                 promotionalProducts: [],
             });
         }
     },
-    // --- Fin implementación fetchPromotionalProducts ---
 
-    // Opcional: Implementación de fetchProductById, etc.
-    // fetchProductById: async (id: string) => { ... },
+    // --- Implementación de las NUEVAS ACCIONES CRUD ---
+    addProduct: async (productRequest: ProductoRequestDTO) => { // <-- CAMBIO AQUÍ
+        set({ loading: true, error: null });
+        try {
+            const newProduct = await productService.create(productRequest); // Ya pasa el DTO correcto
+            set((state) => ({
+                originalProducts: [...state.originalProducts, newProduct],
+                filteredProducts: [...state.filteredProducts, newProduct],
+                loading: false,
+            }));
+        } catch (error: unknown) {
+            console.error("Error adding product:", error);
+            let errorMessage = "An unknown error occurred.";
+            if (error instanceof Error) errorMessage = error.message;
+            else if (typeof error === 'string') errorMessage = error;
+            set({ error: `Failed to add product: ${errorMessage}`, loading: false });
+            throw error;
+        }
+    },
+
+    updateProduct: async (productRequest: ProductoRequestDTO) => { // <-- CAMBIO AQUÍ
+        set({ loading: true, error: null });
+        try {
+            if (!productRequest.id) throw new Error("Product ID is required for update.");
+            const updatedProduct = await productService.update(productRequest.id, productRequest); // Ya pasa el DTO correcto
+            set((state) => ({
+                originalProducts: state.originalProducts.map(p => p.id === updatedProduct.id ? updatedProduct : p),
+                filteredProducts: state.filteredProducts.map(p => p.id === updatedProduct.id ? updatedProduct : p),
+                loading: false,
+            }));
+        } catch (error: unknown) {
+            console.error("Error updating product:", error);
+            let errorMessage = "An unknown error occurred.";
+            if (error instanceof Error) errorMessage = error.message;
+            else if (typeof error === 'string') errorMessage = error;
+            set({ error: `Failed to update product: ${errorMessage}`, loading: false });
+            throw error;
+        }
+    },
+
+    deleteProduct: async (id: number) => {
+        set({ loading: true, error: null });
+        try {
+            await productService.delete(id);
+            set((state) => ({
+                originalProducts: state.originalProducts.filter(p => p.id !== id),
+                filteredProducts: state.filteredProducts.filter(p => p.id !== id),
+                loading: false,
+            }));
+        } catch (error: unknown) {
+            console.error("Error deleting product:", error);
+            let errorMessage = "An unknown error occurred.";
+            if (error instanceof Error) errorMessage = error.message;
+            else if (typeof error === 'string') errorMessage = error;
+            set({ error: `Failed to delete product: ${errorMessage}`, loading: false });
+            throw error;
+        }
+    },
 }));

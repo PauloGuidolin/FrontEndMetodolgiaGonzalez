@@ -8,11 +8,19 @@ import { UpdateCredentialsRequest } from "../../../dto/UpdateCredentialsRequest"
 import Swal from 'sweetalert2';
 
 interface EditAcccesDataProps {
-    closeEditAccesData: () => void;
+    // AÑADE ESTAS DOS PROPIEDADES
+    isOpen: boolean; // Indica si el modal está abierto o cerrado
+    onClose: () => void; // Función para cerrar el modal
     user: UserDTO;
 }
 
-const EditAcccesData: FC<EditAcccesDataProps> = ({ closeEditAccesData, user }) => {
+// CAMBIA LA DESESTRUCTURACIÓN DE LAS PROPS
+const EditAcccesData: FC<EditAcccesDataProps> = ({ isOpen, onClose, user }) => {
+    // AÑADE ESTE RENDERIZADO CONDICIONAL AL PRINCIPIO DEL COMPONENTE
+    if (!isOpen) {
+        return null; // Si isOpen es false, el componente no renderiza nada (está oculto)
+    }
+
     const [email, setEmail] = useState(user.email || '');
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -42,7 +50,7 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ closeEditAccesData, user }) =
 
         if (!emailChanged && !passwordChanged) {
             toast.info("No hay cambios en el email o la contraseña.");
-            closeEditAccesData();
+            onClose(); // Usa onClose aquí
             return;
         }
 
@@ -97,7 +105,7 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ closeEditAccesData, user }) =
             if (emailChanged || passwordChanged) {
                 logout();
             }
-            closeEditAccesData();
+            onClose(); // Usa onClose aquí
         } catch (error: any) {
             console.error("Error al guardar los datos de acceso:", error);
             const errorMessage = error.response?.data?.message || error.message || "Error desconocido al actualizar los datos de acceso.";
@@ -107,7 +115,8 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ closeEditAccesData, user }) =
 
     return (
         <>
-            <div className={styles.background} onClick={closeEditAccesData}></div>
+            {/* CAMBIA closeEditAccesData POR onClose */}
+            <div className={styles.background} onClick={onClose}></div>
             <div className={styles.containerPrincipal}>
                 <h3>Editar Contraseñas y correo</h3>
                 <div className={styles.containerData}>
@@ -145,7 +154,8 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ closeEditAccesData, user }) =
                     />
                 </div>
                 <div className={styles.containerButtons}>
-                    <button onClick={closeEditAccesData} disabled={loadingUser}>Cancelar</button>
+                    {/* CAMBIA closeEditAccesData POR onClose */}
+                    <button onClick={onClose} disabled={loadingUser}>Cancelar</button>
                     <button onClick={handleSave} disabled={loadingUser}>
                         {loadingUser ? 'Guardando...' : 'Aceptar'}
                     </button>

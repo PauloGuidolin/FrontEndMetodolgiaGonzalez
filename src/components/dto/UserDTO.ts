@@ -1,7 +1,7 @@
 // src/types/dtos/UserDTO.ts
 
 import { ImagenDTO } from "./ImagenDTO";
-import { DomicilioDTO } from "./DomicilioDTO";
+import { DireccionDTO } from "./DireccionDTO";
 import { Sexo } from "../../types/ISexo";
 import { Rol } from "../../types/IRol";
 import { ProfileImage } from "../../types/ProfileImage";
@@ -21,5 +21,6 @@ export interface UserDTO {
     telefono?: string | null;
     role: Rol; // Corresponde a `rol`
     // profileImage?:ProfileImage; // Corresponde a `imagenUser`
-    addresses?: DomicilioDTO[] | null; // Corresponde a `direcciones`
+    addresses?: DireccionDTO[] | null; // Corresponde a `direcciones`
+    active: boolean;
 }

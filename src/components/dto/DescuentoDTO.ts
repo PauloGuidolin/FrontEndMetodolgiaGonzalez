@@ -1,12 +1,13 @@
 // src/types/dtos/DescuentoDTO.ts
 
 export interface DescuentoDTO {
-    id: number;
+    id: number; // Long en Java -> number en TS
     denominacion: string;
-    fechaDesde: string; // `LocalDate` en backend -> `string` en frontend (YYYY-MM-DD)
-    fechaHasta: string; // `LocalDate` en backend -> `string` en frontend (YYYY-MM-DD)
-    horaDesde: string; // `LocalTime` en backend -> `string` en frontend (HH:MM:SS)
-    horaHasta: string; // `LocalTime` en backend -> `string` en frontend (HH:MM:SS)
+    fechaDesde: string; // LocalDate en Java -> string (YYYY-MM-DD) en TS
+    fechaHasta: string; // LocalDate en Java -> string (YYYY-MM-DD) en TS
+    horaDesde: string; // LocalTime en Java -> string (HH:MM:SS) en TS
+    horaHasta: string; // LocalTime en Java -> string (HH:MM:SS) en TS
     descripcionDescuento: string;
-    precioPromocional: number; // Factor de descuento (ej. 0.15 para 15%)
+    precioPromocional: number; // Double en Java -> number en TS (factor)
+    active: boolean; // Asumido de Base
 }

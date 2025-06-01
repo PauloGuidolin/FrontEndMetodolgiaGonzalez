@@ -1,7 +1,7 @@
 // src/types/dtos/UserProfileUpdateDTO.ts
 
 import { Sexo } from '../../types/ISexo';
-import { DomicilioDTO } from './DomicilioDTO';
+import { DireccionDTO } from './DireccionDTO';
 import { Rol } from '../../types/IRol'; // Asegúrate de que la ruta a IRol sea correcta y que tu Rol sea un tipo
 import { ImagenDTO } from './ImagenDTO'; // Asegúrate de que la ruta a ImagenDTO sea correcta
 
@@ -25,5 +25,5 @@ export interface UserProfileUpdateDTO {
 
     // --- PROPIEDADES RELACIONADAS CON OTRAS ENTIDADES ---
     imagenUser: ImagenDTO | null; // Si se envía la imagen existente o null
-    addresses: DomicilioDTO[] | null; // Un array de direcciones o null
+    addresses: DireccionDTO[] | null; // Un array de direcciones o null
 }

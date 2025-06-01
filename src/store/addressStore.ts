@@ -1,7 +1,7 @@
 // src/store/addressStore.ts
 
 import { create } from 'zustand'; // Importa la función create de Zustand
-import { DomicilioDTO } from '../components/dto/DomicilioDTO'; // <--- ¡CAMBIADO! Importa DomicilioDTO
+import { DomicilioDTO } from '../components/dto/DireccionDTO'; // <--- ¡CAMBIADO! Importa DomicilioDTO
 import { addressService } from '../https/addressApi';
 
 

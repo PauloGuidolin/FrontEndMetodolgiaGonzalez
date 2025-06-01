@@ -1,4 +1,4 @@
-import { DomicilioDTO } from "../components/dto/DomicilioDTO"; // <--- ¡CAMBIADO! Importamos DomicilioDTO
+import { DomicilioDTO } from "../components/dto/DireccionDTO"; // <--- ¡CAMBIADO! Importamos DomicilioDTO
 import { http } from "./httpService"; // Importamos el servicio HTTP base (ahora usa Axios)
 
 // Obtenemos la URL base del servidor desde las variables de entorno

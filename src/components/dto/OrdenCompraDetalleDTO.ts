@@ -2,28 +2,26 @@
 
 // Esta es la interfaz para cuando RECIBES un detalle de orden de compra desde el backend
 // Es lo que ves cuando haces un GET a una OrdenCompra
+// Coincide con OrdenCompraDetalleDTO del backend
 export interface OrdenCompraDetalleDTO {
-    id?: number;
-    cantidad: number;
-    subtotal?: number;
-    ordenCompraId?: number;
-    productoDetalleId?: number; // Este es el ID del ProductoDetalle
-    productoDetalle?: { // El backend lo envía al consultar una OrdenCompra
-        id?: number;
-        precioCompra?: number;
-        stockActual?: number;
-        stockMaximo?: number;
-        color?: string;
-        talle?: string;
-        productoDenominacion?: string;
-    };
+  id?: number;
+  cantidad: number;
+  precioUnitario: number; // BigDecimal en backend -> number en TS
+  subtotal: number; // BigDecimal en backend -> number en TS
+  ordenCompraId?: number; // Puede ser opcional si el detalle no está asociado aún
+  productoDetalleId: number; // Long en backend -> number en TS
+  productoDetalle: OrdenCompraDetalleProductoDetalleNestedDTO; // Anidado
+  active: boolean;
 }
 
-// Esta es la interfaz para cuando ENVÍAS un detalle de orden de compra al backend para CREAR/ACTUALIZAR
-// Solo incluye los campos que el frontend proporciona
-export interface CreateOrdenCompraDetalleDTO {
-    // CAMBIO CLAVE AQUÍ: Usar 'productoDetalleId' en lugar de 'productoId'
-    productoDetalleId: number; // EL ID del ProductoDetalle que el usuario seleccionó
-    cantidad: number;
-    // No incluyas 'subtotal' ni 'productoDetalle' aquí, el backend se encarga de eso
+
+export interface OrdenCompraDetalleProductoDetalleNestedDTO {
+  id?: number;
+  precioCompra: number; // BigDecimal en backend -> number en TS
+  stockActual: number;
+  stockMaximo: number;
+  color: string;
+  talle: string;
+  productoDenominacion: string;
+  active: boolean;
 }

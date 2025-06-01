@@ -7,13 +7,9 @@ import { Footer } from "../../ui/Footer/Footer";
 import CartCard from "../../ui/Cards/CartCard/CartCard";
 import CheckoutModal from "../../ui/Modal/CheckoutModal/CheckoutModal";
 
-
 import { useCartStore } from "../../../store/cartStore";
 import { useAuthStore } from "../../../store/authStore";
-import { CreateOrdenCompraDTO } from "../../dto/OrdenCompraDTO";
 
-import { useNavigate } from "react-router-dom";
-import { orderService } from "../../../https/orderApi";
 import RegisterModal from "../../ui/Modal/Register/RegisterModal";
 import LoginModal from "../../ui/Modal/LogIn/LoginModal";
 
@@ -22,38 +18,43 @@ const CartScreen: React.FC = () => {
     const updateQuantity = useCartStore((state) => state.updateQuantity);
     const removeFromCart = useCartStore((state) => state.removeFromCart);
     const getTotalPrice = useCartStore((state) => state.getTotalPrice);
-    const clearCart = useCartStore((state) => state.clearCart);
+    // const clearCart = useCartStore((state) => state.clearCart); // Eliminado: 'clearCart' no se usa
 
     const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
     const user = useAuthStore((state) => state.user);
 
     const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState(false);
-    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false); // Nuevo estado para el LoginModal
-    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false); // Nuevo estado para el RegisterModal
-    const navigate = useNavigate();
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+    // const navigate = useNavigate(); // Eliminado: 'navigate' no se usa
 
-    const openCheckoutModal = () => {
-        if (cartItems.length === 0) {
-            toast.info("Tu carrito está vacío.");
-            return;
-        }
+   const openCheckoutModal = () => {
+    console.log("Intentando abrir el modal de checkout...");
+    console.log("Elementos en el carrito:", cartItems.length);
+    console.log("Usuario autenticado:", isAuthenticated);
+    console.log("Objeto user:", user);
 
-        if (isAuthenticated && user) {
-            setIsCheckoutModalOpen(true);
-        } else {
-            toast.info("Debes iniciar sesión para proceder con el pago.");
-            setIsLoginModalOpen(true); // Abre el modal de login si no está autenticado
-        }
-    };
+    if (cartItems.length === 0) {
+        toast.info("Tu carrito está vacío.");
+        return;
+    }
 
+    if (isAuthenticated && user) {
+        console.log("Usuario autenticado y carrito no vacío. Abriendo CheckoutModal.");
+        setIsCheckoutModalOpen(true);
+    } else {
+        console.log("Usuario no autenticado. Abriendo LoginModal.");
+        toast.info("Debes iniciar sesión para proceder con el pago.");
+        setIsLoginModalOpen(true);
+    }
+};
     const closeCheckoutModal = () => {
         setIsCheckoutModalOpen(false);
     };
 
-    // Funciones para manejar los modales de Login/Register
     const openLoginModal = () => {
         setIsLoginModalOpen(true);
-        setIsRegisterModalOpen(false); // Asegúrate de que el modal de registro esté cerrado
+        setIsRegisterModalOpen(false);
     };
 
     const closeLoginModal = () => {
@@ -62,17 +63,16 @@ const CartScreen: React.FC = () => {
 
     const openRegisterModal = () => {
         setIsRegisterModalOpen(true);
-        setIsLoginModalOpen(false); // Asegúrate de que el modal de login esté cerrado
+        setIsLoginModalOpen(false);
     };
 
     const closeRegisterModal = () => {
         setIsRegisterModalOpen(false);
     };
 
-    // Callback que se ejecuta cuando el login es exitoso desde el LoginModal
     const onLoginSuccess = () => {
-        closeLoginModal(); // Cierra el modal de login
-        setIsCheckoutModalOpen(true); // Abre el modal de checkout automáticamente
+        closeLoginModal();
+        setIsCheckoutModalOpen(true);
     };
 
     const handleQuantityChange = (
@@ -105,34 +105,6 @@ const CartScreen: React.FC = () => {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
     });
-
-    const isCheckoutDisabled = cartItems.length === 0 || !isAuthenticated; // Se mantiene la deshabilitación basada en la autenticación para el botón principal
-
-    const handleConfirmOrder = async (orderData: CreateOrdenCompraDTO) => {
-        try {
-            if (!orderData.usuarioId) {
-                toast.error("Error: ID de usuario no disponible para la orden.");
-                throw new Error("ID de usuario no disponible");
-            }
-
-            console.log("Enviando orden:", orderData);
-
-            const newOrder = await orderService.createDTO(orderData);
-            console.log("Orden creada exitosamente:", newOrder);
-            toast.success("Orden de compra creada exitosamente.");
-
-            clearCart();
-            closeCheckoutModal();
-
-            navigate('/order-confirmation', { state: { orderId: newOrder.id } });
-
-        } catch (error) {
-            console.error("Error al confirmar la orden en CartScreen:", error);
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            toast.error(`Error al procesar tu orden: ${errorMessage}. Por favor, intenta de nuevo.`);
-            throw error;
-        }
-    };
 
     return (
         <div>
@@ -179,7 +151,7 @@ const CartScreen: React.FC = () => {
                         <button
                             className={styles.checkoutButton}
                             onClick={openCheckoutModal}
-                            disabled={cartItems.length === 0} // Deshabilitar si el carrito está vacío
+                            disabled={cartItems.length === 0}
                         >
                             Proceder al pago
                         </button>
@@ -198,27 +170,22 @@ const CartScreen: React.FC = () => {
             <CheckoutModal
                 isOpen={isCheckoutModalOpen}
                 onClose={closeCheckoutModal}
-                subtotal={subtotal}
+                subtotal={subtotal} // Esto es lo que estás enviando
                 user={isAuthenticated ? user : null}
-                onConfirmOrder={handleConfirmOrder}
             />
 
-            {/* Renderiza el LoginModal */}
             <LoginModal
                 isOpen={isLoginModalOpen}
                 onClose={closeLoginModal}
-                onRegisterClick={openRegisterModal} // Permite cambiar a RegisterModal
-                onLoginSuccess={onLoginSuccess} // Pasa el callback para reabrir CheckoutModal
+                onRegisterClick={openRegisterModal}
+                onLoginSuccess={onLoginSuccess}
             />
 
-            {/* Renderiza el RegisterModal si lo tienes */}
-            {/* Si aún no tienes RegisterModal, puedes quitar esta parte por ahora */}
             {isRegisterModalOpen && (
                 <RegisterModal
                     isOpen={isRegisterModalOpen}
                     onClose={closeRegisterModal}
-                    onLoginClick={openLoginModal} // Permite cambiar a LoginModal
-                    // onRegisterSuccess={...} // Si quieres auto-login o cerrar ambos modales, similar a onLoginSuccess
+                    onLoginClick={openLoginModal}
                 />
             )}
         </div>
