@@ -40,4 +40,8 @@ export interface CreateOrdenCompraDetalleDTO {
     cantidad: number;
     precioUnitario: number; // <-- CAMBIADO A NUMBER
 }
+export interface MercadoPagoPreferenceResponseDTO {
+    preferenceId: string;
+    initPoint: string;
+}
 

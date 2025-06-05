@@ -1,33 +1,41 @@
 import { Sexo } from "../../types/ISexo";
 
-// src/components/dto/ImagenRequestDTO.ts
+// DTO para enviar información de una imagen dentro de ProductoRequestDTO
 export interface ImagenRequestDTO {
-    id?: number; // Optional for existing images
-    url: string;
-    activo: boolean;
+    id?: number; // Opcional para imágenes existentes (en caso de actualización)
+    url: string; // La URL de la imagen (de Cloudinary)
+    activo?: boolean; // Para soft delete/activación de imágenes individuales
 }
 
-// src/components/dto/ProductoDetalleRequestDTO.ts
+// DTO para enviar información de un detalle de producto dentro de ProductoRequestDTO
 export interface ProductoDetalleRequestDTO {
-    id?: number; // Optional for existing details
+    id?: number; // Opcional para detalles existentes (en caso de actualización)
     precioCompra: number;
     stockActual: number;
     stockMaximo: number;
-    color: string; // 'ROJO', 'AZUL', etc.
-    talle: string; // 'S', 'M', 'L', 'XL', etc.
-    activo: boolean;
-    // productoId?: number; // No es necesario enviar esto desde el front, el backend lo maneja
+    color: string; // Se envía como string (ej. "ROJO")
+    talle: string; // Se envía como string (ej. "M")
+    activo?: boolean; // Para soft delete/activación de detalles individuales
+}
+
+// DTO para enviar información de un descuento dentro de ProductoRequestDTO
+// Solo necesitamos el ID para asociar un descuento existente
+export interface DescuentoRequestDTO {
+    id: number;
 }
 
 
+// DTO principal para la solicitud de creación/actualización de un producto
 export interface ProductoRequestDTO {
-    id?: number; // Solo si estás enviando un ID para actualización
+    id?: number; // Solo presente para actualizaciones (el backend lo usa para buscar el producto a actualizar)
     denominacion: string;
-    precioOriginal: number;
+    precioOriginal: number; // Mapea a 'precioVenta' en el backend
     tienePromocion: boolean;
-    sexo:Sexo
-    activo: boolean;
-    categoriaIds: number[]; // Array de IDs de categorías
-    imagenes: ImagenRequestDTO[];
-    productos_detalles: ProductoDetalleRequestDTO[];
+    sexo:Sexo;
+    activo: boolean; // El estado activo/inactivo se envía en la solicitud
+
+    categoriaIds: number[]; // Solo IDs de categorías para ManyToMany
+    imagenes: ImagenRequestDTO[]; // Lista de ImagenRequestDTOs (con URLs y IDs si existen)
+    productos_detalles: ProductoDetalleRequestDTO[]; // Lista de ProductoDetalleRequestDTOs
+    descuento?: DescuentoRequestDTO; // Objeto con el ID del descuento a asociar
 }

@@ -1,18 +1,16 @@
-// src/types/dtos/ProductoDetalleDTO.ts
-// Asegúrate de que estos enums existan en tu proyecto frontend (ej. types/Color.ts, types/Talle.ts)
-
 import { Color } from "../../types/IColor";
 import { Talle } from "../../types/ITalle";
 
 
 export interface ProductoDetalleDTO {
-    id: number; // ID es `Long` en Java, así que `number` en TS
+    id?: number;
     precioCompra: number;
     stockActual: number;
-    cantidad: number; // Revisa si este campo es realmente necesario para tu frontend
     stockMaximo: number;
-    color: Color; // Usa el tipo Color que has definido (ej. enum o union string literal)
-    talle: Talle; // Usa el tipo Talle que has definido (ej. enum o union string literal)
-    active: boolean;
-    producto?: { id: number }; // <-- ¡AÑADIDO ESTO!
+    color: Color; // Mapea a tu enum Color en el backend (ej. "ROJO", "AZUL")
+    talle: Talle; // Mapea a tu enum Talle en el backend (ej. "S", "M", "L")
+    cantidad?: number; // Usado en carritos, etc., no necesariamente en el CRUD
+    active?: boolean; // Mapea a 'activo' en la entidad ProductoDetalle
+    producto?: { id: number }; // Referencia simplificada al producto padre para evitar ciclos
+    // Si necesitas más datos del producto padre aquí, es mejor fetcharlos por separado en el frontend.
 }

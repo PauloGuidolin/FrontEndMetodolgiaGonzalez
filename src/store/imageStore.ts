@@ -1,19 +1,16 @@
-// Archivo: src/store/imageStore.ts
-
 import { create } from 'zustand'; // Importa la función create de Zustand
-import { ImagenDTO } from '../components/dto/ImagenDTO'; // Importar ImagenDTO para consistencia
-import { imageService } from '../https/imageApi';
-
+import { ImagenDTO } from '../components/dto/ImagenDTO'; // Importar ImagenDTO
+import { imageService } from '../https/imageApi'; // Asegúrate de que esta ruta sea correcta para tu imageService
 
 // Definimos la interfaz para el estado de nuestro store de imagen
 interface ImageState {
     // Estado para la lista general de imágenes
-    images: ImagenDTO[]; // Usar ImagenDTO
+    images: ImagenDTO[];
     loading: boolean;
     error: string | null;
 
     // Estado para una imagen individual seleccionada o buscada
-    selectedImage: ImagenDTO | null; // Usar ImagenDTO
+    selectedImage: ImagenDTO | null;
     loadingImage: boolean;
     errorImage: string | null;
 
@@ -25,11 +22,17 @@ interface ImageState {
     // Acción para obtener una imagen individual por ID
     fetchImageById: (id: number | string) => Promise<void>;
 
-    // Acciones CRUD para gestionar imágenes
-    // Nota: La creación de imágenes a menudo implica subir archivos binarios,
-    // lo cual requiere un manejo específico en el servicio API y posiblemente aquí.
-    addImage: (imageData: Partial<ImagenDTO> | FormData) => Promise<ImagenDTO>; // Puede aceptar Partial<ImagenDTO> o FormData
-    updateImage: (image: ImagenDTO) => Promise<ImagenDTO>; // Usar ImagenDTO
+    // --- NUEVA ACCIÓN: Para subir el archivo de imagen a Cloudinary ---
+    uploadImageFile: (file: File) => Promise<string>; // Devuelve la URL de Cloudinary
+
+    // --- ACCIÓN MODIFICADA: Para crear una entidad Imagen en la BD (con la URL ya obtenida) ---
+    // Ahora espera un objeto DTO con la URL (denominacion)
+    createImageEntity: (imageData: Partial<Omit<ImagenDTO, 'id'>>) => Promise<ImagenDTO>; 
+    
+    // --- ACCIÓN MODIFICADA: Para actualizar una entidad Imagen existente ---
+    updateImage: (id: number | string, imageData: Partial<ImagenDTO>) => Promise<ImagenDTO>;
+    
+    // Acción para eliminar lógicamente una imagen
     deleteImage: (id: number | string) => Promise<void>;
 
     // Acción para limpiar la imagen seleccionada
@@ -70,72 +73,91 @@ export const useImageStore = create<ImageState>((set, get) => ({
         try {
             const imageData = await imageService.getById(id);
             set({ selectedImage: imageData, loadingImage: false });
-        } catch (error: any) { // Se tipa 'error' como 'any' para acceder a 'response' si es un error de Axios
+        } catch (error: any) { 
             console.error(`Error fetching image with ID ${id} in store:`, error);
             const errorMessage =
-                error.response?.data?.message || // Si es un error de Axios con mensaje del backend
+                error.response?.data?.message || 
                 error.message ||
                 `Failed to load image with ID ${id}.`;
             set({
                 errorImage: errorMessage,
                 loadingImage: false,
-                selectedImage: null, // Asegura que selectedImage sea null en caso de error
+                selectedImage: null, 
             });
-            // Opcional: Puedes volver a lanzar el error si necesitas que el componente que llama lo maneje también.
-            // throw error;
+            throw error; // Relanzamos el error para manejo en el componente
         }
     },
 
-    // Implementación de la acción addImage
-    addImage: async (imageData: Partial<ImagenDTO> | FormData) => {
-        // Opcional: Puedes poner un estado de carga/error específico para operaciones CRUD
-        // set({ loading: true, error: null });
+    // --- Implementación de la NUEVA acción uploadImageFile ---
+    uploadImageFile: async (file: File) => {
+        set({ loading: true, error: null }); // Usamos el loading general para subidas
         try {
-            // El servicio imageService.create debe manejar si recibe Partial<ImagenDTO> o FormData
+            const imageUrl = await imageService.upload(file); // Llama al método de subida de archivos del servicio
+            set({ loading: false });
+            return imageUrl; // Devuelve la URL obtenida de Cloudinary
+        } catch (error) {
+            console.error("Error uploading image file:", error);
+            set({ 
+                error: `Failed to upload image file: ${error instanceof Error ? error.message : String(error)}`, 
+                loading: false 
+            });
+            throw error; // Relanza el error
+        }
+    },
+
+    // --- Implementación de la acción createImageEntity (antes addImage) ---
+    // Ahora espera solo los datos de la entidad, incluyendo la URL
+    createImageEntity: async (imageData: Partial<Omit<ImagenDTO, 'id'>>) => {
+        set({ loading: true, error: null });
+        try {
             const newImage = await imageService.create(imageData);
             // Opcional: Actualizar la lista de imágenes en el store después de crear
-            // set(state => ({ images: [...state.images, newImage] }));
-            // set({ loading: false });
+            set(state => ({ images: [...state.images, newImage], loading: false }));
             return newImage; // Devuelve la entidad creada
         } catch (error) {
-            console.error("Error adding image in store:", error);
-            // Opcional: Establecer un error específico para operaciones CRUD
-            // set({ error: `Failed to add image: ${error instanceof Error ? error.message : String(error)}`, loading: false });
-            throw error; // Relanza el error para manejo en el componente/llamador
+            console.error("Error creating image entity in store:", error);
+            set({ 
+                error: `Failed to create image entity: ${error instanceof Error ? error.message : String(error)}`, 
+                loading: false 
+            });
+            throw error; // Relanza el error
         }
     },
 
-    // Implementación de la acción updateImage
-    updateImage: async (image: ImagenDTO) => { // Usar ImagenDTO
-        // Opcional: Estado de carga/error para CRUD
-        // set({ loading: true, error: null });
+    // --- Implementación de la acción updateImage ---
+    updateImage: async (id: number | string, imageData: Partial<ImagenDTO>) => { 
+        set({ loading: true, error: null });
         try {
-            const updatedImage = await imageService.update(image);
+            const updatedImage = await imageService.update(id, imageData); // Pasa el ID y los datos
             // Opcional: Actualizar la lista de imágenes en el store después de actualizar
-            // set(state => ({ images: state.images.map(img => img.id === updatedImage.id ? updatedImage : img) }));
-            // set({ loading: false });
+            set(state => ({ 
+                images: state.images.map(img => img.id === updatedImage.id ? updatedImage : img),
+                loading: false
+            }));
             return updatedImage; // Devuelve la entidad actualizada
         } catch (error) {
             console.error("Error updating image in store:", error);
-            // Opcional: Establecer un error específico para operaciones CRUD
-            // set({ error: `Failed to update image: ${error instanceof Error ? error.message : String(error)}`, loading: false });
+            set({ 
+                error: `Failed to update image: ${error instanceof Error ? error.message : String(error)}`, 
+                loading: false 
+            });
             throw error; // Relanza el error
         }
     },
 
     // Implementación de la acción deleteImage
     deleteImage: async (id: number | string) => {
-        // Opcional: Estado de carga/error para CRUD
-        // set({ loading: true, error: null });
+        set({ loading: true, error: null });
         try {
             await imageService.delete(id);
             // Opcional: Eliminar la imagen de la lista en el store después de eliminar
-            // set(state => ({ images: state.images.filter(img => img.id !== id) }));
-            // set({ loading: false });
+            set(state => ({ images: state.images.filter(img => img.id !== id), loading: false }));
         } catch (error) {
             console.error(`Error deleting image with ID ${id} in store:`, error);
-            // Opcional: Establecer un error específico para operaciones CRUD
-            // set({ error: `Failed to delete image: ${error instanceof Error ? error.message : String(error)}`, loading: false });
+            set({ 
+                error: `Failed to delete image: ${error instanceof Error ? error.message : String(error)}`, 
+                loading: false 
+            });
             throw error; // Relanza el error
         }
     },

@@ -1,43 +1,61 @@
 // Archivo: src/components/screens/Admin/AdminProductScreen/AdminProductScreen.tsx
 
 import React, { useEffect, useState } from "react";
-import {
-    Box,
-    Button,
-    CircularProgress,
-    Table,
-    TableBody,
-    TableCell,
-    TableContainer,
-    TableHead,
-    TableRow,
-    Paper,
-    Typography,
-    IconButton,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Snackbar,
-    Alert,
-    Collapse,
-} from "@mui/material";
-import { Edit, Delete, Add, KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 import { useShallow } from "zustand/shallow";
 
 import { useProductStore } from "../../../../store/productStore";
 import { useProductDetailStore } from "../../../../store/productDetailStore";
 import { useCategoryStore } from "../../../../store/categoryStore";
+import { useImageStore } from "../../../../store/imageStore";
 
 import { ProductoDTO } from "../../../dto/ProductoDTO";
 import { CategoriaDTO } from "../../../dto/CategoriaDTO";
 import { ProductoDetalleDTO } from "../../../dto/ProductoDetalleDTO";
-import { ImagenDTO } from "../../../dto/ImagenDTO"; // Necesario para manejar imágenes existentes
+import { ImagenDTO } from "../../../dto/ImagenDTO";
 import { ProductoRequestDTO, ImagenRequestDTO } from "../../../dto/ProductoRequestDTO";
-import { Sexo } from "../../../../types/ISexo"; // Asegúrate de importar Sexo aquí
+import { Sexo } from "../../../../types/ISexo";
 
 import ProductForm from "../../../ui/Modal/ProductForm/ProductForm";
 import ProductDetailForm from "../../../ui/Modal/ProductDetailForm/ProductDetailForm";
+
+// Importar componentes de Material-UI
+import {
+    Box,
+    Button,
+    Typography,
+    TableContainer,
+    Table,
+    TableHead,
+    TableRow,
+    TableCell,
+    TableBody,
+    IconButton,
+    Collapse,
+    Paper,
+    CircularProgress,
+    Snackbar,
+    Alert,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+} from '@mui/material';
+
+// Importar iconos de Material-UI
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
+// CloseIcon removed as it's not used directly here, only in ProductForm
+
+// Importar el módulo CSS (para estilos generales de layout si los hubiera)
+import styles from "./AdminProductScreen.module.css";
+import { Footer } from "../../../ui/Footer/Footer";
+import { Header } from "../../../ui/Header/Header";
 
 // Componente de Fila de Producto Expandible
 interface ProductRowProps {
@@ -50,7 +68,7 @@ interface ProductRowProps {
     errorDetails: string | null;
     onAddProductDetail: (productId: number) => void;
     onEditProductDetail: (detail: ProductoDetalleDTO) => void;
-    onDeleteProductDetail: (detailId: number, parentProductId: number) => void; // AQUI LA CORRECCIÓN DE LA INTERFAZ
+    onDeleteProductDetail: (detailId: number, parentProductId: number) => void;
 }
 
 const ProductRow: React.FC<ProductRowProps> = ({
@@ -74,20 +92,31 @@ const ProductRow: React.FC<ProductRowProps> = ({
         setOpenDetails(!openDetails);
     };
 
+    const rowSx = product.activo === false ? { backgroundColor: '#ffebee', opacity: 0.7 } : {};
+
     return (
-        <>
-            <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
+        <React.Fragment>
+            <TableRow sx={rowSx}>
                 <TableCell>
                     <IconButton
                         aria-label="expand row"
                         size="small"
                         onClick={handleToggleDetails}
                     >
-                        {openDetails ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+                        {openDetails ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
                     </IconButton>
                 </TableCell>
-                <TableCell component="th" scope="row">{product.id}</TableCell>
-                <TableCell>{product.denominacion}</TableCell>
+                <TableCell>{product.id}</TableCell>
+                <TableCell>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        {product.denominacion}
+                        {product.activo === false && (
+                            <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 'bold', ml: 1 }}>
+                                (INACTIVO)
+                            </Typography>
+                        )}
+                    </Box>
+                </TableCell>
                 <TableCell align="right">${product.precioOriginal?.toFixed(2) || '0.00'}</TableCell>
                 <TableCell align="right">${product.precioFinal?.toFixed(2) || '0.00'}</TableCell>
                 <TableCell>{product.sexo}</TableCell>
@@ -99,45 +128,52 @@ const ProductRow: React.FC<ProductRowProps> = ({
                         color="primary"
                         onClick={() => onEditProduct(product)}
                         aria-label="editar producto"
+                        disabled={product.activo === false}
                     >
-                        <Edit />
+                        <EditIcon />
                     </IconButton>
                     <IconButton
-                        color="error"
+                        color={product.activo === false ? "success" : "error"}
                         onClick={() => onDeleteProduct(product.id as number)}
-                        aria-label="eliminar producto"
+                        aria-label={product.activo === false ? "activar producto" : "desactivar producto"}
                     >
-                        <Delete />
+                        {product.activo === false ? <AddIcon /> : <DeleteIcon />}
                     </IconButton>
                 </TableCell>
             </TableRow>
             <TableRow>
                 <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
                     <Collapse in={openDetails} timeout="auto" unmountOnExit>
-                        <Box sx={{ margin: 1 }}>
-                            <Typography variant="h6" gutterBottom component="div">
-                                Detalles del Producto
+                        <Box sx={{ margin: 1, p: 2 }}>
+                            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                                <Typography variant="h6" gutterBottom component="div">
+                                    Detalles del Producto
+                                </Typography>
                                 <Button
-                                    size="small"
-                                    variant="outlined"
-                                    sx={{ ml: 2 }}
-                                    startIcon={<Add />}
+                                    variant="contained"
+                                    color="primary"
+                                    startIcon={<AddIcon />}
                                     onClick={() => onAddProductDetail(product.id as number)}
+                                    disabled={product.activo === false}
                                 >
                                     Añadir Detalle
                                 </Button>
-                            </Typography>
+                            </Box>
                             {loadingDetails ? (
-                                <Box display="flex" justifyContent="center" alignItems="center" minHeight="100px">
-                                    <CircularProgress size={20} />
-                                    <Typography sx={{ ml: 1 }}>Cargando detalles...</Typography>
+                                <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', py: 3 }}>
+                                    <CircularProgress />
+                                    <Typography sx={{ ml: 2 }}>Cargando detalles...</Typography>
                                 </Box>
                             ) : errorDetails ? (
-                                <Typography color="error">Error al cargar detalles: {errorDetails}</Typography>
+                                <Typography color="error" sx={{ textAlign: 'center', py: 2 }}>
+                                    Error al cargar detalles: {errorDetails}
+                                </Typography>
                             ) : productDetails.length === 0 ? (
-                                <Typography>No hay detalles de producto disponibles para este producto.</Typography>
+                                <Typography sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+                                    No hay detalles de producto disponibles para este producto.
+                                </Typography>
                             ) : (
-                                <Table size="small" aria-label="product details">
+                                <Table size="small">
                                     <TableHead>
                                         <TableRow>
                                             <TableCell>ID Detalle</TableCell>
@@ -152,7 +188,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
                                     <TableBody>
                                         {productDetails.map((detail: ProductoDetalleDTO) => (
                                             <TableRow key={detail.id}>
-                                                <TableCell component="th" scope="row">{detail.id}</TableCell>
+                                                <TableCell>{detail.id}</TableCell>
                                                 <TableCell>{detail.talle}</TableCell>
                                                 <TableCell>{detail.color}</TableCell>
                                                 <TableCell align="right">${detail.precioCompra.toFixed(2)}</TableCell>
@@ -160,20 +196,22 @@ const ProductRow: React.FC<ProductRowProps> = ({
                                                 <TableCell align="right">{detail.stockMaximo}</TableCell>
                                                 <TableCell align="center">
                                                     <IconButton
-                                                        size="small"
                                                         color="primary"
+                                                        size="small"
                                                         onClick={() => onEditProductDetail(detail)}
                                                         aria-label="editar detalle"
+                                                        disabled={product.activo === false}
                                                     >
-                                                        <Edit />
+                                                        <EditIcon />
                                                     </IconButton>
                                                     <IconButton
-                                                        size="small"
                                                         color="error"
+                                                        size="small"
                                                         onClick={() => onDeleteProductDetail(detail.id as number, product.id as number)}
                                                         aria-label="eliminar detalle"
+                                                        disabled={product.activo === false}
                                                     >
-                                                        <Delete />
+                                                        <DeleteIcon />
                                                     </IconButton>
                                                 </TableCell>
                                             </TableRow>
@@ -185,7 +223,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
                     </Collapse>
                 </TableCell>
             </TableRow>
-        </>
+        </React.Fragment>
     );
 };
 
@@ -199,7 +237,6 @@ const AdminProductScreen: React.FC = () => {
         fetchProducts,
         addProduct,
         updateProduct,
-        deleteProduct,
     } = useProductStore(
         useShallow((state) => ({
             originalProducts: state.originalProducts,
@@ -208,7 +245,6 @@ const AdminProductScreen: React.FC = () => {
             fetchProducts: state.fetchProducts,
             addProduct: state.addProduct,
             updateProduct: state.updateProduct,
-            deleteProduct: state.deleteProduct,
         }))
     );
 
@@ -247,6 +283,18 @@ const AdminProductScreen: React.FC = () => {
         }))
     );
 
+    // --- Store de Imágenes (para la subida de archivos) ---
+    const {
+        uploadImageFile,
+    } = useImageStore(
+        useShallow((state) => ({
+            uploadImageFile: state.uploadImageFile,
+            loading: state.loading,
+            error: state.error,
+        }))
+    );
+
+
     // --- Estado para el modal de producto (agregar/editar) ---
     const [isProductFormOpen, setIsProductFormOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<ProductoDTO | null>(null);
@@ -257,9 +305,11 @@ const AdminProductScreen: React.FC = () => {
     const [currentProductIdForDetail, setCurrentProductIdForDetail] = useState<number | null>(null);
 
 
-    // --- Estado para el modal de confirmación de eliminación de Producto ---
-    const [isConfirmProductDeleteOpen, setIsConfirmProductDeleteOpen] = useState(false);
-    const [productIdToDelete, setProductIdToDelete] = useState<number | null>(null);
+    // --- Estado para el modal de confirmación de eliminación/activación de Producto ---
+    const [isConfirmProductStatusChangeOpen, setIsConfirmProductStatusChangeOpen] = useState(false);
+    const [productIdToChangeStatus, setProductIdToChangeStatus] = useState<number | null>(null);
+    const [productStatusAction, setProductStatusAction] = useState<'activate' | 'deactivate' | null>(null);
+
 
     // --- Estado para el modal de confirmación de eliminación de Detalle de Producto ---
     const [isConfirmDetailDeleteOpen, setIsConfirmDetailDeleteOpen] = useState(false);
@@ -278,7 +328,7 @@ const AdminProductScreen: React.FC = () => {
         setSnackbarOpen(true);
     };
 
-    const handleCloseSnackbar = (_event?: React.SyntheticEvent | Event, reason?: string) => { // Agregado '_'
+    const handleCloseSnackbar = (_event?: React.SyntheticEvent | Event, reason?: string) => {
         if (reason === 'clickaway') {
             return;
         }
@@ -292,82 +342,140 @@ const AdminProductScreen: React.FC = () => {
 
     // --- Manejadores para Producto ---
     const handleAddProductClick = () => {
-        setSelectedProduct(null); // Limpiar para el modo "Agregar"
+        setSelectedProduct(null);
         setIsProductFormOpen(true);
+        console.log("AdminProductScreen - Add Product Clicked. selectedProduct set to null.");
     };
 
     const handleEditProductClick = (product: ProductoDTO) => {
-        setSelectedProduct(product); // Establecer el producto para el modo "Editar"
+        setSelectedProduct(product);
         setIsProductFormOpen(true);
+        console.log("AdminProductScreen - Edit Product Clicked. selectedProduct set to:", product);
     };
 
     const handleDeleteProductClick = (id: number) => {
-        setProductIdToDelete(id);
-        setIsConfirmProductDeleteOpen(true);
-    };
-
-    const handleConfirmProductDelete = async () => {
-        if (productIdToDelete === null) return;
-
-        try {
-            await deleteProduct(productIdToDelete);
-            showSnackbar("Producto eliminado correctamente.", "success");
-            fetchProducts(); // Refrescar la lista de productos
-        } catch (error: any) {
-            showSnackbar(`Error al eliminar el producto: ${error.message || "Error desconocido"}`, "error");
-            console.error("Error al eliminar producto:", error);
-        } finally {
-            setIsConfirmProductDeleteOpen(false);
-            setProductIdToDelete(null);
+        const productToChange = originalProducts.find(p => p.id === id);
+        if (productToChange) {
+            setProductIdToChangeStatus(id);
+            setProductStatusAction(productToChange.activo === false ? 'activate' : 'deactivate');
+            setIsConfirmProductStatusChangeOpen(true);
         }
     };
 
-    const handleCancelProductDelete = () => {
-        setIsConfirmProductDeleteOpen(false);
-        setProductIdToDelete(null);
+    const handleConfirmProductStatusChange = async () => {
+        if (productIdToChangeStatus === null || productStatusAction === null) return;
+
+        const product = originalProducts.find(p => p.id === productIdToChangeStatus);
+        if (!product) return;
+
+        try {
+            // Construir el DTO con el estado 'activo' invertido
+            const updatedProductDto: ProductoRequestDTO = {
+                id: product.id,
+                denominacion: product.denominacion,
+                precioOriginal: product.precioOriginal,
+                tienePromocion: product.tienePromocion,
+                sexo: product.sexo,
+                activo: productStatusAction === 'activate', // Cambia el estado activo
+                categoriaIds: product.categorias?.map(cat => cat.id as number) || [],
+                imagenes: product.imagenes?.map(img => ({
+                    id: img.id,
+                    url: img.url,
+                    activo: img.active ?? true
+                })) || [],
+                productos_detalles: product.productos_detalles?.map(detail => ({
+                    id: detail.id,
+                    precioCompra: detail.precioCompra,
+                    stockActual: detail.stockActual,
+                    stockMaximo: detail.stockMaximo,
+                    color: detail.color,
+                    talle: detail.talle,
+                    activo: detail.active ?? true
+                })) || [],
+                descuento: product.descuento ? { id: product.descuento.id as number } : undefined // Asegura que el descuento se envíe como DescuentoRequestDTO
+            };
+
+            await updateProduct(updatedProductDto); // Usar updateProduct para cambiar solo el estado 'activo'
+            showSnackbar(`Producto ${productStatusAction === 'activate' ? 'activado' : 'desactivado'} correctamente.`, "success");
+            await fetchProducts(); // Refetch para asegurar la lista actualizada
+        } catch (error: any) {
+            showSnackbar(`Error al ${productStatusAction === 'activate' ? 'activar' : 'desactivar'} el producto: ${error.message || "Error desconocido"}`, "error");
+            console.error(`Error al ${productStatusAction} producto:`, error);
+        } finally {
+            setIsConfirmProductStatusChangeOpen(false);
+            setProductIdToChangeStatus(null);
+            setProductStatusAction(null);
+        }
+    };
+
+    const handleCancelProductStatusChange = () => {
+        setIsConfirmProductStatusChangeOpen(false);
+        setProductIdToChangeStatus(null);
+        setProductStatusAction(null);
     };
 
     // --- MODIFICACIÓN CLAVE AQUÍ: handleProductFormSubmit ---
     const handleProductFormSubmit = async (
-        productDataFromForm: Partial<ProductoDTO> & {
-            selectedCategoryIds?: number[];
+        productDataFromForm: Partial<ProductoRequestDTO> & {
             newImageFiles?: File[];
         }
     ) => {
+        console.log("AdminProductScreen - handleProductFormSubmit called.");
+        console.log("AdminProductScreen - Received productDataFromForm:", productDataFromForm);
+        console.log("AdminProductScreen - New Image Files to upload:", productDataFromForm.newImageFiles);
+
         try {
-            // Paso 1: Procesar las imágenes existentes y nuevas
+            // Paso 1: Procesar las imágenes existentes y subir las nuevas
             const processedImages: ImagenRequestDTO[] = [];
 
-            // Añadir imágenes existentes (si estamos editando y productDataFromForm.imagenes existen)
+            // Añadir imágenes existentes (que vienen del formulario y están activas)
             if (productDataFromForm.imagenes && Array.isArray(productDataFromForm.imagenes)) {
                 productDataFromForm.imagenes.forEach(img => {
-                    processedImages.push({
-                        id: img.id, // Mantener el ID para actualización
-                        url: img.url,
-                        activo: img.active ?? true, // Asegurar un valor booleano
-                    });
+                    if (img.activo !== false) { // Solo incluimos imágenes que no fueron marcadas como inactivas en el formulario
+                        processedImages.push({
+                            id: img.id,
+                            url: img.url,
+                            activo: img.activo ?? true, // Asegura que sea booleano
+                        });
+                    }
                 });
+                console.log("AdminProductScreen - Existing active images processed (from form data):", processedImages);
             }
 
-            // Subir nuevas imágenes y obtener sus URLs (aquí necesitarías una lógica de subida real)
+            // Subir nuevas imágenes a Cloudinary y obtener sus URLs
             const uploadedImageUrls: string[] = [];
             if (productDataFromForm.newImageFiles && productDataFromForm.newImageFiles.length > 0) {
-                // Simulación de subida de imágenes. EN UN ENTORNO REAL, AQUÍ LLAMARÍAS A TU API
-                // para subir los archivos y obtener las URLs de las imágenes subidas.
-                for (const file of productDataFromForm.newImageFiles) {
-                    // Por ejemplo: const imageUrl = await uploadImageToCloud(file);
-                    // uploadedImageUrls.push(imageUrl);
-                    uploadedImageUrls.push(`http://example.com/uploaded/${file.name}`); // Placeholder
-                }
+                console.log("AdminProductScreen - Starting image uploads...");
+                const uploadPromises = productDataFromForm.newImageFiles.map(file =>
+                    uploadImageFile(file)
+                );
+                const results = await Promise.allSettled(uploadPromises);
+
+                results.forEach((result, index) => {
+                    if (result.status === 'fulfilled') {
+                        uploadedImageUrls.push(result.value);
+                        console.log(`AdminProductScreen - Uploaded file ${productDataFromForm.newImageFiles?.[index]?.name} successfully: ${result.value}`);
+                    } else {
+                        console.error(`AdminProductScreen - Error uploading file ${productDataFromForm.newImageFiles?.[index]?.name || 'desconocido'}:`, result.reason);
+                        showSnackbar(`Error al subir imagen: ${productDataFromForm.newImageFiles?.[index]?.name || 'desconocido'}`, "error");
+                    }
+                });
+                console.log("AdminProductScreen - Uploaded image URLs:", uploadedImageUrls);
             }
 
-            // Añadir las URLs de las imágenes recién subidas como nuevas ImagenRequestDTO
+            // Añadir las URLs de las imágenes recién subidas (y exitosas) como nuevas ImagenRequestDTO
             uploadedImageUrls.forEach(url => {
                 processedImages.push({
+                    id: undefined, // Como es una imagen nueva, no tendrá ID todavía
                     url: url,
                     activo: true, // Las nuevas imágenes suelen estar activas por defecto
                 });
             });
+            console.log("AdminProductScreen - Final processed images for DTO (including new URLs):", processedImages);
+
+
+            // Obtener el producto original si estamos editando para mantener el estado 'activo'
+            const currentProductActiveStatus = selectedProduct ? selectedProduct.activo : true;
 
             // Paso 2: Construir el ProductoRequestDTO final
             const requestDto: ProductoRequestDTO = {
@@ -375,12 +483,11 @@ const AdminProductScreen: React.FC = () => {
                 denominacion: productDataFromForm.denominacion || '',
                 precioOriginal: productDataFromForm.precioOriginal || 0,
                 tienePromocion: productDataFromForm.tienePromocion ?? false,
-                // CORRECCIÓN DEL TIPO: Castear a Sexo.
-                sexo: (productDataFromForm.sexo as Sexo) ?? Sexo.UNISEX,
-                activo: productDataFromForm.active ?? true,
-                categoriaIds: productDataFromForm.selectedCategoryIds || [],
-                imagenes: processedImages,
-                productos_detalles: selectedProduct?.productos_detalles?.map(d => ({
+                sexo: productDataFromForm.sexo ?? Sexo.UNISEX, // Asegura el tipo Sexo
+                activo: currentProductActiveStatus, // Mantener el estado activo existente o true para nuevo
+                categoriaIds: productDataFromForm.categoriaIds || [], // Ya viene correctamente del form
+                imagenes: processedImages, // ¡Ahora con URLs reales de imágenes nuevas y existentes!
+                productos_detalles: productDataFromForm.productos_detalles || selectedProduct?.productos_detalles?.map(d => ({
                     id: d.id,
                     precioCompra: d.precioCompra,
                     stockActual: d.stockActual,
@@ -388,43 +495,73 @@ const AdminProductScreen: React.FC = () => {
                     color: d.color,
                     talle: d.talle,
                     activo: d.active ?? true,
-                })) || []
+                })) || [],
+                descuento: productDataFromForm.descuento
             };
 
-            console.log("Enviando ProductoRequestDTO al store:", requestDto);
+            console.log("AdminProductScreen - Final ProductoRequestDTO sent to store:", requestDto);
 
+            let savedProductId: number | undefined;
             if (selectedProduct) {
                 await updateProduct(requestDto);
+                savedProductId = selectedProduct.id;
                 showSnackbar("Producto actualizado correctamente.", "success");
             } else {
+                // Si addProduct devuelve void, no intentamos extraer el ID directamente.
+                // Simplemente ejecutamos la acción y luego recargamos los productos.
                 await addProduct(requestDto);
                 showSnackbar("Producto agregado correctamente.", "success");
+                savedProductId = undefined; // No podemos obtener el ID directamente aquí
             }
-            fetchProducts();
-            setIsProductFormOpen(false);
+
+            // Refresca la lista completa de productos en el store para obtener los últimos datos
+            await fetchProducts();
+            console.log("AdminProductScreen - Products refetched after save.");
+
+            // Sincroniza el `selectedProduct` con el estado más reciente del store
+            // Esto es CRUCIAL para que `ProductForm` reciba las imágenes actualizadas cuando se edite de nuevo
+            if (savedProductId) {
+                const updatedProductInStore = originalProducts.find(p => p.id === savedProductId);
+                if (updatedProductInStore) {
+                    setSelectedProduct(updatedProductInStore); // Actualiza el estado `selectedProduct`
+                    console.log("AdminProductScreen - selectedProduct state synchronized with latest data:", updatedProductInStore);
+                } else {
+                    console.warn("AdminProductScreen - Could not find saved product in store after refetch. ID:", savedProductId);
+                    setSelectedProduct(null); // Si no se encuentra, limpia para evitar errores
+                }
+            } else {
+                // Para productos nuevos donde no obtuvimos un ID al añadir,
+                // limpiamos selectedProduct para asegurar que el formulario se abra vacío la próxima vez.
+                setSelectedProduct(null);
+                console.log("AdminProductScreen - selectedProduct cleared (new product or failed sync).");
+            }
+
+            setIsProductFormOpen(false); // Cierra el modal de formulario
+            console.log("AdminProductScreen - Product form closed.");
+
         } catch (error: any) {
             showSnackbar(`Error al guardar el producto: ${error.message || "Error desconocido"}`, "error");
-            console.error("Error al guardar producto:", error);
+            console.error("AdminProductScreen - Error saving product:", error);
         }
     };
 
 
     // --- Manejadores para Detalles de Producto ---
     const handleAddProductDetailClick = (productId: number) => {
-        setSelectedProductDetail(null); // Limpiar para el modo "Agregar"
+        setSelectedProductDetail(null);
         setCurrentProductIdForDetail(productId);
         setIsProductDetailFormOpen(true);
     };
 
     const handleEditProductDetailClick = (detail: ProductoDetalleDTO) => {
-        setSelectedProductDetail(detail); // Establecer el detalle para el modo "Editar"
-        setCurrentProductIdForDetail(detail.producto?.id as number); // Asegúrate de que el detalle tenga una referencia a su producto padre
+        setSelectedProductDetail(detail);
+        setCurrentProductIdForDetail(detail.producto?.id as number);
         setIsProductDetailFormOpen(true);
     };
 
     const handleDeleteProductDetailClick = (detailId: number, parentProductId: number) => {
         setProductDetailIdToDelete(detailId);
-        setParentProductIdForDetailDelete(parentProductId); // Necesitamos el ID del padre para refrescar
+        setParentProductIdForDetailDelete(parentProductId);
         setIsConfirmDetailDeleteOpen(true);
     };
 
@@ -434,7 +571,7 @@ const AdminProductScreen: React.FC = () => {
         try {
             await deleteProductDetail(productDetailIdToDelete);
             showSnackbar("Detalle de producto eliminado correctamente.", "success");
-            fetchProductDetailsByProductId(parentProductIdForDetailDelete); // Refrescar los detalles del producto padre
+            fetchProductDetailsByProductId(parentProductIdForDetailDelete);
         } catch (error: any) {
             showSnackbar(`Error al eliminar el detalle: ${error.message || "Error desconocido"}`, "error");
             console.error("Error al eliminar detalle de producto:", error);
@@ -454,55 +591,55 @@ const AdminProductScreen: React.FC = () => {
     const handleProductDetailFormSubmit = async (detailData: Partial<ProductoDetalleDTO>) => {
         try {
             if (selectedProductDetail) {
-                // Editar Detalle
                 if (selectedProductDetail.id) {
                     await updateProductDetail({ ...selectedProductDetail, ...detailData } as ProductoDetalleDTO);
                     showSnackbar("Detalle de producto actualizado correctamente.", "success");
                 }
             } else {
-                // Agregar Detalle
-                // Asegúrate de que el backend reciba el productId correctamente en el objeto detalle
                 await addProductDetail({ ...detailData, producto: { id: currentProductIdForDetail } } as ProductoDetalleDTO);
                 showSnackbar("Detalle de producto agregado correctamente.", "success");
             }
             if (currentProductIdForDetail) {
-                fetchProductDetailsByProductId(currentProductIdForDetail); // Refrescar los detalles
+                fetchProductDetailsByProductId(currentProductIdForDetail);
             }
             setIsProductDetailFormOpen(false);
         } catch (error: any) {
             showSnackbar(`Error al guardar el detalle: ${error.message || "Error desconocido"}`, "error");
             console.error("Error al guardar detalle de producto:", error);
         } finally {
-            setCurrentProductIdForDetail(null); // Limpiar después de usar
+            setCurrentProductIdForDetail(null);
         }
     };
 
 
     if (loadingProducts) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100px', gap: 1 }}>
                 <CircularProgress />
-                <Typography variant="h6" sx={{ ml: 2 }}>Cargando productos...</Typography>
+                <Typography>Cargando productos...</Typography>
             </Box>
         );
     }
 
     if (errorProducts) {
         return (
-            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-                <Typography color="error" variant="h6">Error: {errorProducts}</Typography>
-            </Box>
+            <Typography color="error" sx={{ textAlign: 'center', p: 2 }}>
+                Error: {errorProducts}
+            </Typography>
         );
     }
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Typography variant="h4" gutterBottom>
+        <>
+            <Header/>
+        <Box className={styles.adminProductScreen}>
+            <Typography variant="h4" component="h1" gutterBottom>
                 Administración de Productos
             </Typography>
             <Button
                 variant="contained"
-                startIcon={<Add />}
+                color="primary"
+                startIcon={<AddIcon />}
                 onClick={handleAddProductClick}
                 sx={{ mb: 2 }}
             >
@@ -510,15 +647,15 @@ const AdminProductScreen: React.FC = () => {
             </Button>
 
             <TableContainer component={Paper}>
-                <Table sx={{ minWidth: 650 }} aria-label="productos table">
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
                     <TableHead>
                         <TableRow>
-                            <TableCell /> {/* Celda para el botón de expansión */}
+                            <TableCell />
                             <TableCell>ID</TableCell>
                             <TableCell>Denominación</TableCell>
                             <TableCell align="right">Precio Original</TableCell>
                             <TableCell align="right">Precio Final</TableCell>
-                            <TableCell>Sexo</TableCell>
+                            <TableCell align="center">Sexo</TableCell> {/* Centered for consistency */}
                             <TableCell>Categorías</TableCell>
                             <TableCell align="center">Acciones</TableCell>
                         </TableRow>
@@ -526,7 +663,7 @@ const AdminProductScreen: React.FC = () => {
                     <TableBody>
                         {originalProducts.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={8} align="center">
+                                <TableCell colSpan={8} sx={{ textAlign: 'center', py: 3, color: 'text.secondary' }}>
                                     No hay productos para mostrar.
                                 </TableCell>
                             </TableRow>
@@ -543,7 +680,7 @@ const AdminProductScreen: React.FC = () => {
                                     errorDetails={errorDetailsByProduct[product.id as number] || null}
                                     onAddProductDetail={handleAddProductDetailClick}
                                     onEditProductDetail={handleEditProductDetailClick}
-                                    onDeleteProductDetail={handleDeleteProductDetailClick} // AQUI LA CORRECCIÓN DE LA LLAMADA
+                                    onDeleteProductDetail={handleDeleteProductDetailClick}
                                 />
                             ))
                         )}
@@ -572,57 +709,82 @@ const AdminProductScreen: React.FC = () => {
                 />
             )}
 
-
-            {/* Modal de Confirmación de Eliminación de Producto */}
+            {/* Diálogo de Confirmación de Eliminación/Activación de Producto */}
             <Dialog
-                open={isConfirmProductDeleteOpen}
-                onClose={handleCancelProductDelete}
-                aria-labelledby="alert-dialog-title"
-                aria-describedby="alert-dialog-description"
+                open={isConfirmProductStatusChangeOpen}
+                onClose={handleCancelProductStatusChange}
+                aria-labelledby="confirm-product-status-title"
+                aria-describedby="confirm-product-status-description"
             >
-                <DialogTitle id="alert-dialog-title">{"Confirmar Eliminación de Producto"}</DialogTitle>
+                <DialogTitle id="confirm-product-status-title">
+                    {productStatusAction === 'deactivate' ? "Confirmar Desactivación de Producto" : "Confirmar Activación de Producto"}
+                </DialogTitle>
                 <DialogContent>
-                    <Typography id="alert-dialog-description">
-                        ¿Estás seguro de que deseas eliminar este producto? Esta acción es irreversible y eliminará todos sus detalles asociados.
-                    </Typography>
+                    <DialogContentText id="confirm-product-status-description">
+                        {productStatusAction === 'deactivate'
+                            ? "¿Estás seguro de que deseas DESACTIVAR este producto? Ya no será visible en la tienda."
+                            : "¿Estás seguro de que deseas ACTIVAR este producto? Volverá a ser visible en la tienda."
+                        }
+                    </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCancelProductDelete}>Cancelar</Button>
-                    <Button onClick={handleConfirmProductDelete} color="error" autoFocus>
-                        Eliminar
+                    <Button onClick={handleCancelProductStatusChange} color="inherit">
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={handleConfirmProductStatusChange}
+                        color={productStatusAction === 'deactivate' ? "error" : "success"}
+                        variant="contained"
+                        autoFocus
+                    >
+                        {productStatusAction === 'deactivate' ? "Desactivar" : "Activar"}
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            {/* Modal de Confirmación de Eliminación de Detalle de Producto */}
+            {/* Diálogo de Confirmación de Eliminación de Detalle de Producto */}
             <Dialog
                 open={isConfirmDetailDeleteOpen}
                 onClose={handleCancelProductDetailDelete}
-                aria-labelledby="alert-dialog-detail-title"
-                aria-describedby="alert-dialog-detail-description"
+                aria-labelledby="confirm-detail-delete-title"
+                aria-describedby="confirm-detail-delete-description"
             >
-                <DialogTitle id="alert-dialog-detail-title">{"Confirmar Eliminación de Detalle"}</DialogTitle>
+                <DialogTitle id="confirm-detail-delete-title">{"Confirmar Eliminación de Detalle"}</DialogTitle>
                 <DialogContent>
-                    <Typography id="alert-dialog-detail-description">
+                    <DialogContentText id="confirm-detail-delete-description">
                         ¿Estás seguro de que deseas eliminar este detalle de producto?
-                    </Typography>
+                    </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleCancelProductDetailDelete}>Cancelar</Button>
-                    <Button onClick={handleConfirmProductDetailDelete} color="error" autoFocus>
+                    <Button onClick={handleCancelProductDetailDelete} color="inherit">
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={handleConfirmProductDetailDelete}
+                        color="error"
+                        variant="contained"
+                        autoFocus
+                    >
                         Eliminar
                     </Button>
                 </DialogActions>
             </Dialog>
 
-
             {/* Snackbar para notificaciones */}
-            <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
-                <Alert onClose={handleCloseSnackbar} severity={snackbarSeverity} sx={{ width: '100%' }}>
+            <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbarSeverity}
+                    sx={{ width: '100%' }}
+                    icon={snackbarSeverity === 'success' ? <CheckCircleOutlineIcon fontSize="inherit" /> : <ErrorOutlineIcon fontSize="inherit" />}
+                >
                     {snackbarMessage}
                 </Alert>
             </Snackbar>
         </Box>
+        <Footer/>
+        </>
     );
 };
 

@@ -1,5 +1,5 @@
 // src/services/mercadoPagoService.ts
-
+ // <-- ¡Ruta ajustada según nuestra discusión!
 
 import { MercadoPagoPreferenceRequestDTO, MercadoPagoPreferenceResponseDTO } from "../components/dto/MercadoPagoDTOs";
 import { http } from "./httpService"; // Asegúrate de que la ruta a tu httpService sea correcta
@@ -12,9 +12,9 @@ if (!API_BASE_URL) {
 
 /**
  * Endpoint base para las operaciones de Mercado Pago en tu backend.
- * Coincide con @RequestMapping("/api/mercadopago") en tu MercadoPagoController.
+ * Coincide con @RequestMapping("/api/payments") en tu MercadoPagoController.
  */
-const MP_BASE_URL = `${API_BASE_URL}/api/mercadopago`;
+const MP_BASE_URL = `${API_BASE_URL}/api/payments`; 
 
 /**
  * Servicio para interactuar con la API de Mercado Pago a través de tu backend.
@@ -22,7 +22,7 @@ const MP_BASE_URL = `${API_BASE_URL}/api/mercadopago`;
 export const mercadoPagoService = {
   /**
    * Envía la solicitud de preferencia de pago al backend.
-   * Coincide con el endpoint POST /api/mercadopago/create-preference.
+   * Coincide con el endpoint POST /api/payments/create-preference.
    *
    * @param data Los datos de la preferencia que el backend necesita para crear la solicitud a Mercado Pago.
    * @returns Una promesa que resuelve con la respuesta del backend, que contiene el init_point de Mercado Pago.
@@ -44,5 +44,4 @@ export const mercadoPagoService = {
       throw error;
     }
   },
-
 };
