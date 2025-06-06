@@ -29,7 +29,7 @@ const parseJsonIfString = (data: any): any => {
 export const productService = {
 
     getAllDTO: async (): Promise<ProductoDTO[]> => {
-        const url = `${PRODUCT_ENDPOINT}/dto`;
+        const url = `${PRODUCT_ENDPOINT}`;
         console.log(`Fetching all products from: ${url}`);
         try {
             const data = await http.get(url);
@@ -49,7 +49,7 @@ export const productService = {
     },
 
     getDTOSById: async (id: string | number): Promise<ProductoDTO | null> => {
-        const url = `${PRODUCT_ENDPOINT}/dto/${id}`;
+        const url = `${PRODUCT_ENDPOINT}/${id}`;
         console.log(`Fetching product ID ${id} from: ${url}`);
         try {
             const data = await http.get(url);
@@ -70,7 +70,7 @@ export const productService = {
     },
 
     getPromotionalDTOs: async (): Promise<ProductoDTO[]> => {
-        const url = `${PRODUCT_ENDPOINT}/dto/promociones`;
+        const url = `${PRODUCT_ENDPOINT}/promociones`;
         console.log(`Fetching promotional products from: ${url}`);
         try {
             const data = await http.get(url);
@@ -175,7 +175,7 @@ export const productService = {
      * @returns Una promesa que se resuelve con el ProductoDTO creado.
      */
     create: async (productData: ProductoRequestDTO): Promise<ProductoDTO> => { // ¡CAMBIADO EL TIPO DE ENTRADA!
-        const url = `${PRODUCT_ENDPOINT}/dto`; // ¡CAMBIADO EL ENDPOINT!
+        const url = `${PRODUCT_ENDPOINT}`; // ¡CAMBIADO EL ENDPOINT!
         console.log(`Creating product at: ${url} with data:`, productData);
         try {
             const createdProduct = await http.post<ProductoDTO>(url, productData);
@@ -196,7 +196,7 @@ export const productService = {
      * @returns Una promesa que se resuelve con el ProductoDTO actualizado.
      */
     update: async (id: number, productData: ProductoRequestDTO): Promise<ProductoDTO> => { // ¡CAMBIADO EL TIPO DE ENTRADA!
-        const url = `${PRODUCT_ENDPOINT}/dto/${id}`; // ENDPOINT CORRECTO YA ESTABA
+        const url = `${PRODUCT_ENDPOINT}/${id}`; // ENDPOINT CORRECTO YA ESTABA
         console.log(`Updating product ID ${id} at: ${url} with data:`, productData);
         try {
             const updatedProduct = await http.put<ProductoDTO>(url, productData);

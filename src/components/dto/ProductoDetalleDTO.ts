@@ -1,16 +1,24 @@
-import { Color } from "../../types/IColor";
-import { Talle } from "../../types/ITalle";
-
+import { ColorDTO } from "./ColorDTO";
+import { TalleDTO } from "./TalleDTO";
+import { ProductoDTO } from "./ProductoDTO";
 
 export interface ProductoDetalleDTO {
     id?: number;
     precioCompra: number;
     stockActual: number;
     stockMaximo: number;
-    color: Color; // Mapea a tu enum Color en el backend (ej. "ROJO", "AZUL")
-    talle: Talle; // Mapea a tu enum Talle en el backend (ej. "S", "M", "L")
-    cantidad?: number; // Usado en carritos, etc., no necesariamente en el CRUD
-    active?: boolean; // Mapea a 'activo' en la entidad ProductoDetalle
-    producto?: { id: number }; // Referencia simplificada al producto padre para evitar ciclos
-    // Si necesitas más datos del producto padre aquí, es mejor fetcharlos por separado en el frontend.
+    activo: boolean;
+    cantidad?: number; // Opcional, puede ser un duplicado de stockActual o usado en otros contextos
+
+    // Aseguramos que estos campos sean OBLIGATORIOS al recibir el DTO si representan IDs de relación
+    // Si tu backend SIEMPRE envía estos IDs directamente, quita el '?'
+    colorId: number; // Hacemos obligatorio para el frontend (si el backend lo envía siempre)
+    talleId: number; // Hacemos obligatorio para el frontend (si el backend lo envía siempre)
+    productoId: number; // **ESTE ES EL CRÍTICO: Hazlo OBLIGATORIO**
+
+    // Campos para recibir del backend (DTOs anidados para visualización) - Opcionales
+    color?: ColorDTO;
+    talle?: TalleDTO;
+    producto?: ProductoDTO; // Si el backend envía el objeto completo (no solo el ID)
+    productoDenominacion?: string; // Para mostrar el nombre del producto, puede ser calculado o enviado
 }

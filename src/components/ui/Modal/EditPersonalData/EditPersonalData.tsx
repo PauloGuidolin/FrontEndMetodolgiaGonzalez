@@ -114,10 +114,11 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ isOpen, onClose, u
         const newAddress: DireccionDTO = {
             calle: '',
             numero: 0,
-            cp: "0",
+            cp: 0,
             piso: null,
             departamento: null,
-            localidad: null
+            localidad: null,
+            active: true
         };
         setAddresses([...addresses, newAddress]);
         console.log("handleAddAddress: Nueva dirección añadida.", newAddress);
@@ -190,7 +191,7 @@ export const EditPersonalData: FC<EditPersonalDataProps> = ({ isOpen, onClose, u
                 addresses: addresses.filter(addr =>
                     addr.calle.trim() !== '' &&
                     (addr.numero === undefined || addr.numero === null || addr.numero >= 0) && // Permite 0 para numero
-                    (addr.cp === undefined || addr.cp === null || addr.cp >= "0") && // Permite 0 para CP
+                    (addr.cp === undefined || addr.cp === null || addr.cp >= 0) && // Permite 0 para CP
                     !!addr.localidad?.id // Asegura que la localidad tenga ID
                 ) || null // Asegura que sea un array o null
             };

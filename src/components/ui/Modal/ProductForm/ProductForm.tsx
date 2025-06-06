@@ -1,7 +1,7 @@
 // Archivo: src/components/ui/Modal/ProductForm/ProductForm.tsx
 
 import React, { useEffect, useState } from "react";
-import { Formik, Form } from "formik"; // Removed Field, ErrorMessage
+import { Formik, Form } from "formik";
 import * as Yup from "yup";
 import { useShallow } from "zustand/shallow";
 
@@ -34,12 +34,12 @@ import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { ProductoDTO } from "../../../dto/ProductoDTO";
 import { CategoriaDTO } from "../../../dto/CategoriaDTO";
 import { Sexo } from "../../../../types/ISexo";
-import { ImagenDTO } from "../../../dto/ImagenDTO"; 
-import { ProductoRequestDTO, ImagenRequestDTO, DescuentoRequestDTO } from "../../../dto/ProductoRequestDTO";
+import { ImagenDTO } from "../../../dto/ImagenDTO";
+import { ProductoRequestDTO, ImagenRequestDTO, DescuentoRequestDTO, ProductoDetalleRequestDTO } from "../../../dto/ProductoRequestDTO"; // Importar ProductoDetalleRequestDTO
 
 import { useDiscountStore } from "../../../../store/discountStore";
-import { Footer } from "../../Footer/Footer";
-import { Header } from "../../Header/Header";
+// import { Footer } from "../../Footer/Footer"; // Eliminado porque no se usa
+// import { Header } from "../../Header/Header"; // Eliminado porque no se usa
 
 // Definición de la interfaz para los valores del formulario
 interface ProductFormValues {
@@ -201,7 +201,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
     };
 
     return (
-       
+
         <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
             <DialogTitle>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -228,6 +228,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
                         .map(img => ({ id: img.id, url: img.url, activo: img.active ?? true })); // Asegura `activo`
 
 
+                    // Mapear productos_detalles a ProductoDetalleRequestDTO[]
+                    const productosDetallesRequest: ProductoDetalleRequestDTO[] = product?.productos_detalles?.map(d => ({
+                        id: d.id,
+                        precioCompra: d.precioCompra,
+                        stockActual: d.stockActual,
+                        stockMaximo: d.stockMaximo,
+                        colorId: d.color.id as number, // Asegura que es un número
+                        talleId: d.talle.id as number, // Asegura que es un número
+                        activo: d.activo ?? true,
+                    })) || [];
+
+
                     onSubmit({
                         id: product?.id,
                         denominacion: values.denominacion,
@@ -238,15 +250,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                         categoriaIds: values.selectedCategoryIds,
                         imagenes: imagenesRequest, // ¡Usar el estado `existingImages` actualizado y filtrado!
                         newImageFiles: newImageFiles, // ¡Usar el estado `newImageFiles` directamente!
-                        productos_detalles: product?.productos_detalles?.map(d => ({
-                            id: d.id,
-                            precioCompra: d.precioCompra,
-                            stockActual: d.stockActual,
-                            stockMaximo: d.stockMaximo,
-                            color: d.color,
-                            talle: d.talle,
-                            activo: d.active ?? true,
-                        })) || [],
+                        productos_detalles: productosDetallesRequest, // Usar el mapeo corregido
                         descuento: descuentoRequest,
                     });
                     setSubmitting(false);
@@ -403,7 +407,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                                         type="file"
                                         multiple
                                         style={{ display: 'none' }}
-                                        onChange={handleFileChange} 
+                                        onChange={handleFileChange}
                                     />
                                     <label htmlFor="image-upload">
                                         <Button variant="outlined" component="span" startIcon={<AddPhotoAlternateIcon />}>
@@ -476,7 +480,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 </DialogActions>
             </Dialog>
         </Dialog>
-        
+
     );
 };
 

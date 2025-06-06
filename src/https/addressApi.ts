@@ -1,4 +1,4 @@
-import { DomicilioDTO } from "../components/dto/DireccionDTO"; // <--- ¡CAMBIADO! Importamos DomicilioDTO
+import { DireccionDTO } from "../components/dto/DireccionDTO"; // <--- ¡CAMBIADO! Importamos DomicilioDTO
 import { http } from "./httpService"; // Importamos el servicio HTTP base (ahora usa Axios)
 
 // Obtenemos la URL base del servidor desde las variables de entorno
@@ -24,10 +24,10 @@ export const addressService = {
      * @returns Una Promesa que resuelve con un array de DomicilioDTO.
      * @throws Un error si la solicitud falla.
      */
-    getAll: async (): Promise<DomicilioDTO[]> => { // <--- CAMBIADO
+    getAll: async (): Promise<DireccionDTO[]> => { // <--- CAMBIADO
         const url = ADDRESS_ENDPOINT;
         // Este endpoint probablemente requiere autenticación (ADMIN)
-        return http.get<DomicilioDTO[]>(url); // <--- CAMBIADO
+        return http.get<DireccionDTO[]>(url); // <--- CAMBIADO
     },
 
     /**
@@ -37,10 +37,10 @@ export const addressService = {
      * @returns Una Promesa que resuelve con un DomicilioDTO.
      * @throws Un error si la solicitud falla o la dirección no se encuentra.
      */
-    getById: async (id: number | string): Promise<DomicilioDTO> => { // <--- CAMBIADO
+    getById: async (id: number | string): Promise<DireccionDTO> => { // <--- CAMBIADO
         const url = `${ADDRESS_ENDPOINT}/${id}`;
         // Este endpoint probablemente requiere autenticación (ej. para acceder a una dirección específica de un cliente)
-        return http.get<DomicilioDTO>(url); // <--- CAMBIADO
+        return http.get<DireccionDTO>(url); // <--- CAMBIADO
     },
 
     /**
@@ -52,11 +52,11 @@ export const addressService = {
      */
     getAllByLocalidadId: async (
         idLocalidad: number | string
-    ): Promise<DomicilioDTO[]> => { // <--- CAMBIADO
+    ): Promise<DireccionDTO[]> => { // <--- CAMBIADO
         const url = `${ADDRESS_ENDPOINT}/localidad/${idLocalidad}`;
         // Este endpoint probablemente requiere autenticación
         try {
-            const response = await http.get<DomicilioDTO[]>(url); // <--- CAMBIADO
+            const response = await http.get<DireccionDTO[]>(url); // <--- CAMBIADO
             // Si el backend devuelve 200 con cuerpo null o lista vacía, devolvemos [].
             if (response === null) {
                 return [];
@@ -84,11 +84,11 @@ export const addressService = {
      */
     getAllByClienteId: async (
         idCliente: number | string
-    ): Promise<DomicilioDTO[]> => { // <--- CAMBIADO
+    ): Promise<DireccionDTO[]> => { // <--- CAMBIADO
         const url = `${ADDRESS_ENDPOINT}/cliente/${idCliente}`;
         // Este endpoint probablemente requiere autenticación (el propio cliente o ADMIN)
         try {
-            const response = await http.get<DomicilioDTO[]>(url); // <--- CAMBIADO
+            const response = await http.get<DireccionDTO[]>(url); // <--- CAMBIADO
             // Si el backend devuelve 200 con cuerpo null o lista vacía, devolvemos [].
             if (response === null) {
                 return [];
@@ -117,10 +117,10 @@ export const addressService = {
      * @returns Una Promesa que resuelve con la dirección creada.
      * @throws Un error si la solicitud falla.
      */
-    create: async (addressData: Partial<DomicilioDTO>): Promise<DomicilioDTO> => { // <--- CAMBIADO
+    create: async (addressData: Partial<DireccionDTO>): Promise<DireccionDTO> => { // <--- CAMBIADO
         const url = ADDRESS_ENDPOINT;
         // Este endpoint probablemente requiere autenticación
-        return http.post<DomicilioDTO>(url, addressData); // <--- CAMBIADO
+        return http.post<DireccionDTO>(url, addressData); // <--- CAMBIADO
     },
 
     /**
@@ -131,11 +131,11 @@ export const addressService = {
      * @returns Una Promesa que resuelve con la dirección actualizada.
      * @throws Un error si la solicitud falla.
      */
-     update: async (addressData: DomicilioDTO): Promise<DomicilioDTO> => {
+     update: async (addressData: DireccionDTO): Promise<DireccionDTO> => {
         // *** ESTE ES EL CAMBIO CRUCIAL: El ID va en la URL ***
         const url = `${ADDRESS_ENDPOINT}/${addressData.id}`;
         // El cuerpo de la solicitud sigue siendo el objeto DTO completo
-        return http.put<DomicilioDTO>(url, addressData);
+        return http.put<DireccionDTO>(url, addressData);
     },
 
     /**

@@ -1,0 +1,72 @@
+/* src/components/ui/Modal/ProductDetailForm/ProductDetailForm.module.css */
+
+.dialogTitle {
+  background-color: #f5f5f5;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.dialogContent {
+  padding: 24px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px; /* Espacio entre los campos del formulario */
+}
+
+.textField,
+.formControl {
+  margin-bottom: 0 !important; /* Anular margin-bottom de Material-UI para usar gap */
+}
+
+.dialogActions {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end; /* Alinear botones a la derecha */
+  gap: 8px; /* Espacio entre los botones */
+}
+
+.button {
+  min-width: 100px;
+  padding: 8px 16px;
+  text-transform: none; /* Mantener la capitalización normal */
+}
+
+.loadingText {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(0, 0, 0, 0.54); /* Color de texto deshabilitado de Material-UI */
+}
+
+/* Media queries para responsividad */
+@media (max-width: 600px) {
+  .dialogTitle {
+    padding: 12px 16px;
+    font-size: 1.1rem;
+  }
+
+  .dialogContent {
+    padding: 16px;
+  }
+
+  .dialogActions {
+    flex-direction: column; /* Apilar botones en pantallas pequeñas */
+    align-items: stretch; /* Estirar botones para ocupar todo el ancho */
+    padding: 16px;
+  }
+
+  .button {
+    width: 100%; /* Botones de ancho completo */
+    margin-bottom: 8px; /* Espacio entre botones apilados */
+  }
+
+  .button:last-child {
+    margin-bottom: 0;
+  }
+}

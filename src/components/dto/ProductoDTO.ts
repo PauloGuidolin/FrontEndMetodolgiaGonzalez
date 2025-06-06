@@ -1,21 +1,19 @@
-import { CategoriaDTO } from './CategoriaDTO';
+// /dto/ProductoDTO.ts
 import { ImagenDTO } from './ImagenDTO';
+import { CategoriaDTO } from './CategoriaDTO';
 import { ProductoDetalleDTO } from './ProductoDetalleDTO';
-import { DescuentoDTO } from './DescuentoDTO'; // Asume que tienes este DTO
-import { Sexo } from '../../types/ISexo';
+import { DescuentoDTO } from './DescuentoDTO'; // Asegúrate de tenerlo importado si lo usas
 
-// Corresponde a la entidad Producto del backend para operaciones GET
 export interface ProductoDTO {
-    id?: number; // El ID es opcional si lo usas en el frontend para agregar, pero siempre viene en GET
+    id: number;
     denominacion: string;
-    precioOriginal: number; // Mapea a 'precioVenta' en el backend
-    precioFinal?: number; // Campo calculado en el backend, opcional
+    precioOriginal: number; // Asegúrate de que sea 'number'
+    precioFinal: number;   // Asegúrate de que sea 'number'
     tienePromocion: boolean;
-    sexo:Sexo; // Asegúrate que coincida con tu enum Sexo
-    activo: boolean; // Estado activo/inactivo
-
-    categorias?: CategoriaDTO[]; // Lista de DTOs de categoría
-    imagenes?: ImagenDTO[]; // Lista de DTOs de imagen
-    productos_detalles?: ProductoDetalleDTO[]; // Lista de DTOs de detalle de producto
-    descuento?: DescuentoDTO; 
+    sexo: 'MASCULINO' | 'FEMENINO' | 'OTRO'; // O como lo hayas definido
+    activo: boolean;
+    categorias: CategoriaDTO[];
+    imagenes: ImagenDTO[];
+    productos_detalles: ProductoDetalleDTO[];
+    descuento: DescuentoDTO | null; // Puede ser null si no hay descuento
 }

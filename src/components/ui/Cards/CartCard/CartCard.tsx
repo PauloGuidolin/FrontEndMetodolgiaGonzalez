@@ -5,7 +5,7 @@ import { ProductoDetalleDTO } from "../../../dto/ProductoDetalleDTO";
 
 
 interface CartCardProps {
-    product: ProductoDTO; 
+    product: ProductoDTO;
     productDetail: ProductoDetalleDTO;
     quantity: number;
     onQuantityChange: (newQuantity: number) => void;
@@ -13,7 +13,7 @@ interface CartCardProps {
 }
 
 const CartCard: React.FC<CartCardProps> = ({
-    product, // Ahora lo recibimos como prop
+    product,
     productDetail,
     quantity,
     onQuantityChange,
@@ -58,7 +58,7 @@ const CartCard: React.FC<CartCardProps> = ({
                     className={styles.productImage}
                 />
             </div>
-            <div className={styles.productInfo}> {/* Cambiado de productDetails a productInfo para ser más genérico */}
+            <div className={styles.productInfo}>
                 <h4 className={styles.productName}>
                     {productName}
                 </h4>
@@ -74,17 +74,16 @@ const CartCard: React.FC<CartCardProps> = ({
                         Género: {product.sexo}
                     </p>
                 )}
-                {/* Color y Talle: Accedemos desde productDetail */}
-                <p className={styles.details}>Color: {productDetail.color}</p>
-                <p className={styles.details}>Talle: {productDetail.talle}</p>
-                
+                {/* Color y Talle: Accedemos desde productDetail, usando las propiedades correctas */}
+                <p className={styles.details}>Color: {productDetail.color.nombreColor}</p> {/* CORREGIDO AQUÍ */}
+                <p className={styles.details}>Talle: {productDetail.talle.nombreTalle}</p> {/* CORREGIDO AQUÍ */}
+
                 {/* Mostrar precio final (con o sin promoción) */}
                 <p className={styles.productPrice}>
                     Precio Unitario: {formattedPrice}
                 </p>
-                
-                {/* No necesitamos mostrar "Precio con descuento" por separado si precioFinal ya lo incluye */}
-                {/* Si quisieras mostrar el precio original tachado, tendrías que comparar precioFinal y precioOriginal */}
+
+                {/* Si tiene promoción y el precio final es diferente al original, mostrar el original tachado */}
                 {product.tienePromocion && product.precioFinal !== product.precioOriginal && (
                     <p className={styles.productOriginalPrice}>
                         <del>Precio Original: ${product.precioOriginal?.toLocaleString("es-AR")}</del>
@@ -97,7 +96,7 @@ const CartCard: React.FC<CartCardProps> = ({
                     <button onClick={handleIncrement} className={styles.quantityButton} disabled={quantity >= productDetail.stockActual}>+</button>
                 </div>
             </div>
-            <div className={styles.actions}> {/* Contenedor para el botón de eliminar */}
+            <div className={styles.actions}>
                 <button onClick={onRemove} className={styles.removeButton}>
                     <span role="img" aria-label="Eliminar">🗑️</span>
                 </button>

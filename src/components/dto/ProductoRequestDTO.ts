@@ -8,13 +8,19 @@ export interface ImagenRequestDTO {
 }
 
 // DTO para enviar información de un detalle de producto dentro de ProductoRequestDTO
+/**
+ * @interface ProductoDetalleRequestDTO
+ * @description DTO para enviar datos de detalle de producto al backend.
+ * Utiliza IDs para las relaciones con Color y Talle.
+ */
 export interface ProductoDetalleRequestDTO {
     id?: number; // Opcional para detalles existentes (en caso de actualización)
     precioCompra: number;
     stockActual: number;
     stockMaximo: number;
-    color: string; // Se envía como string (ej. "ROJO")
-    talle: string; // Se envía como string (ej. "M")
+    colorId: number; // Ahora se envía el ID del Color
+    talleId: number; // Ahora se envía el ID del Talle
+    productoId: number; // <--- ADD THIS LINE
     activo?: boolean; // Para soft delete/activación de detalles individuales
 }
 
@@ -26,12 +32,16 @@ export interface DescuentoRequestDTO {
 
 
 // DTO principal para la solicitud de creación/actualización de un producto
+/**
+ * @interface ProductoRequestDTO
+ * @description DTO principal para la solicitud de creación/actualización de un producto.
+ */
 export interface ProductoRequestDTO {
     id?: number; // Solo presente para actualizaciones (el backend lo usa para buscar el producto a actualizar)
     denominacion: string;
     precioOriginal: number; // Mapea a 'precioVenta' en el backend
     tienePromocion: boolean;
-    sexo:Sexo;
+    sexo: Sexo;
     activo: boolean; // El estado activo/inactivo se envía en la solicitud
 
     categoriaIds: number[]; // Solo IDs de categorías para ManyToMany

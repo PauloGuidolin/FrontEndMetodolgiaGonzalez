@@ -229,8 +229,9 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
 
         const mpItems: MercadoPagoItemRequestDTO[] = cartItems.map((item) => ({
             id: item.productDetail.id?.toString() || "",
-            title: `${item.product.denominacion} - ${item.productDetail.color} - ${item.productDetail.talle}`,
-            description: `Color: ${item.productDetail.color}, Talle: ${item.productDetail.talle}`,
+            // CORRECCIÓN AQUÍ: Accede a las propiedades `nombreColor` y `nombreTalle`
+            title: `${item.product.denominacion} - ${item.productDetail.color?.nombreColor || ''} - ${item.productDetail.talle?.nombreTalle || ''}`,
+            description: `Color: ${item.productDetail.color?.nombreColor || ''}, Talle: ${item.productDetail.talle?.nombreTalle || ''}`,
             pictureUrl:
                 item.product.imagenes?.[0]?.url || "https://via.placeholder.com/150",
             categoryId: item.product.categorias?.[0]?.denominacion || "Otros",
