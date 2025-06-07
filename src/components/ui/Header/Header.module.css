@@ -79,11 +79,10 @@
   width: 100%;
 }
 
-/* MODIFICADO: Ajuste del 'top' para superponer el dropdown */
+
 .megaDropDownWrapper {
   position: absolute;
-  /* CAMBIO CLAVE: Usa calc(100% - Xpx) para que el dropdown suba Xpx y se solape */
-  top: calc(100% - 10px); /* Ajusta este valor (10px) si necesitas más o menos solapamiento */
+  top: calc(100% - 10px);
   left: 50%;
   transform: translateX(-50%);
   width: 100vw;

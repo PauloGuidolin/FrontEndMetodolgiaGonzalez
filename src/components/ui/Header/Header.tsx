@@ -114,6 +114,23 @@ export const Header = () => {
     }
   };
 
+  // --- Lógica del menú desplegable (dropdown) ---
+
+  // Función para cerrar todos los drops
+  const closeAllDrops = () => {
+    setDropShoes(false);
+    setDropClothes(false);
+    setDropSport(false);
+  };
+
+  // Función para abrir un drop específico y asegurar que solo uno esté abierto
+  const handleMouseEnterH3 = (
+    setter: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    closeAllDrops(); // Cierra los otros drops
+    setter(true); // Abre el drop específico
+  };
+
   return (
     <>
       <div className={styles.containerTitleUp}>
@@ -128,43 +145,46 @@ export const Header = () => {
             alt="Logo de Adidas"
           />
         </div>
-        <div className={styles.containerTitles}>
-          <h3
-            onMouseEnter={() => setDropShoes(true)}
-            onMouseLeave={() => setDropShoes(false)}
-          >
-            Calzado
-            {dropShoes && (
-              <div className={styles.containerDropDown}>
-                <DropDownShoes />
-              </div>
-            )}
-          </h3>
+        {/* NUEVO CONTENEDOR: Envuelve los h3 y el megaDropDownWrapper para el onMouseLeave */}
+        <div
+          className={styles.megaMenuArea}
+          onMouseLeave={closeAllDrops} // Cierra todos los drops cuando el ratón sale de TODA esta área
+        >
+          {/* Contenedor de los títulos (Calzado, Ropa, Deporte) */}
+          <div className={styles.containerTitles}>
+            <h3 onMouseEnter={() => handleMouseEnterH3(setDropShoes)}>
+              Calzado
+            </h3>
 
-          <h3
-            onMouseEnter={() => setDropClothes(true)}
-            onMouseLeave={() => setDropClothes(false)}
-          >
-            Ropa
-            {dropClothes && (
-              <div className={styles.containerDropDown}>
-                <DropDownClothes />
-              </div>
-            )}
-          </h3>
+            <h3 onMouseEnter={() => handleMouseEnterH3(setDropClothes)}>
+              Ropa
+            </h3>
 
-          <h3
-            onMouseEnter={() => setDropSport(true)}
-            onMouseLeave={() => setDropSport(false)}
-          >
-            Deporte
-            {dropSport && (
-              <div className={styles.containerDropDown}>
-                <DropDownSport />
-              </div>
-            )}
-          </h3>
-        </div>
+            <h3 onMouseEnter={() => handleMouseEnterH3(setDropSport)}>
+              Deporte
+            </h3>
+          </div>
+          {/* Renderizado condicional del mega dropdown wrapper */}
+          {(dropShoes || dropClothes || dropSport) && (
+            <div
+              className={styles.megaDropDownWrapper}
+              // onMouseEnter aquí es una medida de seguridad para evitar cierres prematuros
+              // si el ratón se mueve rápidamente. No debería ser estrictamente necesario
+              // si el onMouseLeave del padre funciona bien, pero no hace daño.
+              onMouseEnter={() => {
+                if (dropShoes) setDropShoes(true);
+                if (dropClothes) setDropClothes(true);
+                if (dropSport) setDropSport(true);
+              }}
+            >
+              {dropShoes && <DropDownShoes />}
+              {dropClothes && <DropDownClothes />}
+              {dropSport && <DropDownSport />}
+            </div>
+          )}{" "}
+          {/* <-- ESTA ES LA ETIQUETA DE CIERRE QUE FALTABA */}
+        </div>{" "}
+        {/* Este div de cierre corresponde a styles.megaMenuArea */}
         <div className={styles.containerRight}>
           <div className={styles.containerLogin}>
             {isAuthenticated ? (
@@ -202,7 +222,6 @@ export const Header = () => {
                     <h4>Panel Admin</h4>
                   </div>
                 )}
-                
               </>
             ) : (
               <>
