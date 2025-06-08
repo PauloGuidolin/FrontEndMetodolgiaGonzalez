@@ -1,0 +1,158 @@
+/* src/components/ui/CategoryComp/CategoryTable/CategoryTable.module.css */
+
+.tableContainer {
+    overflow-x: auto;
+    margin-top: 20px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px; /* Asegura que la tabla no sea demasiado estrecha */
+}
+
+.table th, .table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #333;
+    text-transform: uppercase;
+    font-size: 0.9em;
+}
+
+.table tbody tr:hover {
+    background-color: #f5f5f5;
+}
+
+.message, .errorMessage {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+}
+
+.errorText { /* Ajuste: Asegúrate de que esta clase exista para el mensaje de error principal */
+    color: #d32f2f;
+    font-weight: bold;
+    padding: 10px;
+    background-color: #ffebee;
+    border: 1px solid #ef9a9a;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.loadingSubText, .noSubcategoriesText, .errorSubText { /* Estilos para mensajes de subcategorías */
+    font-style: italic;
+    color: #555;
+    padding: 8px 0;
+}
+
+.errorSubText {
+    color: #d32f2f;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los botones se envuelvan si hay muchos */
+    gap: 8px; /* Espacio entre botones */
+}
+
+.editButton, .deleteButton, .deactivateButton, .activateButton, .createSubcategoryButton {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background-color 0.2s ease;
+    white-space: nowrap; /* Evita que el texto del botón se rompa */
+}
+
+.editButton {
+    background-color: #007bff;
+    color: white;
+}
+.editButton:hover {
+    background-color: #0056b3;
+}
+
+.deleteButton {
+    background-color: #dc3545;
+    color: white;
+}
+.deleteButton:hover {
+    background-color: #bd2130;
+}
+
+.deactivateButton {
+    background-color: #ffc107; /* Amarillo */
+    color: #333;
+}
+.deactivateButton:hover {
+    background-color: #e0a800;
+}
+
+.activateButton {
+    background-color: #28a745; /* Verde */
+    color: white;
+}
+.activateButton:hover {
+    background-color: #1e7e34;
+}
+
+.createSubcategoryButton {
+    background-color: #17a2b8; /* Azul claro/Teal */
+    color: white;
+}
+.createSubcategoryButton:hover {
+    background-color: #138496;
+}
+
+/* Status Pills */
+.statusPill {
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: white;
+}
+
+.statusPill.active {
+    background-color: #28a745; /* Green */
+}
+
+.statusPill.inactive {
+    background-color: #6c757d; /* Gray */
+}
+
+/* Chevron for expanding/collapsing */
+.toggleCell {
+    width: 30px; /* Fixed width for the chevron column */
+    vertical-align: middle;
+}
+
+.toggleButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    padding: 0;
+    line-height: 1;
+    color: #007bff;
+}
+
+.toggleButton:disabled {
+    color: #ccc;
+    cursor: not-allowed;
+}
+
+.chevron {
+    display: inline-block;
+    transition: transform 0.2s ease-in-out;
+}

@@ -1,7 +1,7 @@
 // src/services/discountService.ts
 
 import { DescuentoDTO } from '../components/dto/DescuentoDTO';
-import { http } from './httpService'; // Importamos el servicio HTTP base
+import { http } from '../https/httpService'; // Importamos el servicio HTTP base
 
 // Obtenemos la URL base del servidor desde las variables de entorno (http://localhost:8080)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -37,9 +37,6 @@ export const discountService = {
      */
     getById: async (id: number | string): Promise<DescuentoDTO> => {
         const url = `${DISCOUNT_ENDPOINT}/${id}`;
-        // Se elimina el try-catch explícito aquí.
-        // httpService (Axios) lanzará un error para respuestas 4xx/5xx,
-        // el cual será manejado en la capa de la store o el componente.
         return http.get<DescuentoDTO>(url);
     },
 
@@ -59,7 +56,8 @@ export const discountService = {
      * @returns Una Promesa que resuelve con el descuento actualizado.
      */
     update: async (discountData: DescuentoDTO): Promise<DescuentoDTO> => {
-        const url = DISCOUNT_ENDPOINT; // El ID va en el body gracias a BaseController
+        // ¡CORRECCIÓN AQUÍ! Se añade el ID del descuento a la URL
+        const url = `${DISCOUNT_ENDPOINT}/${discountData.id}`;
         return http.put<DescuentoDTO>(url, discountData);
     },
 

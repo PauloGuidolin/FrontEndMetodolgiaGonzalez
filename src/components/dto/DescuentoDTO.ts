@@ -9,5 +9,11 @@ export interface DescuentoDTO {
     horaHasta: string; // LocalTime en Java -> string (HH:MM:SS) en TS
     descripcionDescuento: string;
     precioPromocional: number; // Double en Java -> number en TS (factor)
-    active: boolean; // Asumido de Base
+    activo: boolean; // Asumido de Base
+}
+export interface CreateDescuentoDTO {
+    porcentaje: number;
+    fechaDesde: string;
+    fechaHasta: string;
+    activo?: boolean; // Puede ser opcional al crear
 }

@@ -1,4 +1,4 @@
-// Archivo: src/store/discountStore.ts
+// src/store/discountStore.ts
 
 import { create } from 'zustand'; // Importa la función create de Zustand
 import { DescuentoDTO } from '../components/dto/DescuentoDTO'; // Importar DescuentoDTO para consistencia
@@ -29,6 +29,9 @@ interface DiscountState {
     addDiscount: (discountData: Partial<DescuentoDTO>) => Promise<DescuentoDTO>; // Usar DescuentoDTO
     updateDiscount: (discount: DescuentoDTO) => Promise<DescuentoDTO>; // Usar DescuentoDTO
     deleteDiscount: (id: number | string) => Promise<void>;
+
+    // NUEVA ACCIÓN: Para activar/desactivar un descuento
+    toggleDiscountActive: (id: number, currentStatus: boolean) => Promise<DescuentoDTO>;
 
     // Acción para limpiar el descuento seleccionado
     clearSelectedDiscount: () => void;
@@ -90,8 +93,8 @@ export const useDiscountStore = create<DiscountState>((set, get) => ({
         // set({ loading: true, error: null });
         try {
             const newDiscount = await discountService.create(discountData);
-            // Opcional: Actualizar la lista de descuentos en el store después de crear
-            // set(state => ({ discounts: [...state.discounts, newDiscount] }));
+            // Si quieres actualizar la lista inmediatamente después de crear:
+            set(state => ({ discounts: [...state.discounts, newDiscount] }));
             // set({ loading: false });
             return newDiscount; // Devuelve la entidad creada
         } catch (error) {
@@ -108,8 +111,8 @@ export const useDiscountStore = create<DiscountState>((set, get) => ({
         // set({ loading: true, error: null });
         try {
             const updatedDiscount = await discountService.update(discount);
-            // Opcional: Actualizar la lista de descuentos en el store después de actualizar
-            // set(state => ({ discounts: state.discounts.map(d => d.id === updatedDiscount.id ? updatedDiscount : d) }));
+            // Actualizar la lista de descuentos en el store después de actualizar
+            set(state => ({ discounts: state.discounts.map(d => d.id === updatedDiscount.id ? updatedDiscount : d) }));
             // set({ loading: false });
             return updatedDiscount; // Devuelve la entidad actualizada
         } catch (error) {
@@ -126,14 +129,49 @@ export const useDiscountStore = create<DiscountState>((set, get) => ({
         // set({ loading: true, error: null });
         try {
             await discountService.delete(id);
-            // Opcional: Eliminar el descuento de la lista en el store después de eliminar
-            // set(state => ({ discounts: state.discounts.filter(d => d.id !== id) }));
+            // Eliminar el descuento de la lista en el store después de eliminar
+            set(state => ({ discounts: state.discounts.filter(d => d.id !== id) }));
             // set({ loading: false });
         } catch (error) {
             console.error(`Error deleting discount with ID ${id} in store:`, error);
             // Opcional: Establecer un error específico para operaciones CRUD
             // set({ error: `Failed to delete discount: ${error instanceof Error ? error.message : String(error)}`, loading: false });
             throw error; // Relanza el error
+        }
+    },
+
+    // NUEVA IMPLEMENTACIÓN DE LA ACCIÓN: toggleDiscountActive
+    toggleDiscountActive: async (id: number, currentStatus: boolean) => {
+        set({ loadingDiscount: true, errorDiscount: null });
+        try {
+            // 1. Obtener el descuento actual para tener todos sus datos
+            const discountToUpdate = await discountService.getById(id);
+
+            // 2. Modificar solo la propiedad 'active'
+            const updatedDiscountData: DescuentoDTO = {
+                ...discountToUpdate,
+                activo: !currentStatus, // Invertir el estado actual (true -> false, false -> true)
+            };
+
+            // 3. Enviar la actualización completa usando el método 'update' (PUT)
+            const updatedDiscount = await discountService.update(updatedDiscountData);
+
+            // Actualiza la lista de descuentos en el store para reflejar el cambio
+            set((state) => ({
+                discounts: state.discounts.map((d) =>
+                    d.id === updatedDiscount.id ? updatedDiscount : d
+                ),
+                selectedDiscount: updatedDiscount, // Si era el seleccionado, actualízalo también
+                loadingDiscount: false,
+            }));
+            return updatedDiscount; // Devuelve el descuento actualizado
+        } catch (error) {
+            console.error(`Error toggling discount status for ID ${id} in store:`, error);
+            set({
+                errorDiscount: `Failed to toggle discount status: ${error instanceof Error ? error.message : String(error)}`,
+                loadingDiscount: false,
+            });
+            throw error; // Relanza el error para que el componente que llama lo maneje
         }
     },
 

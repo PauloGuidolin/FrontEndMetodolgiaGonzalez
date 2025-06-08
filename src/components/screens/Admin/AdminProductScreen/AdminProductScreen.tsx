@@ -38,6 +38,7 @@ import styles from "./AdminProductScreen.module.css";
 // --- Importaciones de DTOs y Stores ---
 import { ProductoDTO } from "../../../dto/ProductoDTO";
 import { ProductoDetalleDTO } from "../../../dto/ProductoDetalleDTO";
+import { CategoriaDTO } from "../../../dto/CategoriaDTO"; // Asegúrate de que esta importación existe
 import { useProductStore } from "../../../../store/productStore";
 import { useProductDetailStore } from "../../../../store/productDetailStore";
 import { useCategoryStore } from "../../../../store/categoryStore";
@@ -54,6 +55,7 @@ import { Header } from "../../../ui/Header/Header";
 import ProductDetailForm from "../../../ui/Modal/ProductDetailForm/ProductDetailForm";
 import ProductForm from "../../../ui/Modal/ProductForm/ProductForm";
 import { Footer } from "../../../ui/Footer/Footer";
+import { AdminHeader } from "../../../ui/AdminHeader/AdminHeader";
 
 // Componente Alert para el Snackbar (MuiAlert con ref)
 const Alert = React.forwardRef<HTMLDivElement, any>(function Alert(props, ref) {
@@ -159,6 +161,12 @@ const ProductRow: React.FC<ProductRowProps> = ({
             ? product.categorias.map((cat) => cat.denominacion).join(", ")
             : "N/A"}
         </TableCell>
+        {/* NUEVA CELDA PARA SUBCATEGORIAS */}
+        <TableCell>
+          {product.categorias && product.categorias.length > 0
+            ? product.categorias.map((subcat) => subcat.denominacion).join(", ")
+            : "N/A"}
+        </TableCell>
         <TableCell align="center">
           <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
             <Button
@@ -186,7 +194,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={8}>
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}> {/* Aumenta colSpan a 9 por la nueva columna */}
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1, py: 2 }}>
               <Box
@@ -392,13 +400,17 @@ const AdminProductScreen: React.FC = () => {
 
   const {
     categories,
+    subCategories, // AÑADIDO: Para obtener subcategorías
     loading: loadingCategorias,
-    fetchCategories,
+    fetchCategories, // Renombrado a fetchRootCategories para mayor claridad si solo trae raíces
+    fetchSubcategories, // AÑADIDO: Función para obtener subcategorías
   } = useCategoryStore(
     useShallow((state) => ({
       categories: state.categories,
+      subCategories: state.categories, // Asegúrate de que tu categoryStore tenga este estado
       loading: state.loading,
-      fetchCategories: state.fetchCategories,
+      fetchCategories: state.fetchRootCategories, // Asumo que fetchRootCategories es el método para categorías de nivel superior
+      fetchSubcategories: state.fetchSubcategories, // Asegúrate de que tu categoryStore tenga este método
     }))
   );
 
@@ -497,10 +509,11 @@ const AdminProductScreen: React.FC = () => {
   // --- Efecto: Carga datos iniciales al montar el componente ---
   useEffect(() => {
     fetchProducts();
-    fetchCategories();
+    fetchCategories(); // Trae las categorías principales
+    fetchSubcategories(); // AÑADIDO: Trae las subcategorías
     fetchAllColors();
     fetchAllTalles();
-  }, [fetchProducts, fetchCategories, fetchAllColors, fetchAllTalles]);
+  }, [fetchProducts, fetchCategories, fetchSubcategories, fetchAllColors, fetchAllTalles]);
 
   // --- Manejadores para Productos ---
 
@@ -547,6 +560,8 @@ const AdminProductScreen: React.FC = () => {
         sexo: product.sexo as Sexo,
         activo: productStatusAction === "activate", // Establece 'activo' basado en la acción (true para activar, false para desactivar)
         categoriaIds: product.categorias?.map((cat) => cat.id as number) || [],
+        subcategoriaIds:
+          product.categorias?.map((subcat) => subcat.id as number) || [], // CORREGIDO: Usar product.subCategorias
         imagenes:
           product.imagenes?.map((img) => ({
             id: img.id,
@@ -680,6 +695,7 @@ const AdminProductScreen: React.FC = () => {
         sexo: productDataFromForm.sexo ?? Sexo.UNISEX,
         activo: currentProductActiveStatus, // Mantiene el estado activo para actualizaciones, por defecto true para nuevos
         categoriaIds: productDataFromForm.categoriaIds || [],
+        subcategoriaIds: productDataFromForm.subcategoriaIds || [], // AÑADIDO: Incluye las subcategorías del formulario
         imagenes: processedImages, // Lista combinada de imágenes existentes activas y nuevas
         // Cuando se actualiza un producto, se conservan sus detalles existentes.
         // Los nuevos detalles de producto se añaden a través de un modal separado.
@@ -797,10 +813,16 @@ const AdminProductScreen: React.FC = () => {
       if (detailData.id) {
         // Es una actualización
         await updateProductDetail(detailData.id, detailData);
-        showSnackbar("Detalle de producto actualizado correctamente.", "success");
+        showSnackbar(
+          "Detalle de producto actualizado correctamente.",
+          "success"
+        );
       } else {
         // Es una adición
-        if (detailData.productoId === null || detailData.productoId === undefined) {
+        if (
+          detailData.productoId === null ||
+          detailData.productoId === undefined
+        ) {
           throw new Error(
             "El ID del producto padre es obligatorio para agregar un nuevo detalle de producto."
           );
@@ -856,6 +878,7 @@ const AdminProductScreen: React.FC = () => {
   return (
     <>
       <Header />
+      <AdminHeader/>
       <Box className={styles.adminProductScreen}>
         <Typography variant="h4" component="h1" gutterBottom>
           Administración de Productos
@@ -881,6 +904,7 @@ const AdminProductScreen: React.FC = () => {
                 <TableCell align="right">Precio Final</TableCell>
                 <TableCell align="center">Sexo</TableCell>
                 <TableCell>Categorías</TableCell>
+                <TableCell>Subcategorías</TableCell> {/* AÑADIDO: Encabezado para Subcategorías */}
                 <TableCell align="center">Acciones</TableCell>
               </TableRow>
             </TableHead>
@@ -888,7 +912,7 @@ const AdminProductScreen: React.FC = () => {
               {originalProducts.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={9} // Aumenta colSpan a 9 por la nueva columna de subcategorías
                     sx={{ textAlign: "center", py: 3, color: "text.secondary" }}
                   >
                     No hay productos para mostrar.
@@ -928,7 +952,9 @@ const AdminProductScreen: React.FC = () => {
           product={selectedProduct}
           onSubmit={handleProductFormSubmit}
           categorias={categories}
+          subCategorias={subCategories} // AÑADIDO: Pasa las subcategorías al ProductForm
           loadingCategorias={loadingCategorias}
+          loadingSubCategorias={loadingCategorias} // Puedes tener un loading separado para subCategorias si tu store lo maneja
         />
 
         {/* Modal para Agregar/Editar Detalle de Producto */}

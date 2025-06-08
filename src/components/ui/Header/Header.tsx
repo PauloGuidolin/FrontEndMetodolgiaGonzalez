@@ -1,5 +1,6 @@
+// src/components/ui/Header/Header.tsx
 import styles from "./Header.module.css";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react"; // Importa useCallback
 import { DropDownClothes } from "../Modal/DropDownClothes/DropDownClothes";
 import { Link, useNavigate } from "react-router-dom";
 import LoginModal from "../Modal/LogIn/LoginModal";
@@ -30,11 +31,14 @@ export const Header = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
+  // Obtenemos checkAuth del store de Zustand
   const checkAuth = useAuthStore((state) => state.checkAuth);
 
+  // Este useEffect solo debe ejecutarse una vez al montar el componente.
+  // La función 'checkAuth' de Zustand es estable y no necesita estar en el array de dependencias.
   useEffect(() => {
     checkAuth();
-  }, [checkAuth]);
+  }, []); // <--- ¡ARRAY DE DEPENDENCIAS VACÍO!
 
   useEffect(() => {
     if (isAuthenticated && user?.imagenUser?.url) {
@@ -44,7 +48,7 @@ export const Header = () => {
     }
   }, [isAuthenticated, user]);
 
-  // >>>>> CONSOLE.LOGS PARA DEPURACIÓN <<<<<
+  // >>>>> CONSOLE.LOGS PARA DEPURACIÓN (déjalos para verificar que el bucle desaparece) <<<<<
   useEffect(() => {
     console.log("Header - Estado de autenticación:", isAuthenticated);
     if (isAuthenticated && user) {
@@ -64,72 +68,78 @@ export const Header = () => {
     );
   }, [isAuthenticated, user, displayedProfileImageUrl]);
 
-  const openLoginModal = () => {
+
+  // ********** INICIO DE LA CORRECCIÓN CRÍTICA: APLICAR useCallback **********
+
+  const openLoginModal = useCallback(() => {
     console.log("Se hizo clic en Iniciar Sesion");
     setIsLoginModalOpen(true);
     setIsRegisterModalOpen(false); // Asegúrate de cerrar el de registro si estaba abierto
-  };
+  }, []); // Dependencias vacías: esta función nunca cambiará
 
-  const closeLoginModal = () => {
+  const closeLoginModal = useCallback(() => {
     setIsLoginModalOpen(false);
-  };
+  }, []); // Dependencias vacías: esta función nunca cambiará
 
-  const openRegisterModal = () => {
+  const openRegisterModal = useCallback(() => {
     setIsRegisterModalOpen(true);
     setIsLoginModalOpen(false); // Asegúrate de cerrar el de login si estaba abierto
-  };
+  }, []); // Dependencias vacías: esta función nunca cambiará
 
-  const closeRegisterModal = () => {
+  const closeRegisterModal = useCallback(() => {
     setIsRegisterModalOpen(false);
-  };
+  }, []); // Dependencias vacías: esta función nunca cambiará
 
-  const handleRegisterClick = () => {
-    closeLoginModal();
-    openRegisterModal();
-  };
+  const handleRegisterClick = useCallback(() => {
+    closeLoginModal(); // closeLoginModal ya está memoizada
+    openRegisterModal(); // openRegisterModal ya está memoizada
+  }, [closeLoginModal, openRegisterModal]); // Depende de las funciones memoizadas
 
   // Nueva función para manejar el éxito del registro: cierra el modal de registro y abre el de login
-  const handleRegisterSuccess = () => {
-    closeRegisterModal();
-    openLoginModal();
-  };
+  const handleRegisterSuccess = useCallback(() => {
+    closeRegisterModal(); // closeRegisterModal ya está memoizada
+    openLoginModal(); // openLoginModal ya está memoizada
+  }, [closeRegisterModal, openLoginModal]); // Depende de las funciones memoizadas
 
   // La función que se llama cuando se hace clic en "Ya tengo una cuenta" desde RegisterModal
   // o cuando se cierra el RegisterModal sin completar el registro y se quiere volver al Login.
-  const handleBackToLogin = () => {
-    closeRegisterModal();
-    openLoginModal();
-  };
+  const handleBackToLogin = useCallback(() => {
+    closeRegisterModal(); // closeRegisterModal ya está memoizada
+    openLoginModal(); // openLoginModal ya está memoizada
+  }, [closeRegisterModal, openLoginModal]); // Depende de las funciones memoizadas
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     navigate("/");
-  };
+  }, [logout, navigate]); // Depende de logout (de Zustand) y navigate (de react-router-dom)
 
-  const handleProfileClick = () => {
+  const handleProfileClick = useCallback(() => {
     if (isAuthenticated) {
       navigate("/UserProfile");
     } else {
       openLoginModal();
     }
-  };
+  }, [isAuthenticated, navigate, openLoginModal]); // Depende de isAuthenticated, navigate, y openLoginModal
 
   // --- Lógica del menú desplegable (dropdown) ---
 
   // Función para cerrar todos los drops
-  const closeAllDrops = () => {
+  const closeAllDrops = useCallback(() => {
     setDropShoes(false);
     setDropClothes(false);
     setDropSport(false);
-  };
+  }, []); // Dependencias vacías: esta función nunca cambiará
 
   // Función para abrir un drop específico y asegurar que solo uno esté abierto
-  const handleMouseEnterH3 = (
-    setter: React.Dispatch<React.SetStateAction<boolean>>
-  ) => {
-    closeAllDrops(); // Cierra los otros drops
-    setter(true); // Abre el drop específico
-  };
+  const handleMouseEnterH3 = useCallback(
+    (setter: React.Dispatch<React.SetStateAction<boolean>>) => {
+      closeAllDrops(); // closeAllDrops ya está memoizada
+      setter(true); // Abre el drop específico
+    },
+    [closeAllDrops]
+  ); // Depende de closeAllDrops
+
+  // ********** FIN DE LA CORRECCIÓN CRÍTICA **********
 
   return (
     <>
@@ -259,9 +269,7 @@ export const Header = () => {
       <RegisterModal
         isOpen={isRegisterModalOpen}
         onClose={closeRegisterModal}
-        // Aquí es donde corregimos la prop: 'onLoginClick' en lugar de 'onCancelClick'
         onLoginClick={handleBackToLogin}
-        // Añadimos la nueva prop para manejar el éxito del registro
         onRegisterSuccess={handleRegisterSuccess}
       />
     </>

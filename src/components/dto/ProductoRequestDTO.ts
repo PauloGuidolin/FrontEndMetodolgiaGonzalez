@@ -45,6 +45,7 @@ export interface ProductoRequestDTO {
     activo: boolean; // El estado activo/inactivo se envía en la solicitud
 
     categoriaIds: number[]; // Solo IDs de categorías para ManyToMany
+    subcategoriaIds: number[]; // <--- ¡AÑADE ESTA LÍNEA! Para las subcategorías
     imagenes: ImagenRequestDTO[]; // Lista de ImagenRequestDTOs (con URLs y IDs si existen)
     productos_detalles: ProductoDetalleRequestDTO[]; // Lista de ProductoDetalleRequestDTOs
     descuento?: DescuentoRequestDTO; // Objeto con el ID del descuento a asociar

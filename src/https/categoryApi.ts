@@ -1,4 +1,3 @@
-// src/https/categoryService.ts
 import { CategoriaDTO } from '../components/dto/CategoriaDTO';
 import { http } from './httpService'; // Importamos el servicio HTTP base
 
@@ -32,8 +31,14 @@ export const categoryService = {
      */
     getAll: async (): Promise<CategoriaDTO[]> => {
         const url = CATEGORY_ENDPOINT;
-        // Este endpoint probablemente es público y no requiere autenticación
-        return http.get<CategoriaDTO[]>(url);
+        try {
+            const data = await http.get<CategoriaDTO[]>(url);
+            console.log('API Response for getAll Categories (categoryApi.ts):', data); // <--- AÑADIDO
+            return data;
+        } catch (error) {
+            console.error('Error in categoryService.getAll (categoryApi.ts):', error); // <--- AÑADIDO
+            throw error; // Re-lanza el error para que el store lo capture
+        }
     },
 
     /**

@@ -8,9 +8,8 @@ import { UserProfile }  from "../components/screens/UserProfile/UserProfile";
 import ProductScreen from "../components/screens/ProductsScreen/ProductScreen";
 import ProductDetailPage from "../components/screens/ProductDetailPage/ProductDetailPage";
 import OrderConfirmation from "../components/screens/MecadoPagoScreens/OrderConfirmation";
-
-// ¡IMPORTAR EL COMPONENTE AdminProductScreen!
 import AdminProductScreen from "../components/screens/Admin/AdminProductScreen/AdminProductScreen";
+import { ProductReferencesScreen } from "../components/screens/Admin/ProductReferencesScreen/ProductReferencesScreen";
 
 
 export const AppRouter = () => {
@@ -29,7 +28,7 @@ export const AppRouter = () => {
         <Route path="/checkout/pending" element={<OrderConfirmation />} />
         <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
         <Route path="/admin/productos" element={<AdminProductScreen />} />
-
+        <Route path="/admin/ProductReferencesScreen" element={<ProductReferencesScreen />} />
       </Routes>
     </>
   );
