@@ -1,110 +1,407 @@
-.cartContainer {
-    padding: 40px;
-    font-family: sans-serif;
-    display: flex;
-    gap: 40px;
-    margin: 0 auto;
-    min-height: calc(100vh - altura-de-tu-header - altura-de-tu-footer - algunos-margenes); /* Ajusta la altura */
-  }
-  
-  .cartTitle {
-    font-size: 2.5em;
-    margin-bottom: 30px;
-    text-align: left;
-    width: 100%;
-  }
-  
-  .cartContent {
-    display: flex;
-    gap: 40px;
-    width: 100%;
-    flex-grow: 1;
-    /* No necesitamos un max-height aquí para el contenedor del contenido */
-  }
-  .productList {
-    flex: 2;
-    overflow-y: auto; /* Mantiene el scroll SOLO para la lista de productos */
-    max-height: 60vh; /* Ajusta este valor según la altura que quieras darle a la lista */
-    padding-right: 20px;
-    border-right: 1px solid #ccc;
-  }
-  
-  .productList::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .productList::-webkit-scrollbar-track {
-    background-color: #f1f1f1;
-  }
-  
-  .productList::-webkit-scrollbar-thumb {
-    background-color: #888;
-    border-radius: 3px;
-  }
-  
-  .productList::-webkit-scrollbar-thumb:hover {
-    background-color: #555;
-  }
-  
-  .orderSummary {
+.listTitle {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #333;
+}
 
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    background-color: #f9f9f9;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    min-height: 25vh;
-    max-height: 30vh;
+/* Estilos para la fila horizontal de tarjetas con scroll (CardList CSS) */
+.cardGrid {
+  display: flex;
+  flex-wrap: nowrap; /* Una sola fila continua */
+  overflow-x: auto; /* Habilita el scroll horizontal */
+  gap: 1rem; /* Espacio entre tarjetas */
+  padding: 1rem 0;
+  scroll-behavior: smooth;
+}
+
+/* Hacemos que cada tarjeta tenga ancho fijo para el scroll */
+.cardGrid > * {
+  flex: 0 0 auto;
+  min-width: 250px; /* O ajustalo a 300px si preferís */
+}
+
+/* Estilos para el mensaje cuando no hay productos */
+.noProductsMessage {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #666;
+  margin-top: 2rem;
+}
+
+/*Aplicado CSS al scroll bar de la sección */
+.cardGrid::-webkit-scrollbar {
+  height: 8px;
+}
+
+.cardGrid::-webkit-scrollbar-track {
+  background: #cacaca;
+}
+
+.cardGrid::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.699);
+  border-radius: 0px;
+  border: none;
+}
+
+.cardGrid::-webkit-scrollbar-thumb:hover {
+  cursor: pointer;
+}
+
+/* Media query para pantallas pequeñas de CardList */
+@media (max-width: 768px) {
+  .cardGrid > * {
+    min-width: 200px; /* Ajuste para móviles */
   }
-  
+
+  .cardGrid {
+    gap: 0.75rem; /* Espacio más chico en pantallas pequeñas */
+  }
+}
+
+/* --- ESTILOS PRINCIPALES DE TU APLICACIÓN --- */
+
+/* .main es el contenedor que tenías inicialmente (ej. en HomeScreen) */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 3fr;
+  gap: 50px;
+  justify-content: space-evenly;
+}
+
+.profileContainer {
+  margin: 20px;
+  height: 80%;
+  padding-top: 20px;
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(168, 167, 167);
+  align-items: center;
+  text-align: center;
+}
+
+.profileContainer img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
+
+.profileContainer p {
+  padding-top: 10px;
+  font-size: 30px;
+}
+
+.profileContainer button {
+  margin-top: 30px;
+  padding: 10px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  background-color: black;
+  color: white;
+  font-size: 30px;
+}
+
+.profileContainer button:hover {
+  cursor: pointer;
+}
+
+.dataContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  margin: 20px;
+  padding: 20px;
+  background-color: rgb(168, 167, 167);
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
+
+.dataContainer h4 {
+  font-size: 30px;
+}
+
+.dataContainer h5 {
+  font-size: 25px;
+}
+
+.dataContainer p {
+  font-size: 25px;
+}
+
+.dataContainer .editButton {
+  max-width: 50px;
+  margin-top: 10px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid black;
+  color: black;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.dataContainer button:hover {
+  cursor: pointer;
+}
+
+.deleteButton {
+  margin-top: 30px;
+  padding: 10px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  background-color: black;
+  color: white;
+  font-size: 30px;
+}
+
+/* -------------------------- MEDIA QUERIES (de .main y relacionados) -------------------------- */
+
+/* Para tabletas y pantallas más pequeñas (máximo 768px de ancho) */
+@media (max-width: 768px) {
+  .main {
+    grid-template-columns: 1fr; /* Una sola columna para un diseño de pila */
+    gap: 30px; /* Reducir el espacio entre elementos */
+  }
+
+  .profileContainer,
+  .dataContainer {
+    margin: 15px; /* Ajustar márgenes para pantallas más pequeñas */
+    padding: 15px; /* Ajustar padding */
+  }
+
+  .profileContainer p,
+  .dataContainer h4 {
+    font-size: 24px; /* Reducir tamaño de fuente */
+  }
+
+  .profileContainer button,
+  .deleteButton {
+    font-size: 24px; /* Reducir tamaño de fuente de botones */
+    padding: 8px; /* Ajustar padding de botones */
+  }
+
+  .profileContainer img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .dataContainer h5,
+  .dataContainer p {
+    font-size: 20px; /* Reducir tamaño de fuente */
+  }
+
+  .dataContainer .editButton {
+    font-size: 18px; /* Reducir tamaño de fuente del botón de edición */
+    max-width: 70px; /* Permitir que sea un poco más ancho o auto */
+  }
+}
+
+/* Para teléfonos móviles y pantallas muy pequeñas (máximo 480px de ancho) */
+@media (max-width: 480px) {
+  .main {
+    gap: 20px; /* Reducir aún más el espacio */
+  }
+
+  .profileContainer,
+  .dataContainer {
+    margin: 10px; /* Márgenes más pequeños */
+    padding: 10px; /* Padding más pequeño */
+  }
+
+  .profileContainer p,
+  .dataContainer h4 {
+    font-size: 20px; /* Fuentes más pequeñas para títulos */
+  }
+
+  .profileContainer button,
+  .deleteButton {
+    font-size: 20px; /* Fuentes más pequeñas para botones */
+    padding: 6px;
+  }
+
+  .profileContainer img {
+    width: 100px;
+    height: 100px;
+  }
+
+  .dataContainer h5,
+  .dataContainer p {
+    font-size: 16px; /* Fuentes más pequeñas para el contenido */
+  }
+
+  .dataContainer .editButton {
+    font-size: 16px; /* Ajustar tamaño de fuente del botón de edición */
+    max-width: 100%; /* Permitir que ocupe todo el ancho si es necesario */
+  }
+}
+
+.cartContainer {
+  padding: 40px;
+  font-family: sans-serif;
+  display: flex;
+  gap: 40px;
+  margin: 0 auto;
+  flex-grow: 1; 
+  flex-direction: column;
+  margin-bottom: 67px;
+}
+
+.cartTitle {
+  font-size: 2.5em;
+  margin-bottom: 30px;
+  text-align: left;
+  width: 100%;
+}
+
+.cartContent {
+  display: flex;
+  gap: 40px;
+  width: 100%;
+  flex-grow: 1; /* Asegura que este contenedor también pueda crecer */
+  /* No necesitamos un max-height aquí para el contenedor del contenido */
+}
+
+.productList {
+  flex: 2;
+  overflow-y: auto; /* Mantiene el scroll SOLO para la lista de productos */
+  max-height: 60vh; /* Ajusta este valor según la altura que quieras darle a la lista */
+  padding-right: 20px;
+  border-right: 1px solid #ccc;
+}
+
+.productList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.productList::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+.productList::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 3px;
+}
+
+.productList::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+.orderSummary {
+  flex: 1; /* Permite que ocupe el espacio restante en el flex del cartContent */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  /* min-height: 25vh;  Puedes quitar o ajustar si el contenido del carrito es variable */
+  /* max-height: 30vh;  Puedes quitar o ajustar si el contenido del carrito es variable */
+}
+
+.orderSummary h2 {
+  font-size: 1.8em;
+  margin-bottom: 20px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1em;
+  color: #333;
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #000;
+}
+
+.checkoutButton {
+  background-color: #000;
+  color: #fff;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.1em;
+  width: 100%;
+  margin-top: 20px;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.checkoutButton:hover {
+  opacity: 0.9;
+}
+
+.emptyCart {
+  text-align: center;
+  font-style: italic;
+  color: #777;
+  padding: 20px;
+  font-size: 1.1em;
+}
+
+/* Media queries para el carrito (ajusta según sea necesario) */
+@media (max-width: 768px) {
+  .cartContainer {
+    padding: 20px;
+    flex-direction: column; /* Apila el productList y orderSummary en pantallas pequeñas */
+    gap: 30px;
+  }
+
+  .cartContent {
+    flex-direction: column; /* Asegura que la lista y el resumen se apilen */
+    gap: 30px;
+  }
+
+  .productList {
+    max-height: 40vh; /* Ajusta la altura máxima para móviles si la lista es muy larga */
+    border-right: none; /* Quita el borde derecho en móvil */
+    padding-right: 0;
+    border-bottom: 1px solid #ccc; /* Añade un borde inferior */
+    padding-bottom: 20px;
+  }
+
+  .orderSummary {
+    min-height: auto;
+    max-height: none;
+    padding: 15px;
+  }
+
   .orderSummary h2 {
-    font-size: 1.8em;
-    margin-bottom: 20px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
+    font-size: 1.5em;
   }
-  
-  .summaryItem {
-    display: flex;
-    justify-content: space-between;
-    font-size: 1em;
-    color: #333;
-  }
-  
-  .summaryTotal {
-    display: flex;
-    justify-content: space-between;
-    padding-top: 20px;
-    border-top: 1px solid #eee;
-    font-weight: bold;
-    font-size: 1.2em;
-    color: #000;
-  }
-  
+
   .checkoutButton {
-    background-color: #000;
-    color: #fff;
-    padding: 15px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1.1em;
-    width: 100%;
-    margin-top: 20px;
-    transition: opacity 0.2s ease-in-out;
+    font-size: 1em;
+    padding: 12px 15px;
   }
-  
-  .checkoutButton:hover {
-    opacity: 0.9;
+}
+
+@media (max-width: 480px) {
+  .cartContainer {
+    padding: 15px;
+    gap: 20px;
   }
-  
-  .emptyCart {
-    text-align: center;
-    font-style: italic;
-    color: #777;
-    padding: 20px;
-    font-size: 1.1em;
+
+  .cartTitle {
+    font-size: 2em;
+    margin-bottom: 20px;
   }
+
+  .productList {
+    max-height: 35vh; /* Puede necesitar más ajuste */
+  }
+
+  .orderSummary h2 {
+    font-size: 1.3em;
+  }
+
+  .summaryItem,
+  .summaryTotal {
+    font-size: 0.9em;
+  }
+}

@@ -1,6 +1,6 @@
 // src/components/ui/Header/Header.tsx
 import styles from "./Header.module.css";
-import React, { useState, useEffect, useCallback } from "react"; // Importa useCallback
+import React, { useState, useEffect, useCallback, FC } from "react"; // Importa useCallback
 import { DropDownClothes } from "../Modal/DropDownClothes/DropDownClothes";
 import { Link, useNavigate } from "react-router-dom";
 import LoginModal from "../Modal/LogIn/LoginModal";

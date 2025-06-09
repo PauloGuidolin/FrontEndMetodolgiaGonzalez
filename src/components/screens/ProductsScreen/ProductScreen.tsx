@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 
 import styles from "./ProductScreen.module.css"; // Importa los estilos CSS Module
-import { ProductoDTO } from "../../dto/ProductoDTO";
 
 // *** Importamos el store y la interfaz ProductFilters CORRECTA y UNIFICADA desde el store ***
 import { useProductStore, ProductFilters } from "../../../store/productStore"; // AJUSTA LA RUTA si es necesario
@@ -144,68 +143,70 @@ const ProductScreen: React.FC = () => {
   // Renderiza la pantalla de productos
   return (
     <>
-    <Header />
-    <div className={styles.container}>
-      
-      {/* Asegúrate de que Header no cause problemas de renderizado o estilos */}
-      {/* Botón o elemento para abrir el panel de filtros */}
-      {/* Puedes añadir un botón aquí en tu UI principal */}
-      <button className={styles.openFilterButton} onClick={openFilterPanel}>
-        Abrir Filtros
-      </button>
-      <FilterPanel
-        isOpen={isFilterPanelOpen}
-        onClose={closeFilterPanel}
-        onApplyFilters={handleApplyFilters}
-        onClearFilters={handleClearFilters}
-        availableCategories={availableCategories} // Pasa las listas de opciones disponibles
-        availableColors={availableColors}
-        availableSizes={availableSizes}
-        initialFilters={currentFilters} // Pasa los filtros actuales del store al panel
-      />
-      {/* Contenedor de la lista de productos */}
-      <div className={styles.productList}>
-        {/* Mapea sobre los productos FILTRADOS solo si filteredProducts es un array válido */}
-        {Array.isArray(filteredProducts) && filteredProducts.length > 0
-          ? filteredProducts.map((product) => (
-              // La key es crucial para el rendimiento de las listas en React
-              // Usamos product.id si existe, o un fallback seguro si no
-              <ProductCard
-                key={
-                  product.id !== undefined && product.id !== null
-                    ? product.id
-                    : `product-${Math.random()}`
-                }
-                product={product}
-              />
-            ))
-          : // Mostrar mensajes si no hay productos o no hay resultados
-            // Solo si NO estamos cargando y filteredProducts está vacío
-            !loading &&
-            (currentFilters && Object.keys(currentFilters).length > 0 ? (
-              // Si hay filtros aplicados pero no hay resultados
-              <div className={styles.noResults}>
-                No se encontraron productos que coincidan con los filtros
-                seleccionados.
-              </div>
-            ) : (
-              // Si no hay filtros aplicados y la lista está vacía (puede que no haya productos en total)
-              !error && ( // Solo muestra este mensaje si no hay un error general
-                <div className={styles.noProductsMessage}>
-                  No hay productos disponibles.
-                </div>
-              )
-            ))}
+      <Header />
+      <div className={styles.containerPrincipal}>
+        {/* Sección de Filtros */}
+        <div className={styles.filterSection}>
+          {/* Botón para abrir el panel de filtros */}
+          <button className={styles.openFilterButton} onClick={openFilterPanel}>
+            Abrir Filtros
+          </button>
 
-        
+          {/* El componente FilterPanel se renderiza aquí */}
+          <FilterPanel
+            isOpen={isFilterPanelOpen}
+            onClose={closeFilterPanel}
+            onApplyFilters={handleApplyFilters}
+            onClearFilters={handleClearFilters}
+            availableCategories={availableCategories} // Pasa las listas de opciones disponibles
+            availableColors={availableColors}
+            availableSizes={availableSizes}
+            initialFilters={currentFilters} // Pasa los filtros actuales del store al panel
+          />
+        </div>
+
+        {/* Sección de Productos */}
+        <div className={styles.productsSection}>
+          {/* Título para la sección de productos */}
+          {/* Contenedor de la lista de productos */}
+          <div className={styles.productList}>
+            {/* Mapea sobre los productos FILTRADOS solo si filteredProducts es un array válido */}
+            {Array.isArray(filteredProducts) && filteredProducts.length > 0
+              ? filteredProducts.map((product) => (
+                  // La key es crucial para el rendimiento de las listas en React
+                  // Usamos product.id si existe, o un fallback seguro si no
+                  <ProductCard
+                    key={
+                      product.id !== undefined && product.id !== null
+                        ? product.id
+                        : `product-${Math.random()}`
+                    }
+                    product={product}
+                  />
+                ))
+              : // Mostrar mensajes si no hay productos o no hay resultados
+                // Solo si NO estamos cargando y filteredProducts está vacío
+                !loading &&
+                (currentFilters && Object.keys(currentFilters).length > 0 ? (
+                  // Si hay filtros aplicados pero no hay resultados
+                  <div className={styles.noResults}>
+                    No se encontraron productos que coincidan con los filtros
+                    seleccionados.
+                  </div>
+                ) : (
+                  // Si no hay filtros aplicados y la lista está vacía (puede que no haya productos en total)
+                  !error && ( // Solo muestra este mensaje si no hay un error general
+                    <div className={styles.noProductsMessage}>
+                      No hay productos disponibles.
+                    </div>
+                  )
+                ))}
+          </div>
+        </div>
       </div>
-      
-    </div>
-    <Footer />
+      <Footer />
     </>
   );
-  
 };
-
 
 export default ProductScreen;

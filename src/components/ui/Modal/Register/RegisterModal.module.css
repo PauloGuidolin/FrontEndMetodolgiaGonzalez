@@ -15,7 +15,6 @@
     transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
-/* *** CAMBIO CLAVE AQUÍ: Mayor especificidad para la clase 'active' *** */
 .modalOverlay.active {
     opacity: 1;
     visibility: visible;
@@ -23,21 +22,12 @@
 
 .modalContent {
     background-color: white;
-    padding: 30px;
-    border-radius: 8px;
+    padding: 20px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     width: 90%;
     max-width: 500px; /* Un poco más ancho para el formulario de registro */
     box-sizing: border-box;
-
-    /* Animación de entrada opcional */
-    /* transform: translateY(-20px); */
-    /* transition: transform 0.3s ease; */
 }
-
-/* .modalOverlay.active .modalContent {
-    transform: translateY(0);
-} */
 
 .modalHeader {
     display: flex;
@@ -51,7 +41,7 @@
 .logoContainer {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
 .logo {
@@ -65,26 +55,12 @@
     color: #333;
 }
 
-.closeButton {
-    background: none;
-    border: none;
-    font-size: 2em;
-    color: #999;
-    cursor: pointer;
-    padding: 5px 10px;
-    transition: color 0.2s ease;
-}
-
-.closeButton:hover {
-    color: #333;
-}
-
 .modalBody {
     font-size: 1em;
 }
 
 .formGroup {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .formGroup label {
@@ -99,7 +75,7 @@
 .formGroup input[type="password"],
 .formGroup input[type="number"] { /* Incluye type="number" */
     width: 100%;
-    padding: 12px;
+    padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1em;
@@ -114,7 +90,7 @@
 
 .radioGroup {
     display: flex;
-    gap: 20px; /* Espacio entre las opciones de radio */
+    gap: 10px; /* Espacio entre las opciones de radio */
     margin-top: 5px;
 }
 
@@ -123,7 +99,7 @@
     margin-bottom: 0;
     display: flex;
     align-items: center; /* Alinea texto y radio button */
-    gap: 5px;
+    gap: 3px;
 }
 
 .errorText {
@@ -132,15 +108,14 @@
     margin-top: 5px;
 }
 
-.registerButton, .cancelButton {
+.registerButton, .loginLink {
     width: 100%;
-    padding: 15px;
+    padding: 10px;
     border: none;
-    border-radius: 4px;
     font-size: 1.1em;
     cursor: pointer;
     transition: background-color 0.2s ease, color 0.2s ease;
-    margin-top: 10px;
+    margin-top: 7px;
 }
 
 .registerButton {
@@ -158,14 +133,9 @@
     cursor: not-allowed;
 }
 
-.cancelButton {
+.loginLink{
     background-color: transparent;
     color: #000;
     border: 1px solid #000;
     margin-top: 15px;
-}
-
-.cancelButton:hover {
-    background-color: #eee;
-    color: #333;
 }

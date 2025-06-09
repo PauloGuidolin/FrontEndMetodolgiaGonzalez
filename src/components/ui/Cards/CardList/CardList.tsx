@@ -1,15 +1,11 @@
-// Archivo: src/components/CardList/CardList.tsx
-
 import React from "react";
-// Importamos tu componente ProductCard.
-// Asegúrate de que esta ruta sea correcta en tu estructura de carpetas.
 import ProductCard from "../ProductCard/ProductCard";
 import styles from "./CardList.module.css"; // Importamos los estilos CSS Modules para CardList
 import { ProductoDTO } from "../../../dto/ProductoDTO"; // Importamos la interfaz del DTO
 
 // Definimos las props que el componente CardList espera recibir
 interface CardListProps {
-  products: ProductoDTO[]; // La lista de productos a mostrar (aunque a veces llegue otra cosa) // Puedes añadir otras props aquí si es necesario (ej. loading, error, title) // loading?: boolean; // error?: string | null; // title?: string;
+  products: ProductoDTO[]; // La lista de productos a mostrar (aunque a veces llegue otra cosa) 
 }
 
 // Componente funcional CardList
@@ -24,17 +20,7 @@ const CardList: React.FC<CardListProps> = ({
     typeof products,
     "Is Array:",
     Array.isArray(products)
-  ); /* // --- Manejo opcional de estados de carga y error a nivel de lista ---
-  if (loading) {
-      return <p className={styles.loadingMessage}>Cargando lista de productos...</p>;
-  }
-
-  if (error) {
-      return <p className={styles.errorMessage}>Error al cargar la lista: {error}</p>;
-  }
-  */ // --- Fin Manejo opcional --- // Si la lista de productos está vacía o no es un array o está vacía
-  // --- FIN LOG DE DEPURACIÓN ---
-
+  );
   if (!Array.isArray(products) || products.length === 0) {
     // <-- Asegúrate de tener esta verificación
     return (

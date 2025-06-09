@@ -1,20 +1,14 @@
-import { useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 // import { useNavigate } from "react-router-dom"; // Puedes eliminar esta línea si solo usas el useNavigate de 'react-router'
 import { Footer } from "../../ui/Footer/Footer";
 import { Header } from "../../ui/Header/Header";
 import styles from "./HomeScreen.module.css";
 // import { ProductoDTO } from "../../dto/ProductoDTO"; // Ya no necesitas importar ProductoDTO aquí si solo lo usas en el Store/Card
-import { useProductStore } from "../../../store/productStore"; // Verifica la ruta
+import {  useProductStore } from "../../../store/productStore"; // Verifica la ruta
 import CardList from "../../ui/Cards/CardList/CardList";
 import { useShallow } from "zustand/shallow";
-import { useNavigate } from "react-router"; // Asegúrate de que esta sea la importación correcta para tu router
 
 export const HomeScreen = () => {
-  const navigate = useNavigate();
-
-  const handleNavigate = () => {
-    navigate("/UserProfile");
-  };
 
   // Consumimos el estado y las acciones del store de productos
   const {
