@@ -1,8 +1,11 @@
+// src/components/dto/OrdenCompraDTO.ts
 
-import { UserDTO } from './UserDTO';
-import { OrdenCompraDetalleDTO } from './OrdenCompraDetalleDTO';
-import { CreateOrdenCompraDetalleDTO } from './MercadoPagoDTOs';
+
+import { CreateOrdenCompraDetalleDTO } from './MercadoPagoDTOs'; // Asegúrate de que esta ruta y DTO existan
 import { DireccionDTO } from './DireccionDTO';
+import { OrdenCompraDetalleDTO } from './OrdenCompraDetalleDTO';
+import { UserInfoDTO } from './UserInfoDTO';
+
 
 export type EstadoOrdenCompra =
   | "PENDIENTE_PAGO"
@@ -11,36 +14,35 @@ export type EstadoOrdenCompra =
   | "EN_PREPARACION"
   | "EN_CAMINO"
   | "ENTREGADA";
-// Coincide con OrdenCompraDTO del backend
+
 export interface OrdenCompraDTO {
-  id?: number;
-  total: number; // BigDecimal en backend -> number en TS
-  fechaCompra: string; // LocalDateTime en backend -> string (ISO 8601) en TS
-  direccionEnvio?: string; // Opcional, podría ser redundante si usas `direccionId` o `nuevaDireccion`
+  id: number;
+  total: number;
+  fechaCompra: string; // LocalDateTime a string (ISO 8601)
+  direccionEnvio?: string;
   detalles: OrdenCompraDetalleDTO[];
-  usuarioId: number; // Long en backend -> number en TS
-  estadoOrden: EstadoOrdenCompra; // String en backend (enum) -> type en TS
-  mercadopagoPreferenceId?: string; // Opcional, si aún no se ha generado
-  mercadopagoPaymentId?: string; // Opcional, si aún no se ha completado el pago
+  usuarioId: number;
+  usuarioInfoDTO?: UserInfoDTO; // <<< ¡AGREGADO! Para el objeto de usuario anidado del backend
+  estadoOrden: EstadoOrdenCompra;
+  mercadopagoPreferenceId?: string;
+  mercadopagoPaymentId?: string;
   shippingOption: "delivery" | "pickup";
-  shippingCost: number; // BigDecimal en backend -> number en TS
+  shippingCost: number;
   buyerPhoneNumber: string;
-  direccionId: number | null; // Long en backend -> number | null en TS
-  nuevaDireccion: Partial<DireccionDTO> | null; // Coincide con DireccionDTO en el backend, ahora DomicilioDTO en frontend
-  active: boolean;
+  direccionId: number | null;
+  nuevaDireccion: DireccionDTO | null; // Puede ser un objeto Dirección completo, o null
 }
 
-// DTO para la creación de una nueva orden de compra, sin incluir campos de la respuesta del backend
-// (como id, fechaCompra, total, subtotal de detalles, etc., que son generados por el backend)
 export interface CreateOrdenCompraDTO {
   usuarioId: number;
-  direccionEnvio: string; // Dirección completa formateada para el backend
+  direccionEnvio?: string; // Considerar si es necesario o si ya lo cubren direccionId/nuevaDireccion
   buyerPhoneNumber: string;
   shippingOption: "delivery" | "pickup";
   shippingCost: number;
   montoTotal: number;
-  detalles: CreateOrdenCompraDetalleDTO[]; // Reutilizamos el DTO de Mercado Pago para los detalles
+  detalles: CreateOrdenCompraDetalleDTO[];
   direccionId: number | null;
-  nuevaDireccion: Partial<DireccionDTO> | null;
-  active: boolean;
+  nuevaDireccion: Partial<DireccionDTO> | null; // O DireccionDTO si siempre esperas todos los campos
+  // active: boolean; // <<< ELIMINADO: El backend lo maneja
 }
+

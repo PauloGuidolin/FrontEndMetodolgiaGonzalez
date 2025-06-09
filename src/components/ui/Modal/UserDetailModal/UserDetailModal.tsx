@@ -27,38 +27,7 @@ const UserDetailModal: React.FC<UserDetailModalProps> = ({ isOpen, onClose, user
 
     if (!isOpen || !user) return null;
 
-    // handleChange y handleSave ya no son necesarios si no hay edición en este modal.
-    // Los dejaremos comentados por si en el futuro decides reintroducir la edición con otra lógica.
-    /*
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-        const { name, value, type, checked } = e.target as HTMLInputElement;
 
-        setEditedUser((prev) => {
-            if (!prev) return null;
-            if (name === 'activo') {
-                return { ...prev, [name]: checked };
-            }
-            if (name === 'role') {
-                return { ...prev, [name]: value as Rol };
-            }
-            return prev;
-        });
-    };
-
-    const handleSave = async () => {
-        if (!editedUser) return;
-        try {
-            await updateUser(user.id, {
-                activo: editedUser.activo,
-                rol: editedUser.role,
-            });
-            alert('Usuario actualizado exitosamente.');
-            onClose();
-        } catch (err) {
-            console.error('Error al guardar el usuario:', err);
-        }
-    };
-    */
 
     return (
         <div className={`${styles.modalBackground} ${isOpen ? styles.open : ''}`}>

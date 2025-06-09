@@ -11,6 +11,7 @@ import OrderConfirmation from "../components/screens/MecadoPagoScreens/OrderConf
 import AdminProductScreen from "../components/screens/Admin/AdminProductScreen/AdminProductScreen";
 import { ProductReferencesScreen } from "../components/screens/Admin/ProductReferencesScreen/ProductReferencesScreen";
 import AdminUsersScreen from "../components/screens/Admin/AdminUsersScreen/AdminUsersScreen";
+import SalesPage from "../components/screens/Admin/SalesPage/SalesPage";
 
 
 export const AppRouter = () => {
@@ -31,6 +32,7 @@ export const AppRouter = () => {
         <Route path="/admin/productos" element={<AdminProductScreen />} />
         <Route path="/admin/ProductReferencesScreen" element={<ProductReferencesScreen />} />
         <Route path="/admin/AdminUsersScreen" element={<AdminUsersScreen />} />
+         <Route path="/admin/SalesPage" element={<SalesPage />} />
       </Routes>
     </>
   );

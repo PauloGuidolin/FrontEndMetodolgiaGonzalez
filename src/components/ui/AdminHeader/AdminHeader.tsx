@@ -36,7 +36,7 @@ export const AdminHeader: React.FC = () => {
                 </button>
                 <button
                     className={styles.navButton}
-                    onClick={() => handleNavigation('/admin/ventas')} // Ruta para ventas
+                    onClick={() => handleNavigation('/admin/SalesPage')} // Ruta para ventas
                 >
                     Ventas
                 </button>

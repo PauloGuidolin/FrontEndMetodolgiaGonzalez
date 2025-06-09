@@ -1,0 +1,117 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 800px;
+    max-height: 90vh; /* Limita la altura del modal */
+    overflow-y: auto; /* Habilita el scroll si el contenido es largo */
+    position: relative;
+    font-family: Arial, sans-serif;
+}
+
+.closeButton {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 2em;
+    cursor: pointer;
+    color: #666;
+}
+
+.closeButton:hover {
+    color: #333;
+}
+
+.modalTitle {
+    color: #007bff;
+    margin-bottom: 25px;
+    text-align: center;
+    font-size: 2em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.detailSection {
+    margin-bottom: 25px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.detailSection h3 {
+    color: #343a40;
+    margin-top: 0;
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #ccc;
+    padding-bottom: 8px;
+}
+
+.detailSection p {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+
+.detailSection strong {
+    color: #555;
+}
+
+.productsTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.productsTable th,
+.productsTable td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    vertical-align: top;
+    font-size: 0.9em;
+}
+
+.productsTable th {
+    background-color: #f1f1f1;
+    color: #333;
+    font-weight: bold;
+}
+
+.productsTable tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* Estilos para los badges de estado */
+.statusBadge {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-weight: bold;
+    font-size: 0.85em;
+    color: white;
+}
+
+.pendiente { background-color: #ffc107; color: #333; } /* Amarillo */
+.aprobado { background-color: #28a745; } /* Verde */
+.rechazado { background-color: #dc3545; } /* Rojo */
+.en_cocina { background-color: #007bff; } /* Azul */
+.en_delivery { background-color: #17a2b8; } /* Turquesa */
+.completado { background-color: #6f42c1; } /* Púrpura */
+.cancelado { background-color: #6c757d; } /* Gris */
