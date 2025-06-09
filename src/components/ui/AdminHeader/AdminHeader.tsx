@@ -30,7 +30,7 @@ export const AdminHeader: React.FC = () => {
                 </button>
                 <button
                     className={styles.navButton}
-                    onClick={() => handleNavigation('/admin/usuarios')} // Ruta para usuarios
+                    onClick={() => handleNavigation('/admin/AdminUsersScreen')} // Ruta para usuarios
                 >
                     Usuarios
                 </button>

@@ -1,0 +1,204 @@
+/* src/components/ui/AdminUserTable/AdminUserTable.module.css */
+
+.tableContainer {
+    width: 100%; /* Asegura que el contenedor de la tabla ocupe todo el ancho disponible */
+    /* REMOVEMOS: overflow-x: auto; */ /* Eliminar la barra de desplazamiento horizontal */
+    margin-top: 1.5rem;
+    background-color: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Mantenemos esto, es crucial para controlar los anchos */
+}
+
+.tableHeader {
+    background-color: #e2e8f0;
+}
+
+.tableTh {
+    padding: 1rem 0.75rem;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #4a5568;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #cbd5e0;
+}
+
+.tableRow {
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.tableRow:nth-child(even) {
+    background-color: #f8f8f8;
+}
+
+.tableTd {
+    padding: 1rem 0.75rem;
+    font-size: 0.9rem;
+    color: #374151;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Ajuste de anchos para columnas específicas (MUY IMPORTANTE PARA ELIMINAR EL OVERFLOW) */
+/* SUMA DE LOS PORCENTAJES DEBE SER 100% */
+.tableTh:nth-child(1), .tableTd:nth-child(1) { width: 5%; } /* ID (Pequeño) */
+.tableTh:nth-child(2), .tableTd:nth-child(2) { width: 12%; } /* Username (Reducido) */
+.tableTh:nth-child(3), .tableTd:nth-child(3) { width: 18%; } /* Email (Reducido un poco) */
+.tableTh:nth-child(4), .tableTd:nth-child(4) { width: 10%; } /* Nombre (Reducido) */
+.tableTh:nth-child(5), .tableTd:nth-child(5) { width: 10%; } /* Apellido (Reducido) */
+.tableTh:nth-child(6), .tableTd:nth-child(6) { width: 8%; } /* Rol (Pequeño, el select se ajustará) */
+.tableTh:nth-child(7), .tableTd:nth-child(7) { width: 7%; } /* Activo (Muy pequeño) */
+.tableTh:nth-child(8), .tableTd:nth-child(8) { width: 30%; } /* Acciones (¡Aquí está el mayor cambio!) */
+
+
+.roleSelect {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    background-color: #ffffff;
+    font-size: 0.875rem;
+    color: #374151;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath d='M7 7l3-3 3 3m0 6l-3 3-3-3' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.5rem;
+}
+
+.roleSelect:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+.activeStatus, .inactiveStatus {
+    font-weight: 600;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    display: inline-block;
+    /* Ajustes de tamaño de fuente para que encaje mejor */
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.activeStatus {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.inactiveStatus {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.tableTdActions {
+    padding: 0.75rem;
+    display: flex;
+    flex-wrap: wrap; /* Permitir que los botones se envuelvan si el espacio es muy reducido */
+    gap: 0.3rem; /* Reducir el espacio entre los botones */
+    justify-content: flex-start; /* Alinear los botones al inicio de la celda */
+    align-items: center;
+}
+
+.actionButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.4rem 0.6rem; /* Reducir padding de los botones */
+    font-size: 0.75rem; /* Reducir tamaño de fuente de los botones */
+    font-weight: 600;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
+    border: none;
+    white-space: nowrap;
+    line-height: 1; /* Ajustar line-height para que el texto y el ícono encajen mejor */
+}
+
+.actionButton .icon {
+    margin-right: 0.3rem; /* Reducir margen del ícono */
+    font-size: 0.9rem; /* Reducir tamaño del ícono */
+}
+
+/* Estilos de botones específicos - Mantener */
+.viewButton {
+    background-color: #3b82f6;
+    color: white;
+}
+.viewButton:hover {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+}
+
+.deactivateButton {
+    background-color: #dc2626;
+    color: white;
+}
+.deactivateButton:hover {
+    background-color: #b91c1c;
+    transform: translateY(-1px);
+}
+
+.activateButton {
+    background-color: #22c55e;
+    color: white;
+}
+.activateButton:hover {
+    background-color: #16a34a;
+    transform: translateY(-1px);
+}
+
+.hardDeleteButton {
+    background-color: #b91c1c;
+    color: white;
+    position: relative;
+}
+.hardDeleteButton:hover {
+    background-color: #7f1d1d;
+    transform: translateY(-1px);
+}
+
+.warningIcon {
+    margin-left: 0.2rem; /* Ajustar margen */
+    color: #fcd34d;
+    font-size: 0.8rem; /* Ajustar tamaño */
+}
+
+
+/* Mensajes de estado - Mantener */
+.loadingMessage, .errorMessage, .noDataMessage {
+    text-align: center;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border-radius: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.loadingMessage {
+    background-color: #e0f2fe;
+    color: #2563eb;
+}
+
+.errorMessage {
+    background-color: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #ef4444;
+}
+
+.noDataMessage {
+    background-color: #f3f4f6;
+    color: #6b7280;
+}

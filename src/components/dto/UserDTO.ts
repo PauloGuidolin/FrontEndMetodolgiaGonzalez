@@ -22,5 +22,5 @@ export interface UserDTO {
     role: Rol; // Corresponde a `rol`
     // profileImage?:ProfileImage; // Corresponde a `imagenUser`
     addresses?: DireccionDTO[] | null; // Corresponde a `direcciones`
-    active: boolean;
+    activo: boolean;
 }

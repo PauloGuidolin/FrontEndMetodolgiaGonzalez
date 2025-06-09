@@ -1,0 +1,40 @@
+/* src/screens/admin/AdminUsersScreen/AdminUsersScreen.module.css */
+
+.screenContainer {
+    padding: 2rem;
+    background-color: #f4f7f6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    /* AUMENTAR EL MAX-WIDTH para dar más espacio a la tabla */
+    max-width: 1400px; /* Aumentado de 1200px a 1400px o incluso más si es necesario */
+    margin: 0 auto;
+}
+
+.screenTitle {
+    font-size: 2.5rem;
+    font-weight: 900;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+/* Estilos opcionales para SweetAlert2 */
+.swalCustomPopup {
+    font-family: 'Inter', sans-serif;
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 6px 6px rgba(0, 0, 0, 0.05);
+}
+
+.swal2-title {
+    color: #1f2937 !important;
+}
+.swal2-html-container {
+    color: #4b5563 !important;
+}
