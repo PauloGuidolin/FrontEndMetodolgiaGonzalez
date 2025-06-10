@@ -1,22 +1,25 @@
-
-
 import React, { useState } from 'react';
 import styles from './CategoryTable.module.css';
 import { useCategoryStore } from '../../../store/categoryStore';
 import { CategoriaDTO } from '../../dto/CategoriaDTO';
 
+// Componentes de flechas para indicar el estado expandido/contraído
 const ChevronRight = () => <span className={styles.chevron}>▶</span>;
 const ChevronDown = () => <span className={styles.chevron}>▼</span>;
 
+/**
+ * Define las propiedades esperadas por el componente CategoryTable.
+ * `depth` se usa para renderizado recursivo de subcategorías.
+ */
 interface CategoryTableProps {
     categories: CategoriaDTO[];
     loading: boolean;
     error: string | null;
     onEditCategoria: (categoria: CategoriaDTO) => void;
     onToggleCategoriaActive: (id: number, currentStatus: boolean, denominacion: string) => void;
-    onDeleteCategoria: (categoria: CategoriaDTO) => void; 
+    onDeleteCategoria: (categoria: CategoriaDTO) => void; // Aunque no se usa en este código, se mantiene por la interfaz.
     onCreateSubcategoria: (parentCategory: CategoriaDTO) => void;
-    depth?: number;
+    depth?: number; // Profundidad actual de la categoría (0 para categorías raíz).
 }
 
 export const CategoryTable: React.FC<CategoryTableProps> = ({
@@ -25,32 +28,39 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
     error,
     onEditCategoria,
     onToggleCategoriaActive,
-    onDeleteCategoria, 
+    onDeleteCategoria,
     onCreateSubcategoria,
     depth = 0
 }) => {
+    // Estado para controlar qué categorías están expandidas.
     const [expandedCategories, setExpandedCategories] = useState<Set<number>>(new Set());
 
+    // Acciones y estados del store de Zustand para subcategorías.
     const fetchSubcategories = useCategoryStore(state => state.fetchSubcategories);
     const fetchedSubcategories = useCategoryStore(state => state.fetchedSubcategories);
     const loadingSubcategories = useCategoryStore(state => state.loadingSubcategories);
     const errorSubcategories = useCategoryStore(state => state.errorSubcategories);
 
+    /**
+     * Maneja la expansión/contracción de una categoría y la carga de sus subcategorías.
+     */
     const handleToggleExpand = (categoryId: number, categoria: CategoriaDTO) => {
         const newExpanded = new Set(expandedCategories);
         if (newExpanded.has(categoryId)) {
             newExpanded.delete(categoryId);
         } else {
             newExpanded.add(categoryId);
+            // Carga subcategorías si no han sido cargadas o si el array está vacío.
             if (categoria.id) {
                 if (!fetchedSubcategories.has(categoryId) || fetchedSubcategories.get(categoryId)?.length === 0) {
-                     fetchSubcategories(categoria.id);
+                    fetchSubcategories(categoria.id);
                 }
             }
         }
         setExpandedCategories(newExpanded);
     };
 
+    // Mensajes de estado para las categorías principales.
     if (loading && depth === 0) {
         return <p>Cargando categorías principales...</p>;
     }
@@ -59,6 +69,7 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
         return <p className={styles.errorText}>Error al cargar categorías principales: {error}</p>;
     }
 
+    // Mensaje cuando no hay categorías o subcategorías.
     if (!categories || categories.length === 0) {
         return (
             <tr>
@@ -69,6 +80,9 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
         );
     }
 
+    /**
+     * Función recursiva para renderizar las filas de la tabla de categorías.
+     */
     const renderCategoryRows = (categoryList: CategoriaDTO[], currentDepth: number) => {
         return categoryList.map((categoria) => {
             const isExpanded = expandedCategories.has(categoria.id!);
@@ -76,16 +90,16 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
             const isLoadingSub = loadingSubcategories.has(categoria.id!);
             const subError = errorSubcategories.get(categoria.id!);
 
+            // Determina si una categoría puede tener hijos (y por lo tanto, el botón de expandir).
             const canHaveChildren = subcategoriesForThisParent.length > 0 || !fetchedSubcategories.has(categoria.id!);
 
-            // Determinar si el botón "Crear Subcategoría" debe ser visible
-            // Solo es visible si la profundidad es 0 (es decir, es una categoría raíz)
+            // El botón "Crear Subcategoría" solo es visible para categorías raíz (profundidad 0).
             const showCreateSubcategoryButton = currentDepth === 0;
-
 
             return (
                 <React.Fragment key={categoria.id}>
                     <tr>
+                        {/* Celda para el botón de expandir/contraer y sangría */}
                         <td className={styles.toggleCell} style={{ paddingLeft: `${currentDepth * 20 + 10}px` }}>
                             {canHaveChildren && (
                                 <button
@@ -105,7 +119,6 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                                 {categoria.activo ? 'Activo' : 'Inactivo'}
                             </span>
                         </td>
-                        {/* <td>{categoria.categoriaPadre?.denominacion || 'N/A (Categoría Raíz)'}</td> <-- ELIMINADO */}
                         <td className={styles.actions}>
                             <button onClick={() => onEditCategoria(categoria)} className={styles.editButton}>
                                 Editar
@@ -126,10 +139,10 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                             )}
                         </td>
                     </tr>
+                    {/* Fila para subcategorías o mensajes de estado de subcategorías */}
                     {isExpanded && (
                         <tr>
-                            {/* Ajusta colSpan a 5 porque ahora hay 5 columnas (toggle, ID, Denominación, Estado, Acciones) */}
-                            <td colSpan={5}> 
+                            <td colSpan={5}>
                                 {isLoadingSub && <p className={styles.loadingSubText} style={{ paddingLeft: `${(currentDepth + 1) * 20}px` }}>Cargando subcategorías...</p>}
                                 {subError && <p className={styles.errorSubText} style={{ paddingLeft: `${(currentDepth + 1) * 20}px` }}>Error: {subError}</p>}
                                 {!isLoadingSub && !subError && subcategoriesForThisParent.length > 0 && (
@@ -139,7 +152,7 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                                         error={null}
                                         onEditCategoria={onEditCategoria}
                                         onToggleCategoriaActive={onToggleCategoriaActive}
-                                        onDeleteCategoria={onDeleteCategoria} 
+                                        onDeleteCategoria={onDeleteCategoria}
                                         onCreateSubcategoria={onCreateSubcategoria}
                                         depth={currentDepth + 1}
                                     />
@@ -166,7 +179,6 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                                 <th>ID</th>
                                 <th>Denominación</th>
                                 <th>Estado</th>
-                                {/* <th>Categoría Padre</th> <-- ELIMINADO */}
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -176,6 +188,7 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                     </table>
                 </div>
             ) : (
+                // Si no es la tabla principal, solo renderiza el cuerpo (para subtablas recursivas).
                 <tbody>
                     {renderCategoryRows(categories, depth)}
                 </tbody>

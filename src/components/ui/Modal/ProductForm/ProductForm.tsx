@@ -1,4 +1,3 @@
-// Archivo: src/components/ui/Modal/ProductForm/ProductForm.tsx
 
 import React, { useEffect, useState } from "react";
 import { Formik, Form } from "formik";
@@ -44,8 +43,6 @@ import {
 } from "../../../dto/ProductoRequestDTO"; // Importar ProductoDetalleRequestDTO
 
 import { useDiscountStore } from "../../../../store/discountStore";
-// import { Footer } from "../../Footer/Footer"; // Eliminado porque no se usa
-// import { Header } from "../../Header/Header"; // Eliminado porque no se usa
 
 // Definición de la interfaz para los valores del formulario
 interface ProductFormValues {
@@ -55,23 +52,24 @@ interface ProductFormValues {
   sexo: Sexo; // Asegurar que sea el tipo enum Sexo
   selectedCategoryIds: number[];
   newImageFiles: File[];
-  imagenes: ImagenDTO[]; // Sigue siendo ImagenDTO para el estado interno y previsualizaciones
+  imagenes: ImagenDTO[]; // Usado para inicializar Formik, el estado real es existingImages
   descuentoId: number | "" | undefined; // ID del descuento seleccionado
 }
 
 interface ProductFormProps {
-  open: boolean;
-  onClose: () => void;
-  product: ProductoDTO | null;
+  open: boolean; // Controla si el modal está abierto
+  onClose: () => void; // Función para cerrar el modal
+  product: ProductoDTO | null; // Datos del producto a editar (o null para nuevo)
   onSubmit: (
     productData: Partial<ProductoRequestDTO> & {
       newImageFiles?: File[];
     }
-  ) => void;
-  categorias: CategoriaDTO[];
-  loadingCategorias: boolean;
+  ) => void; // Función para manejar el envío del formulario
+  categorias: CategoriaDTO[]; // Lista de categorías disponibles
+  loadingCategorias: boolean; // Indica si las categorías están cargando
 }
 
+// Esquema de validación con Yup para el formulario
 const validationSchema = Yup.object({
   denominacion: Yup.string().required("La denominación es obligatoria."),
   precioOriginal: Yup.number()
@@ -81,9 +79,9 @@ const validationSchema = Yup.object({
     .oneOf(Object.values(Sexo), "Sexo inválido.")
     .required("El sexo es obligatorio."),
   selectedCategoryIds: Yup.array()
-    .min(1, "Debe seleccionar al menos una categoría.")
+    .min(1, "Debe seleccionar al menos una categoría.") // Requiere al menos una categoría
     .required("Debe seleccionar al menos una categoría."),
-  tienePromocion: Yup.boolean().required(),
+  tienePromocion: Yup.boolean().required(), // Campo booleano requerido
 });
 
 const ProductForm: React.FC<ProductFormProps> = ({
@@ -94,19 +92,23 @@ const ProductForm: React.FC<ProductFormProps> = ({
   categorias,
   loadingCategorias,
 }) => {
+  // Determina si el formulario está en modo edición o creación
   const isEditing = !!product;
 
+  // Estado para los archivos de imagen nuevos seleccionados por el usuario
   const [newImageFiles, setNewImageFiles] = useState<File[]>([]);
+  // Estado para las imágenes existentes del producto (las que ya están en el backend)
   const [existingImages, setExistingImages] = useState<ImagenDTO[]>([]);
 
   // Estados para el diálogo de confirmación de eliminación de imagen
   const [isConfirmRemoveImageOpen, setIsConfirmRemoveImageOpen] =
     useState(false);
   const [imageToRemove, setImageToRemove] = useState<{
-    originalIndexInSource: number;
-    isNew: boolean;
+    originalIndexInSource: number; // Índice original de la imagen en su array (newImageFiles o existingImages)
+    isNew: boolean; // true si es una imagen nueva, false si es existente
   } | null>(null);
 
+  // Usa el store de descuentos para obtener los descuentos y la función de carga
   const {
     discounts,
     loading: loadingDiscounts,
@@ -119,45 +121,34 @@ const ProductForm: React.FC<ProductFormProps> = ({
     }))
   );
 
+  // Carga los descuentos al montar el componente
   useEffect(() => {
     fetchDiscounts();
   }, [fetchDiscounts]);
 
+  // Sincroniza el estado de las imágenes con el producto cuando cambia la prop 'product'
   useEffect(() => {
-    console.log(
-      "ProductForm - useEffect [product] triggered. Product:",
-      product
-    );
     if (product) {
-      console.log("ProductForm - Product has images:", product.imagenes);
-      // Set existing images from the product prop. These are already on the backend.
+      // Si hay un producto, inicializa 'existingImages' con las imágenes del producto
       setExistingImages(product.imagenes || []);
-      // Clear new files as we're initializing from a potentially saved product
+      // Limpia 'newImageFiles' al cargar un producto existente
       setNewImageFiles([]);
-      console.log(
-        "ProductForm - Initial existing images (from product prop):",
-        product.imagenes
-      );
-      console.log("ProductForm - New local files cleared.");
     } else {
-      // For a new product, clear all image states
+      // Si no hay producto (formulario de creación), limpia ambos estados de imagen
       setExistingImages([]);
       setNewImageFiles([]);
-      console.log("ProductForm - Resetting image states for new product.");
     }
   }, [product]);
 
+  // Maneja la selección de nuevos archivos de imagen
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const filesArray = Array.from(event.target.files);
-      setNewImageFiles((prevFiles) => {
-        console.log("ProductForm - New files selected locally:", filesArray);
-        return [...prevFiles, ...filesArray];
-      });
+      setNewImageFiles((prevFiles) => [...prevFiles, ...filesArray]);
     }
   };
 
-  // Abre el diálogo de confirmación
+  // Abre el diálogo de confirmación para eliminar una imagen
   const handleRemoveImageClick = (
     originalIndexInSource: number,
     isNew: boolean
@@ -166,24 +157,20 @@ const ProductForm: React.FC<ProductFormProps> = ({
     setIsConfirmRemoveImageOpen(true);
   };
 
-  // Confirma la eliminación de la imagen
+  // Confirma y ejecuta la eliminación/desactivación de la imagen
   const handleConfirmRemoveImage = () => {
     if (!imageToRemove) return;
 
     const { originalIndexInSource, isNew } = imageToRemove;
 
     if (isNew) {
-      console.log(
-        `ProductForm - Confirming removal of new local image at original index ${originalIndexInSource}`
-      );
+      // Si es una imagen nueva (local), simplemente la elimina del array
       const updatedNewImageFiles = newImageFiles.filter(
         (_, i) => i !== originalIndexInSource
       );
       setNewImageFiles(updatedNewImageFiles);
     } else {
-      console.log(
-        `ProductForm - Confirming marking existing image at original index ${originalIndexInSource} as inactive (id: ${existingImages[originalIndexInSource]?.id})`
-      );
+      // Si es una imagen existente, la marca como inactiva (para eliminación lógica en el backend)
       const updatedExistingImages = existingImages.map((img, i) =>
         i === originalIndexInSource ? { ...img, active: false } : img
       );
@@ -193,30 +180,33 @@ const ProductForm: React.FC<ProductFormProps> = ({
     setImageToRemove(null); // Limpiar el estado de la imagen a eliminar
   };
 
-  // Cancela la eliminación de la imagen
+  // Cancela la eliminación de la imagen y cierra el diálogo
   const handleCancelRemoveImage = () => {
     setIsConfirmRemoveImageOpen(false);
     setImageToRemove(null); // Limpiar el estado de la imagen a eliminar
   };
 
-  // Combined array for rendering previews: active existing images + new local files
+  // Array combinado de imágenes para renderizar las previsualizaciones
   const imagePreviewsToRender = [
+    // Mapea las imágenes existentes y activas
     ...existingImages.map((img, originalIndex) => ({
       src: img.url,
       isNew: false,
       key: `existing-${img.id || originalIndex}`,
       originalIndexInSource: originalIndex,
-      active: img.active, // Keep active status for filtering later
+      active: img.active,
     })),
+    // Mapea las nuevas imágenes locales
     ...newImageFiles.map((file, originalIndex) => ({
-      src: URL.createObjectURL(file),
+      src: URL.createObjectURL(file), // Crea una URL temporal para previsualización
       isNew: true,
       key: `new-${originalIndex}`,
       originalIndexInSource: originalIndex,
-      active: true, // Explicitly set active for new images to satisfy type check
+      active: true, // Las nuevas imágenes siempre se consideran activas
     })),
-  ].filter((image) => image.isNew || image.active !== false); // Filter out inactive existing images here
+  ].filter((image) => image.isNew || image.active !== false); // Filtra las imágenes existentes marcadas como inactivas
 
+  // Valores iniciales para Formik, basados en el producto prop o valores por defecto
   const initialValues: ProductFormValues = {
     denominacion: product?.denominacion || "",
     precioOriginal: product?.precioOriginal || 0,
@@ -224,8 +214,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
     sexo: Sexo.UNISEX, // Inicializa con el sexo del producto o UNISEX
     selectedCategoryIds:
       product?.categorias?.map((cat) => cat.id as number) || [],
-    newImageFiles: [], // Formik will only track these if they are put into `values` from file input
-    imagenes: product?.imagenes || [], // This is initialized, but the state `existingImages` is the source of truth for updates
+    newImageFiles: [], // Formik no gestiona directamente archivos, estos se manejan por el estado 'newImageFiles'
+    imagenes: product?.imagenes || [], // Usado solo para inicialización, el estado 'existingImages' es la fuente de verdad
     descuentoId: product?.descuento?.id || "",
   };
 
@@ -251,79 +241,66 @@ const ProductForm: React.FC<ProductFormProps> = ({
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={(values, { setSubmitting }) => {
-          console.log("ProductForm - Submitting values to parent:", values);
-          console.log(
-            "ProductForm - New Image Files (from state) to submit:",
-            newImageFiles
-          );
-          console.log(
-            "ProductForm - Existing Images (from state) to submit:",
-            existingImages
-          );
-
+          // Determina el ID del descuento a enviar
           const finalDiscountId = values.tienePromocion
             ? values.descuentoId
             : undefined;
+          // Crea el objeto DescuentoRequestDTO si hay un descuento
           const descuentoRequest: DescuentoRequestDTO | undefined =
             finalDiscountId ? { id: finalDiscountId as number } : undefined;
 
-          // Mapear `existingImages` (el estado actualizado) a `ImagenRequestDTO[]`
+          // Mapea las 'existingImages' (desde el estado, ya filtradas por 'active') a 'ImagenRequestDTO[]'
           const imagenesRequest: ImagenRequestDTO[] = existingImages
-            .filter((img) => img.active !== false) // Asegurarse de enviar solo las activas
+            .filter((img) => img.active !== false) // Asegura que solo se envíen las imágenes activas
             .map((img) => ({
               id: img.id,
               url: img.url,
-              activo: img.active ?? true, // Asegura `activo`
+              activo: img.active ?? true, // Asegura que 'activo' esté definido
             }));
 
-          // Mapear productos_detalles a ProductoDetalleRequestDTO[]
+          // Mapea los detalles del producto a 'ProductoDetalleRequestDTO[]'
           const productosDetallesRequest: ProductoDetalleRequestDTO[] =
-            product?.productos_detalles?.map((d) => {
-              // Asegúrate de que d.color y d.talle existan antes de acceder a sus IDs
-              // Si d.color o d.talle pueden ser undefined, y su id es obligatorio,
-              // deberías manejarlo (e.g., filtrar o asignar un valor predeterminado)
-              // Aquí, asumimos que si el producto existe y tiene detalles,
-              // estos detalles tendrán color y talle.
-              const colorId = d.color?.id;
-              const talleId = d.talle?.id;
+            product?.productos_detalles
+              ?.map((d) => {
+                const colorId = d.color?.id;
+                const talleId = d.talle?.id;
 
-              if (colorId === undefined || talleId === undefined) {
-                // Si colorId o talleId son undefined, puedes optar por:
-                // 1. Lanzar un error: throw new Error("Color o Talle faltante en detalle de producto");
-                // 2. Omitir este detalle: return null; (requiere un filter(Boolean) después del map)
-                // 3. Asignar un valor por defecto (si es aceptable en tu backend/DTO)
-                console.warn(
-                  `ProductForm: Detalle de producto con ID ${d.id} le falta Color o Talle. Se omitirá del request.`
-                );
-                return null; // Omitir este detalle del request
-              }
+                // Si falta el ID de color o talle, emite una advertencia y omite este detalle
+                if (colorId === undefined || talleId === undefined) {
+                  console.warn(
+                    `ProductForm: Detalle de producto con ID ${d.id} le falta Color o Talle. Se omitirá del request.`
+                  );
+                  return null; // Omitir este detalle del request
+                }
 
-              return {
-                id: d.id,
-                precioCompra: d.precioCompra,
-                stockActual: d.stockActual,
-                stockMaximo: d.stockMaximo,
-                colorId: colorId as number, // Aserción de tipo, asumiendo que es un número
-                talleId: talleId as number, // Aserción de tipo, asumiendo que es un número
-                activo: d.activo ?? true,
-                productoId: product.id as number, // ¡AÑADIDO! Asegura que `product.id` existe si `isEditing`
-              };
-            }).filter(Boolean) as ProductoDetalleRequestDTO[] || []; // Filtra los `null` y asegura el tipo
+                return {
+                  id: d.id,
+                  precioCompra: d.precioCompra,
+                  stockActual: d.stockActual,
+                  stockMaximo: d.stockMaximo,
+                  colorId: colorId as number, // Aserción de tipo
+                  talleId: talleId as number, // Aserción de tipo
+                  activo: d.activo ?? true,
+                  productoId: product.id as number, // Asegura que `product.id` existe si `isEditing`
+                };
+              })
+              .filter(Boolean) as ProductoDetalleRequestDTO[] || []; // Filtra los elementos 'null'
 
+          // Llama a la función onSubmit del componente padre con los datos preparados
           onSubmit({
-            id: product?.id,
+            id: product?.id, // ID del producto (si está editando)
             denominacion: values.denominacion,
             precioOriginal: values.precioOriginal,
             tienePromocion: values.tienePromocion,
             sexo: values.sexo,
             activo: product?.activo ?? true, // El estado activo lo maneja AdminProductScreen
             categoriaIds: values.selectedCategoryIds,
-            imagenes: imagenesRequest, // ¡Usar el estado `existingImages` actualizado y filtrado!
-            newImageFiles: newImageFiles, // ¡Usar el estado `newImageFiles` directamente!
-            productos_detalles: productosDetallesRequest, // Usar el mapeo corregido
+            imagenes: imagenesRequest, // Usa las imágenes existentes (activas) del estado
+            newImageFiles: newImageFiles, // Usa los nuevos archivos de imagen directamente del estado
+            productos_detalles: productosDetallesRequest, // Detalles de producto mapeados
             descuento: descuentoRequest,
           });
-          setSubmitting(false);
+          setSubmitting(false); // Deshabilita el estado de submitting
         }}
       >
         {({
@@ -344,6 +321,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   gap: 3,
                 }}
               >
+                {/* Columna izquierda: Campos del formulario */}
                 <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
                   <FormControl
                     fullWidth
@@ -429,6 +407,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                         checked={values.tienePromocion}
                         onChange={(e) => {
                           setFieldValue("tienePromocion", e.target.checked);
+                          // Si se desactiva la promoción, limpia el descuento seleccionado
                           if (!e.target.checked) {
                             setFieldValue("descuentoId", "");
                           }
@@ -439,11 +418,14 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     sx={{ mt: 1, mb: 1 }}
                   />
 
+                  {/* Campo de selección de descuento, solo si tienePromocion es true */}
                   {values.tienePromocion && (
                     <FormControl
                       fullWidth
                       margin="normal"
-                      error={touched.descuentoId && Boolean(errors.descuentoId)}
+                      error={
+                        touched.descuentoId && Boolean(errors.descuentoId)
+                      }
                     >
                       <InputLabel id="descuento-label">
                         Seleccionar Descuento
@@ -491,7 +473,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                       labelId="categorias-label"
                       id="selectedCategoryIds"
                       name="selectedCategoryIds"
-                      multiple
+                      multiple // Permite selección múltiple
                       value={values.selectedCategoryIds}
                       onChange={handleChange}
                       onBlur={handleBlur}
@@ -500,20 +482,21 @@ const ProductForm: React.FC<ProductFormProps> = ({
                         Boolean(errors.selectedCategoryIds)
                       }
                       label="Categorías"
+                      // Renderiza los chips para las categorías seleccionadas
                       renderValue={(selected) => (
                         <Box
                           sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}
                         >
                           {(selected as number[]).map((value) => {
-                            // Find the category (either parent or subcategory)
+                            // Encuentra la categoría o subcategoría por su ID para mostrar su denominación
                             const category = categorias.find(
                               (cat) => cat.id === value
                             );
                             const subcategory = category
                               ? null
-                              : categorias.flatMap(
-                                  (cat) => cat.subcategorias || []
-                                ).find((subCat) => subCat.id === value);
+                              : categorias
+                                  .flatMap((cat) => cat.subcategorias || [])
+                                  .find((subCat) => subCat.id === value);
 
                             const displayCategory = category || subcategory;
 
@@ -523,7 +506,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                                 label={
                                   displayCategory
                                     ? displayCategory.denominacion
-                                    : value
+                                    : value // Si no se encuentra, muestra el ID
                                 }
                               />
                             );
@@ -534,8 +517,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
                       {loadingCategorias ? (
                         <MenuItem disabled>Cargando categorías...</MenuItem>
                       ) : (
+                        // Mapea las categorías y subcategorías para el menú de selección
                         categorias.map((category) => (
                           [
+                            // Opción para la categoría principal
                             <MenuItem key={category.id} value={category.id}>
                               <Checkbox
                                 checked={
@@ -546,27 +531,35 @@ const ProductForm: React.FC<ProductFormProps> = ({
                               />
                               {category.denominacion}
                             </MenuItem>,
-                            category.subcategorias && category.subcategorias.length > 0 && (
-                              <ListSubheader key={`subheader-${category.id}`} sx={{ pl: 4 }}>
-                                Subcategorías de {category.denominacion}
-                              </ListSubheader>
+                            // Si tiene subcategorías, añade un subencabezado
+                            category.subcategorias &&
+                              category.subcategorias.length > 0 && (
+                                <ListSubheader
+                                  key={`subheader-${category.id}`}
+                                  sx={{ pl: 4 }}
+                                >
+                                  Subcategorías de {category.denominacion}
+                                </ListSubheader>
+                              ),
+                            // Opciones para las subcategorías (con indentación)
+                            ...(category.subcategorias || []).map(
+                              (subCategory) => (
+                                <MenuItem
+                                  key={subCategory.id}
+                                  value={subCategory.id}
+                                  sx={{ pl: 6 }} // Indenta las subcategorías
+                                >
+                                  <Checkbox
+                                    checked={
+                                      values.selectedCategoryIds.indexOf(
+                                        subCategory.id as number
+                                      ) > -1
+                                    }
+                                  />
+                                  {subCategory.denominacion}
+                                </MenuItem>
+                              )
                             ),
-                            ...(category.subcategorias || []).map((subCategory) => (
-                              <MenuItem
-                                key={subCategory.id}
-                                value={subCategory.id}
-                                sx={{ pl: 6 }} // Indent subcategories
-                              >
-                                <Checkbox
-                                  checked={
-                                    values.selectedCategoryIds.indexOf(
-                                      subCategory.id as number
-                                    ) > -1
-                                  }
-                                />
-                                {subCategory.denominacion}
-                              </MenuItem>
-                            )),
                           ]
                         ))
                       )}
@@ -580,6 +573,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   </FormControl>
                 </Box>
 
+                {/* Columna derecha: Carga y previsualización de imágenes */}
                 <Box
                   sx={{
                     border: "1px dashed",
@@ -593,18 +587,20 @@ const ProductForm: React.FC<ProductFormProps> = ({
                     minHeight: "200px",
                   }}
                 >
+                  {/* Input oculto para la selección de archivos */}
                   <input
                     accept="image/*"
                     id="image-upload"
                     type="file"
-                    multiple
+                    multiple // Permite seleccionar múltiples archivos
                     style={{ display: "none" }}
                     onChange={handleFileChange}
                   />
+                  {/* Botón para activar el input de archivos */}
                   <label htmlFor="image-upload">
                     <Button
                       variant="outlined"
-                      component="span"
+                      component="span" // Permite que el botón active el input de archivo
                       startIcon={<AddPhotoAlternateIcon />}
                     >
                       Subir Imágenes
@@ -617,6 +613,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   >
                     PNG, JPG (Máx 5MB por archivo)
                   </Typography>
+                  {/* Contenedor para las previsualizaciones de imágenes */}
                   <Box
                     sx={{
                       display: "flex",
@@ -649,6 +646,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                             objectFit: "cover",
                           }}
                         />
+                        {/* Botón para eliminar/desactivar imagen */}
                         <IconButton
                           size="small"
                           sx={{
@@ -676,6 +674,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
                 </Box>
               </Box>
             </DialogContent>
+            {/* Acciones del formulario (Botones) */}
             <DialogActions sx={{ p: 3 }}>
               <Button onClick={onClose} color="inherit" variant="outlined">
                 Cancelar

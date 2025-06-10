@@ -1,87 +1,113 @@
-// CheckoutModal.tsx
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import styles from "./CheckoutModal.module.css";
-import { useCartStore } from "../../../../store/cartStore";
-import { useAuthStore } from "../../../../store/authStore";
-import { useMercadoPagoStore } from "../../../../store/mercadoPagoStore";
-import { UserDTO } from "../../../dto/UserDTO";
-import { DireccionDTO } from "../../../dto/DireccionDTO";
-import { toast } from "react-toastify";
-import { LocalidadDTO, ProvinciaDTO } from "../../../dto/location";
-import { CreateOrdenCompraDetalleDTO, MercadoPagoItemRequestDTO, MercadoPagoPreferenceRequestDTO } from "../../../dto/MercadoPagoDTOs";
-import InputField from "../../InputField/InputField";
-import { AddressForm } from "../AddressForm/AddressForm";
-import { formatCurrency } from "../../../../types/formatUtils";
 
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import styles from "./CheckoutModal.module.css"; // Estilos CSS para el modal.
+import { useCartStore } from "../../../../store/cartStore"; // Store de Zustand para el carrito de compras.
+import { useAuthStore } from "../../../../store/authStore"; // Store de Zustand para la autenticación del usuario.
+import { useMercadoPagoStore } from "../../../../store/mercadoPagoStore"; // Store de Zustand para la integración con Mercado Pago.
+import { UserDTO } from "../../../dto/UserDTO"; // DTO para la estructura de datos del usuario.
+import { DireccionDTO } from "../../../dto/DireccionDTO"; // DTO para la estructura de datos de la dirección.
+import { toast } from "react-toastify"; // Para mostrar notificaciones toast.
+import { LocalidadDTO, ProvinciaDTO } from "../../../dto/location"; // DTOs para localidad y provincia.
+import { CreateOrdenCompraDetalleDTO, MercadoPagoItemRequestDTO, MercadoPagoPreferenceRequestDTO } from "../../../dto/MercadoPagoDTOs"; // DTOs para la solicitud de preferencia de Mercado Pago.
+import InputField from "../../InputField/InputField"; // Componente genérico para campos de entrada.
+import { AddressForm } from "../AddressForm/AddressForm"; // Componente para el formulario de dirección.
+import { formatCurrency } from "../../../../types/formatUtils"; // Utilidad para formatear valores de moneda.
+
+/**
+ * Propiedades esperadas por el componente CheckoutModal.
+ */
 interface CheckoutModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    subtotal: number;
-    user: UserDTO | null;
+    isOpen: boolean; // Booleano que controla la visibilidad del modal.
+    onClose: () => void; // Función callback para cerrar el modal.
+    subtotal: number; // El subtotal de los productos en el carrito (sin IVA ni envío).
+    user: UserDTO | null; // El objeto UserDTO del usuario logueado, o null si no hay ninguno.
 }
 
+// Porcentaje de IVA fijo para calcular impuestos.
 const ivaPercentage = 0.21; // 21% de IVA
 
+/**
+ * `CheckoutModal` es un componente de modal que maneja el flujo de checkout.
+ * Muestra los datos personales del usuario, opciones de envío, campos de dirección
+ * y un resumen del pedido antes de redirigir a Mercado Pago para el pago.
+ *
+ * @param {CheckoutModalProps} props Las propiedades para controlar el modal y los datos.
+ * @returns {JSX.Element | null} El componente modal o null si no está abierto.
+ */
 const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal, user }) => {
+    // Acceso a estados y acciones del store de carrito.
     const { items: cartItems, clearCart } = useCartStore();
+    // Acceso a acciones del store de autenticación.
     const { fetchUser } = useAuthStore();
 
+    // Acceso a estados y acciones del store de Mercado Pago.
     const {
-        initPoint,
-        isLoading: loadingPaymentProcess,
-        error: paymentError,
-        createPreference,
-        resetState,
+        initPoint, // URL de redirección a Mercado Pago.
+        isLoading: loadingPaymentProcess, // Estado de carga del proceso de pago.
+        error: paymentError, // Mensaje de error del proceso de pago.
+        createPreference, // Función para crear la preferencia de pago en Mercado Pago.
+        resetState, // Función para resetear el estado del store de Mercado Pago.
     } = useMercadoPagoStore();
 
+    // Estados locales para los datos personales del usuario.
     const [firstName, setFirstName] = useState<string>("");
     const [lastName, setLastName] = useState<string>("");
     const [phone, setPhone] = useState<string>("");
     const [email, setEmail] = useState<string>("");
 
+    // Estado local para la opción de envío seleccionada (delivery o pickup).
     const [selectedShippingOption, setSelectedShippingOption] =
         useState<"delivery" | "pickup">("delivery");
 
-    // Inicializamos selectedAddress para permitir null
+    // Estado local para la dirección de envío seleccionada o ingresada.
     const [selectedAddress, setSelectedAddress] = useState<DireccionDTO | null>(null);
 
+    // Costo de envío calculado dinámicamente según la opción de envío.
     const currentShippingCost = useMemo(() => {
         return selectedShippingOption === "delivery" ? 500 : 0;
     }, [selectedShippingOption]);
 
+    // Cantidad de IVA calculada en base al subtotal.
     const ivaAmount = useMemo(() => {
         return subtotal * ivaPercentage;
     }, [subtotal]);
 
+    // Total a pagar, incluyendo subtotal, IVA y costo de envío.
     const totalWithShippingAndTaxes = useMemo(() => {
         return subtotal + ivaAmount + currentShippingCost;
     }, [subtotal, ivaAmount, currentShippingCost]);
 
 
+    // Efecto para inicializar estados y limpiar el store al abrir/cerrar el modal.
     useEffect(() => {
         if (!isOpen) {
+            // Resetea todos los estados locales a sus valores iniciales cuando el modal se cierra.
             setFirstName("");
             setLastName("");
             setPhone("");
             setEmail("");
             setSelectedShippingOption("delivery");
             setSelectedAddress(null);
-            resetState();
+            resetState(); // Limpia el estado de Mercado Pago.
             return;
         }
 
+        // Si el modal se abre y hay un usuario logueado, se intenta actualizar sus datos.
         if (user?.id) {
             fetchUser();
         }
     }, [isOpen, user?.id, fetchUser, resetState]);
 
+    // Efecto para cargar los datos del usuario en los campos del formulario.
     useEffect(() => {
         if (user) {
+            // Rellena los campos personales con los datos del usuario.
             setFirstName(user.firstname || "");
             setLastName(user.lastname || "");
             setPhone(user.telefono || "");
             setEmail(user.email || "");
 
+            // Carga la primera dirección del usuario si existe, o inicializa una dirección vacía.
             if (user.addresses && user.addresses.length > 0) {
                 console.log(
                     "DEBUG: Usuario tiene direcciones existentes. Cargando primera dirección."
@@ -94,40 +120,48 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                     "DEBUG: Usuario NO tiene direcciones existentes. Empezando con una nueva dirección vacía."
                 );
                 setSelectedAddress({
-                    id: undefined,
+                    id: undefined, // undefined para indicar que es una nueva dirección.
                     calle: "",
                     numero: 0,
                     piso: null,
                     departamento: null,
                     cp: 0,
                     localidad: null,
-                    active: true
+                    active: true // Asume que una nueva dirección estará activa.
                 });
             }
         } else if (isOpen) {
+            // Si no hay usuario, se vacían los campos.
             setFirstName("");
             setLastName("");
             setPhone("");
             setEmail("");
             setSelectedAddress(null);
         }
-    }, [user, isOpen]);
+    }, [user, isOpen]); // Dependencias: `user` y `isOpen`.
 
+    // Efecto para redirigir a Mercado Pago una vez que se obtiene el `initPoint`.
     useEffect(() => {
         if (initPoint) {
-            window.location.href = initPoint;
-            clearCart();
-            onClose();
+            window.location.href = initPoint; // Redirige al usuario.
+            clearCart(); // Limpia el carrito después de iniciar el pago.
+            onClose(); // Cierra el modal.
         }
     }, [initPoint, clearCart, onClose]);
 
+    // Efecto para mostrar errores de pago.
     useEffect(() => {
         if (paymentError) {
-            toast.error(paymentError);
+            toast.error(paymentError); // Muestra el mensaje de error.
         }
     }, [paymentError]);
 
+    /**
+     * Maneja el proceso de "Proceder al Pago".
+     * Realiza validaciones, construye la solicitud de preferencia de Mercado Pago y la envía.
+     */
     const handleProceedToPay = useCallback(async () => {
+        // Validaciones iniciales
         if (!user || !user.id) {
             toast.error("Debe iniciar sesión para proceder al pago.");
             return;
@@ -150,11 +184,13 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
             return;
         }
 
-        let addressDisplayString: string = "";
-        let finalDireccionId: number | null = null;
-        let nuevaDireccionData: Partial<DireccionDTO> | null = null;
+        let addressDisplayString: string = ""; // Cadena para la descripción de la dirección.
+        let finalDireccionId: number | null = null; // ID de la dirección si es existente.
+        let nuevaDireccionData: Partial<DireccionDTO> | null = null; // Datos de una nueva dirección.
 
+        // Lógica condicional basada en la opción de envío.
         if (selectedShippingOption === "delivery") {
+            // Validaciones para la dirección de envío si se selecciona "delivery".
             if (
                 !selectedAddress ||
                 !selectedAddress.calle?.trim() ||
@@ -171,6 +207,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                 return;
             }
 
+            // Construye la cadena de visualización de la dirección.
             addressDisplayString = `${selectedAddress.calle} ${selectedAddress.numero}`;
             if (selectedAddress.piso)
                 addressDisplayString += `, Piso: ${selectedAddress.piso}`;
@@ -182,10 +219,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
             }
             addressDisplayString += `, CP: ${selectedAddress.cp}`;
 
+            // Determina si la dirección es existente o nueva.
             if (selectedAddress.id) {
                 finalDireccionId = selectedAddress.id;
                 nuevaDireccionData = null;
             } else {
+                // Si es una nueva dirección, se prepara el objeto `DireccionDTO` parcial.
                 nuevaDireccionData = {
                     calle: selectedAddress.calle,
                     numero: selectedAddress.numero,
@@ -206,36 +245,42 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                         : null,
                     active: true
                 };
-                finalDireccionId = null;
+                finalDireccionId = null; // No hay ID de dirección si es nueva.
             }
         } else {
+            // Si la opción es "pickup", la dirección de envío no es necesaria.
             addressDisplayString = "Retiro en Sucursal";
             finalDireccionId = null;
             nuevaDireccionData = null;
         }
 
+        // Prepara los detalles de la orden para ser enviados al backend.
         const detallesOrdenParaMP: CreateOrdenCompraDetalleDTO[] = cartItems.map(
             (item) => ({
                 productoDetalleId: item.productDetail.id!,
                 cantidad: item.quantity,
+                // Calcula el precio unitario incluyendo IVA.
                 precioUnitario: parseFloat(((item.product.precioFinal || item.product.precioOriginal || 0) * (1 + ivaPercentage)).toFixed(2)),
             })
         );
 
+        // Prepara los ítems para la solicitud de Mercado Pago.
         const mpItems: MercadoPagoItemRequestDTO[] = cartItems.map((item) => ({
             id: item.productDetail.id?.toString() || "",
             title: `${item.product.denominacion} - ${item.productDetail.color?.nombreColor || ''} - ${item.productDetail.talle?.nombreTalle || ''}`,
             description: `Color: ${item.productDetail.color?.nombreColor || ''}, Talle: ${item.productDetail.talle?.nombreTalle || ''}`,
             pictureUrl:
-                item.product.imagenes?.[0]?.url || "https://via.placeholder.com/150",
-            categoryId: item.product.categorias?.[0]?.denominacion || "Otros",
+                item.product.imagenes?.[0]?.url || "https://via.placeholder.com/150", // URL de la primera imagen o un placeholder.
+            categoryId: item.product.categorias?.[0]?.denominacion || "Otros", // Categoría principal o "Otros".
             quantity: item.quantity,
+            // Precio unitario con IVA para Mercado Pago.
             unitPrice: parseFloat(((item.product.precioFinal || item.product.precioOriginal || 0) * (1 + ivaPercentage)).toFixed(2)),
         }));
 
+        // Construye el objeto de solicitud de preferencia de Mercado Pago.
         const mpRequestData: MercadoPagoPreferenceRequestDTO = {
             items: mpItems,
-            external_reference: `orden-${Date.now()}-${user.id}`,
+            external_reference: `orden-${Date.now()}-${user.id}`, // Referencia única para la orden.
             userId: user.id!,
             payerName: firstName,
             payerLastName: lastName,
@@ -243,24 +288,24 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
             buyerPhoneNumber: phone,
             shippingOption: selectedShippingOption,
             shippingCost: currentShippingCost,
-            
+
             back_urls: {
-                success: `${window.location.origin}/checkout/success`,
-                failure: `${window.location.origin}/checkout/failure`,
-                pending: `${window.location.origin}/checkout/pending`,
+                success: `${window.location.origin}/checkout/success`, // URL de retorno para pago exitoso.
+                failure: `${window.location.origin}/checkout/failure`, // URL de retorno para pago fallido.
+                pending: `${window.location.origin}/checkout/pending`, // URL de retorno para pago pendiente.
             },
-            auto_return: "approved",
-            montoTotal: totalWithShippingAndTaxes,
-            direccionId: finalDireccionId,
-            nuevaDireccion: nuevaDireccionData,
-            detalles: detallesOrdenParaMP,
-            notification_url: `${import.meta.env.VITE_API_BASE_URL}/mercadopago/webhook`,
+            auto_return: "approved", // Redirige automáticamente al éxito.
+            montoTotal: totalWithShippingAndTaxes, // Monto total de la compra.
+            direccionId: finalDireccionId, // ID de la dirección existente.
+            nuevaDireccion: nuevaDireccionData, // Datos de la nueva dirección (si aplica).
+            detalles: detallesOrdenParaMP, // Detalles de los ítems de la orden.
+            notification_url: `${import.meta.env.VITE_API_BASE_URL}/mercadopago/webhook`, // URL para notificaciones de Mercado Pago.
         };
 
         console.log("DEBUG: Datos de la preferencia de MP a enviar:", mpRequestData);
 
         try {
-            await createPreference(mpRequestData);
+            await createPreference(mpRequestData); // Envía la solicitud para crear la preferencia.
             toast.success("Redireccionando a Mercado Pago...");
         } catch (error: any) {
             console.error("Error capturado en el componente:", error);
@@ -281,23 +326,24 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
         ivaAmount
     ]);
 
+    // Si el modal no está abierto, no renderiza nada.
     if (!isOpen) return null;
 
     return (
         <div className={`${styles.modalOverlay} ${isOpen ? styles.isOpen : ''}`}>
             <div className={styles.modalContent}>
-                {/* Aquí puedes agregar un encabezado de modal si no lo tienes */}
                 <div className={styles.modalHeader}>
                     <h2>Finalizar Compra</h2>
                     <button className={styles.closeButton} onClick={onClose}>
-                        &times;
+                        &times; {/* Botón para cerrar el modal */}
                     </button>
                 </div>
 
-                <div className={styles.modalBodyWrapper}> {/* Este es el contenedor de las dos columnas */}
+                <div className={styles.modalBodyWrapper}> {/* Contenedor de dos columnas */}
                     <div className={styles.checkoutFormsSection}> {/* Columna izquierda: Formularios */}
                         {user ? (
                             <>
+                                {/* Sección de Datos Personales */}
                                 <div className={styles.personalInfoSection}>
                                     <h3>Datos Personales</h3>
                                     <InputField
@@ -306,7 +352,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                         value={firstName}
                                         onChange={(e) => setFirstName(e.target.value)}
                                         className={styles.inputField}
-                                        disabled={!!user?.firstname}
+                                        disabled={!!user?.firstname} // Deshabilita si el nombre ya está en el usuario.
                                     />
                                     <InputField
                                         id="lastName"
@@ -314,7 +360,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                         value={lastName}
                                         onChange={(e) => setLastName(e.target.value)}
                                         className={styles.inputField}
-                                        disabled={!!user?.lastname}
+                                        disabled={!!user?.lastname} // Deshabilita si el apellido ya está en el usuario.
                                     />
                                     <InputField
                                         id="phone"
@@ -333,10 +379,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="Ej: tuemail@example.com"
                                         className={styles.inputField}
-                                        disabled={!!user?.email}
+                                        disabled={!!user?.email} // Deshabilita si el email ya está en el usuario.
                                     />
                                 </div>
 
+                                {/* Sección de Opciones de Envío */}
                                 <div className={styles.shippingAddressSection}>
                                     <h3>Opciones de Envío</h3>
                                     <div className={styles.paymentMethods}>
@@ -367,6 +414,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                     </div>
                                 </div>
 
+                                {/* Sección de Dirección de Envío (visible solo si se selecciona "delivery") */}
                                 {selectedShippingOption === "delivery" && (
                                     <div className={styles.shippingAddressSection}>
                                         <h3>Dirección de Envío</h3>
@@ -405,6 +453,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                                             setSelectedAddress(foundAddress || null);
                                                         }
                                                     }}
+                                                    // Valor seleccionado: el ID de la dirección actual o "new".
                                                     value={selectedAddress?.id?.toString() || "new"}
                                                 >
                                                     <option value="new">
@@ -429,26 +478,28 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                             <p>Ingresa una nueva dirección de envío:</p>
                                         )}
 
+                                        {/* Formulario de dirección (visible solo si selectedAddress no es null) */}
                                         {selectedAddress && (
                                             <AddressForm
                                                 address={selectedAddress}
+                                                // Cuando cambia la dirección en el formulario hijo, actualiza el estado local.
                                                 onAddressChange={(_idx, updatedAddr) =>
                                                     setSelectedAddress(updatedAddr)
                                                 }
-                                                index={0}
-                                                onRemoveAddress={() => {}}
-                                                showRemoveButton={false}
+                                                index={0} // El índice 0 ya que solo se maneja una dirección a la vez aquí.
+                                                onRemoveAddress={() => {}} // No se permite eliminar direcciones desde aquí.
+                                                showRemoveButton={false} // Oculta el botón de eliminar.
                                             />
                                         )}
                                     </div>
                                 )}
-                                {/* Botón de "Confirmar Compra" dentro de la sección de formularios */}
+                                {/* Botón "Proceder al Pago" en la sección de formularios */}
                                 <div className={styles.paymentSection}>
                                     <button
                                         type="button"
                                         className={styles.confirmButton}
                                         onClick={handleProceedToPay}
-                                        disabled={loadingPaymentProcess || cartItems.length === 0}
+                                        disabled={loadingPaymentProcess || cartItems.length === 0} // Deshabilitado si está procesando o el carrito está vacío.
                                     >
                                         {loadingPaymentProcess
                                             ? "Procesando..."
@@ -487,12 +538,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                 <span>{formatCurrency(totalWithShippingAndTaxes)}</span>
                             </div>
                         </div>
-                        {/* Botón "Proceder al pago" en el resumen del pedido */}
-                        {/* Se puede duplicar el botón o moverlo aquí si solo debe aparecer en el resumen */}
-                        {user && ( // Solo muestra el botón si hay un usuario logueado
+                        {/* Botón "Proceder al pago" en el resumen del pedido (duplicado para visibilidad si se desea) */}
+                        {user && ( // Solo muestra el botón si hay un usuario logueado.
                             <button
                                 type="button"
-                                className={styles.proceedToPaymentButton} // Nueva clase para el botón en el resumen
+                                className={styles.proceedToPaymentButton} // Nueva clase para el botón en el resumen.
                                 onClick={handleProceedToPay}
                                 disabled={loadingPaymentProcess || cartItems.length === 0}
                             >

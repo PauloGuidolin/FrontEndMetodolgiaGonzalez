@@ -34,7 +34,34 @@
   margin-top: 0; /* Elimina el margen superior por defecto del h3 */
   margin-bottom: 15px; /* Espacio entre el encabezado y la lista de ítems */
 }
+.filterLink {
+  cursor: pointer; /* Indica que es clickeable */
+  position: relative; /* Necesario para la animación del subrayado */
+  padding-bottom: 2px; /* Espacio para el subrayado */
+  transition: color 0.3s ease-in-out; /* Transición suave para el color del texto */
+}
 
+/* Efecto de subrayado animado al pasar el mouse */
+.filterLink::after {
+  content: '';
+  position: absolute;
+  width: 0%; /* Inicia sin ancho */
+  height: 2px; /* Grosor del subrayado */
+  bottom: 0;
+  left: 0;
+  background-color: white; /* Color del subrayado */
+  transition: width 0.3s ease-in-out; /* Transición para el ancho */
+}
+
+/* Estado hover para el enlace de filtro */
+.filterLink:hover {
+  color: #c0c0c0; /* Un color ligeramente diferente al pasar el mouse para una pequeña indicación */
+}
+
+/* Animación del subrayado al pasar el mouse */
+.filterLink:hover::after {
+  width: 100%; /* El subrayado se expande al 100% del ancho del texto */
+}
 /* Estilos para las listas (ul) dentro de las columnas */
 .column ul {
   list-style: none; /* Eliminar los puntos de la lista */
@@ -125,6 +152,7 @@
     flex: none; /* Deshabilita la proporción flex definida para escritorio */
     border-left: 3px solid black;
   }
+  
 }
 
 /* --- Media Query para Tablet y Laptop (ancho mínimo de 769px) --- */

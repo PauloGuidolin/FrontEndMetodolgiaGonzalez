@@ -2,7 +2,7 @@
 import { create } from "zustand";
 
 import { ColorDTO } from "../components/dto/ColorDTO"; // Asegúrate de la ruta correcta a tu DTO
-import { colorService } from "../https/colorService";
+import { colorService } from "../https/colorService"; // Asegúrate de la ruta correcta a tu colorService
 
 
 interface ColorState {
@@ -13,11 +13,16 @@ interface ColorState {
 }
 
 interface ColorActions {
+    // Para la administración: carga todos los colores (activos e inactivos)
     fetchAllColors: () => Promise<void>;
+    // Para la página principal: carga solo los colores activos
+    fetchActiveColors: () => Promise<void>;
     fetchColorById: (id: number | string) => Promise<void>;
     fetchColorByName: (name: string) => Promise<void>;
     createColor: (colorData: Partial<Omit<ColorDTO, 'id'>>) => Promise<ColorDTO>;
     updateColor: (colorData: ColorDTO) => Promise<ColorDTO>;
+    // deactivateColor y activateColor se mantienen si los usas para una acción directa,
+    // pero toggleStatus es más versátil y podría reemplazarlos en la UI.
     deactivateColor: (id: number | string) => Promise<void>;
     activateColor: (id: number | string) => Promise<ColorDTO>;
     clearSelectedColor: () => void;
@@ -36,14 +41,27 @@ export const useColorStore = create<ColorState & ColorActions>((set) => ({
     error: null,
     selectedColor: null,
 
+    // Método para cargar solo los colores activos (para la página principal o filtros de usuario)
+    fetchActiveColors: async () => {
+        set({ loading: true, error: null });
+        try {
+            const activeColors = await colorService.getActives(); // Llama a `/colores`
+            set({ colors: activeColors, loading: false });
+        } catch (error: any) {
+            console.error("Error al cargar colores activos:", error);
+            set({ error: `Error al cargar colores activos: ${error.message || String(error)}`, loading: false });
+        }
+    },
+
+    // Método para cargar TODOS los colores (activos e inactivos) (para el panel de administración)
     fetchAllColors: async () => {
         set({ loading: true, error: null });
         try {
-            const colors = await colorService.getAll();
-            set({ colors, loading: false });
+            const allColors = await colorService.getAll(); // Llama a `/colores/all`
+            set({ colors: allColors, loading: false });
         } catch (error: any) {
-            console.error("Error fetching all colors:", error);
-            set({ error: `Error al cargar colores: ${error.message || String(error)}`, loading: false });
+            console.error("Error al cargar todos los colores:", error);
+            set({ error: `Error al cargar todos los colores: ${error.message || String(error)}`, loading: false });
         }
     },
 
@@ -53,7 +71,7 @@ export const useColorStore = create<ColorState & ColorActions>((set) => ({
             const color = await colorService.getById(id);
             set({ selectedColor: color, loading: false });
         } catch (error: any) {
-            console.error(`Error fetching color by ID ${id}:`, error);
+            console.error(`Error al cargar color por ID ${id}:`, error);
             set({ error: `Error al cargar color por ID: ${error.message || String(error)}`, loading: false, selectedColor: null });
         }
     },
@@ -64,7 +82,7 @@ export const useColorStore = create<ColorState & ColorActions>((set) => ({
             const color = await colorService.getByName(name);
             set({ selectedColor: color, loading: false });
         } catch (error: any) {
-            console.error(`Error fetching color by name ${name}:`, error);
+            console.error(`Error al cargar color por nombre ${name}:`, error);
             set({ error: `Error al cargar color por nombre: ${error.message || String(error)}`, loading: false, selectedColor: null });
         }
     },
@@ -72,17 +90,14 @@ export const useColorStore = create<ColorState & ColorActions>((set) => ({
     createColor: async (colorData: Partial<Omit<ColorDTO, 'id'>>) => {
         set({ loading: true, error: null });
         try {
-            // ¡EL CAMBIO CLAVE ESTÁ AQUÍ!
-            // Ahora se llama al método `create` del `colorService`,
-            // que ya maneja la llamada `http.post` y el `COLOR_ENDPOINT`.
             const newColor = await colorService.create(colorData);
             set((state) => ({
-                colors: [...state.colors, newColor],
+                colors: [...state.colors, newColor], // Añade el nuevo color a la lista actual (asumiendo que se añadió como activo)
                 loading: false,
             }));
             return newColor;
         } catch (error: any) {
-            console.error("Error creating color:", error);
+            console.error("Error al crear color:", error);
             set({ error: `Error al crear color: ${error.message || String(error)}`, loading: false });
             throw error;
         }
@@ -100,7 +115,7 @@ export const useColorStore = create<ColorState & ColorActions>((set) => ({
             }));
             return updatedColor;
         } catch (error: any) {
-            console.error(`Error updating color with ID ${colorData.id}:`, error);
+            console.error(`Error al actualizar color con ID ${colorData.id}:`, error);
             set({ error: `Error al actualizar color: ${error.message || String(error)}`, loading: false });
             throw error;
         }
@@ -117,7 +132,7 @@ export const useColorStore = create<ColorState & ColorActions>((set) => ({
                 loading: false,
             }));
         } catch (error: any) {
-            console.error(`Error deactivating color with ID ${id}:`, error);
+            console.error(`Error al desactivar color con ID ${id}:`, error);
             set({ error: `Error al desactivar color: ${error.message || String(error)}`, loading: false });
             throw error;
         }
@@ -135,7 +150,7 @@ export const useColorStore = create<ColorState & ColorActions>((set) => ({
             }));
             return activatedColor;
         } catch (error: any) {
-            console.error(`Error activating color with ID ${id}:`, error);
+            console.error(`Error al activar color con ID ${id}:`, error);
             set({ error: `Error al activar color: ${error.message || String(error)}`, loading: false });
             throw error;
         }

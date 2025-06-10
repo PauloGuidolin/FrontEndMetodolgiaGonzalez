@@ -14,18 +14,29 @@ import { toast } from "react-toastify";
 import Avatar from "@mui/material/Avatar";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // El ícono de círculo con silueta de persona
 
+/**
+ * `UserProfile` es el componente de vista que muestra la información
+ * del perfil del usuario, permite la edición de datos personales y de acceso,
+ * y ofrece opciones para cerrar sesión y desactivar la cuenta.
+ */
 export const UserProfile = () => {
+  // Extrae el estado y las acciones relacionadas con la autenticación del store de Zustand.
   const { user, loadingUser, errorUser, fetchUser, logout, deactivateAccount } =
     useAuthStore();
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Hook para la navegación programática.
 
+  // Estados para controlar la visibilidad de los modales de edición.
   const [openEditPersonalDataModal, setEditPersonalDataModal] = useState(false);
   const [openEditAccesDataModal, setEditAccesDataModal] = useState(false);
 
-  // Estado para la URL de la imagen que se intentará mostrar.
+  // Estado para la URL de la imagen de perfil que se intentará mostrar.
   // Si esta URL es inválida o vacía, el componente Avatar de MUI mostrará su children (el ícono).
   const [displayedProfileImageUrl, setDisplayedProfileImageUrl] = useState("");
 
+  /**
+   * `fetchUserData` es un callback memorizado que se encarga de obtener
+   * los datos del usuario desde el store. Incluye manejo básico de errores.
+   */
   const fetchUserData = useCallback(async () => {
     try {
       await fetchUser();
@@ -35,48 +46,72 @@ export const UserProfile = () => {
         error
       );
     }
-  }, [fetchUser]);
+  }, [fetchUser]); // Dependencia: `fetchUser` (del store).
 
+  /**
+   * `useEffect` para la carga inicial de datos del usuario y manejo de autenticación.
+   * Se ejecuta cuando el componente se monta o cuando cambian las dependencias.
+   */
   useEffect(() => {
     // Solo intenta cargar el usuario si no está ya cargado, no está cargando y no hay un error previo.
-    // Y si el token existe en localStorage.
+    // Además, verifica la existencia del token en localStorage para determinar si hay una sesión activa.
     if (!user && !loadingUser && !errorUser) {
       const token = localStorage.getItem("jwt_token");
       if (token) {
-        fetchUserData();
+        fetchUserData(); // Si hay token, intenta cargar los datos del usuario.
       } else {
+        // Si no hay token, redirige al inicio o a la página de login y muestra un mensaje.
         navigate("/HomeScreen"); // o "/login" si prefieres redirigir a la página de login
         toast.error("Debes iniciar sesión para acceder a tu perfil.");
       }
     }
-  }, [user, loadingUser, errorUser, navigate, fetchUserData]);
+  }, [user, loadingUser, errorUser, navigate, fetchUserData]); // Dependencias para re-ejecutar el efecto.
 
-  // Lógica para determinar qué URL de imagen se pasa al Avatar de MUI.
-  // Si user.imagenUser.url no existe, se establece a una cadena vacía para activar el fallback del Avatar.
+  /**
+   * `useEffect` para determinar la URL de la imagen de perfil a mostrar.
+   * Se ejecuta cuando los datos del usuario (`user`) cambian.
+   */
   useEffect(() => {
+    // Si `user` y `user.imagenUser.url` existen, usa esa URL.
+    // De lo contrario, establece la URL a una cadena vacía para activar el fallback del Avatar.
     if (user && user.imagenUser && user.imagenUser.url) {
       setDisplayedProfileImageUrl(user.imagenUser.url);
     } else {
       setDisplayedProfileImageUrl(""); // Si no hay URL, el Avatar mostrará el ícono por defecto
     }
-  }, [user]);
+  }, [user]); // Dependencia: `user`.
 
+  /**
+   * Cierra el modal de edición de datos personales y recarga los datos del usuario.
+   */
   const closeEditPersonalData = () => {
     setEditPersonalDataModal(false);
-    fetchUserData(); // Recargar datos del usuario después de editar
+    fetchUserData(); // Recargar datos del usuario después de editar.
   };
 
+  /**
+   * Cierra el modal de edición de datos de acceso y recarga los datos del usuario.
+   */
   const closeEditAccesData = () => {
     setEditAccesDataModal(false);
-    fetchUserData(); // Recargar datos del usuario para ver los cambios
+    fetchUserData(); // Recargar datos del usuario para ver los cambios.
   };
 
+  /**
+   * Maneja el cierre de sesión del usuario.
+   * Llama a la acción `logout` del store y redirige al inicio.
+   */
   const handleLogout = () => {
     logout();
-    navigate("/"); // Redirigir al home o página de inicio de sesión
+    navigate("/"); // Redirigir al home o página de inicio de sesión.
     toast.info("Sesión cerrada correctamente.");
   };
 
+  /**
+   * Maneja la desactivación de la cuenta del usuario.
+   * Pide confirmación al usuario antes de proceder, llama a la acción `deactivateAccount`,
+   * y redirige al inicio si la desactivación es exitosa.
+   */
   const handleDeleteAccount = async () => {
     const confirmDeactivation = window.confirm(
       "¿Estás seguro de que quieres desactivar tu cuenta? Esta acción es irreversible."
@@ -86,8 +121,8 @@ export const UserProfile = () => {
       try {
         await deactivateAccount();
         toast.success("Tu cuenta ha sido desactivada correctamente.");
-        logout(); // Asegurarse de cerrar sesión después de desactivar
-        navigate("/"); // Redirigir al home o página de inicio de sesión
+        logout(); // Asegurarse de cerrar sesión después de desactivar.
+        navigate("/"); // Redirigir al home o página de inicio de sesión.
       } catch (error) {
         console.error(
           "Error al intentar desactivar la cuenta desde la UI:",
@@ -100,6 +135,7 @@ export const UserProfile = () => {
     }
   };
 
+  // --- Renderizado condicional basado en el estado de carga y errores ---
   if (loadingUser) {
     return (
       <>
@@ -148,8 +184,10 @@ export const UserProfile = () => {
     );
   }
 
+  // Si hay datos de usuario, obtiene la primera dirección (si existe) para mostrar.
   const firstAddress = user.addresses?.[0];
 
+  // --- Renderizado del perfil del usuario cuando los datos están disponibles ---
   return (
     <>
       <Header />
@@ -178,7 +216,6 @@ export const UserProfile = () => {
           <p className={styles.correo}>{user.email}</p>
 
           <button onClick={handleLogout}>CERRAR SESIÓN</button>
-          
         </div>
 
         <div className={styles.dataContainer}>
@@ -189,7 +226,9 @@ export const UserProfile = () => {
 
           <div>
             <h4>Datos Personales</h4>
-            <p>Fecha Nacimiento: {user.fechaNacimiento || "No especificado"}</p>
+            <p>
+              Fecha Nacimiento: {user.fechaNacimiento || "No especificado"}
+            </p>
             <p>Sexo: {user.sexo || "No especificado"}</p>
             {/* AÑADIDO: Mostrar DNI */}
             <p>DNI: {user.dni || "No especificado"}</p>
@@ -198,7 +237,8 @@ export const UserProfile = () => {
             <p>
               Dirección:
               {firstAddress
-                ? `${firstAddress.calle} ${firstAddress.numero || ""}` +
+                ? // Formatea la dirección completa si está disponible.
+                  `${firstAddress.calle} ${firstAddress.numero || ""}` +
                   `${firstAddress.piso ? `, Piso ${firstAddress.piso}` : ""}` +
                   `${
                     firstAddress.departamento
@@ -248,19 +288,20 @@ export const UserProfile = () => {
           </div>
         </div>
 
+        {/* Renderizado condicional de los modales de edición */}
         {openEditPersonalDataModal && (
           <EditPersonalData
-            isOpen={openEditPersonalDataModal} // <-- ¡Añadir prop isOpen!
-            onClose={closeEditPersonalData} // <-- ¡Cambiar nombre de prop!
-            user={user}
+            isOpen={openEditPersonalDataModal} // Pasa el estado de apertura.
+            onClose={closeEditPersonalData} // Callback para cerrar el modal y recargar datos.
+            user={user} // Pasa los datos del usuario al modal.
           />
         )}
 
         {openEditAccesDataModal && (
           <EditAcccesData
-            isOpen={openEditAccesDataModal} // <-- ¡Añadir prop isOpen!
-            onClose={closeEditAccesData} // <-- ¡Cambiar nombre de prop!
-            user={user}
+            isOpen={openEditAccesDataModal} // Pasa el estado de apertura.
+            onClose={closeEditAccesData} // Callback para cerrar el modal y recargar datos.
+            user={user} // Pasa los datos del usuario al modal.
           />
         )}
       </div>
