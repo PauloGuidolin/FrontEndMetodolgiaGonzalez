@@ -138,28 +138,7 @@ export const HomeScreen = () => {
           </div>
 
           {/* Sección "Tendencias de las tiendas" - Muestra una lista de productos promocionales */}
-          <div className={styles.sliderClothes}>
-            <h2>Tendencias de las tiendas</h2>
-            {/* Mensajes condicionales para estados de carga y error de promocionales */}
-            {loadingPromotional && <p>Cargando tendencias...</p>}
-            {errorPromotional && (
-              <p>Error al cargar tendencias: {errorPromotional}</p>
-            )}
-            {/* Renderiza CardList solo si no hay carga, no hay error y hay productos promocionales */}
-            {!loadingPromotional &&
-              !errorPromotional &&
-              Array.isArray(promotionalProducts) &&
-              promotionalProducts.length > 0 && (
-                <CardList products={promotionalProducts} />
-              )}
-            {/* Mensaje si no se encuentran productos promocionales */}
-            {!loadingPromotional &&
-              !errorPromotional &&
-              Array.isArray(promotionalProducts) &&
-              promotionalProducts.length === 0 && (
-                <p>No se encontraron productos promocionales.</p>
-              )}
-          </div>
+         
           <Footer />
         </div>
       </div>
