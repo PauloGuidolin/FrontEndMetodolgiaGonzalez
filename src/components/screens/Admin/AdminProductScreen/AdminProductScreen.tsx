@@ -452,7 +452,7 @@ const AdminProductScreen: React.FC = () => {
     useShallow((state) => ({
       talles: state.talles,
       loading: state.loading,
-      fetchAllTalles: state.fetchAllTalles,
+      fetchAllTalles: state.fetchActiveTalles,
     }))
   );
 

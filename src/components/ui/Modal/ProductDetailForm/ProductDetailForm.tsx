@@ -11,7 +11,8 @@ import {
     FormControl,
     InputLabel,
     CircularProgress,
-    Box
+    Box,
+    FormHelperText // Importar FormHelperText para mostrar errores en Select
 } from "@mui/material";
 import { SelectChangeEvent } from "@mui/material/Select";
 
@@ -19,7 +20,7 @@ import { SelectChangeEvent } from "@mui/material/Select";
 import { ProductoDetalleDTO } from "../../../dto/ProductoDetalleDTO";
 import { ColorDTO } from "../../../dto/ColorDTO";
 import { TalleDTO } from "../../../dto/TalleDTO";
-import { ProductoDetalleRequestDTO } from "../../../dto/ProductoRequestDTO"; // Importar ProductoDetalleRequestDTO (usado para el payload de envío)
+import { ProductoDetalleRequestDTO } from "../../../dto/ProductoRequestDTO";
 
 // Importar el CSS Module
 import styles from './ProductDetailForm.module.css';
@@ -30,17 +31,27 @@ interface ProductDetailFormState {
     precioCompra: number | '';
     stockActual: number | '';
     stockMaximo: number | '';
-    color: ColorDTO | null; // Objeto ColorDTO completo para manejo en el frontend (para mostrar el nombre)
-    talle: TalleDTO | null; // Objeto TalleDTO completo para manejo en el frontend (para mostrar el nombre)
-    productoId: number | null; // ID del producto asociado. Puede ser null al inicio para creación hasta que se pase productId.
+    color: ColorDTO | null; 
+    talle: TalleDTO | null; 
+    productoId: number | null; 
     activo?: boolean;
+}
+
+// Interfaz para el estado de los errores de validación
+interface ProductDetailFormErrors {
+    precioCompra?: string;
+    stockActual?: string;
+    stockMaximo?: string;
+    color?: string;
+    talle?: string;
+    productoId?: string;
 }
 
 interface ProductDetailFormProps {
     open: boolean;
     onClose: () => void;
-    productDetail: ProductoDetalleDTO | null; // Esto será `selectedProductDetail` del padre
-    productId: number | null; // Este será `currentProductIdForDetail` del padre (usado para CREACIÓN)
+    productDetail: ProductoDetalleDTO | null; 
+    productId: number | null; 
     onSubmit: (detailData: ProductoDetalleRequestDTO) => Promise<void>;
     colors: ColorDTO[];
     loadingColors: boolean;
@@ -51,71 +62,68 @@ interface ProductDetailFormProps {
 const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
     open,
     onClose,
-    productDetail, // Contiene los datos del detalle a EDITAR (incluido productoId)
-    productId,     // Contiene el ID del producto PADRE para CREAR un nuevo detalle
+    productDetail, 
+    productId, 
     onSubmit,
     colors,
     loadingColors,
     talles,
     loadingTalles,
 }) => {
-    // Inicialización del estado: Si hay un 'productDetail' (modo edición), usa sus datos.
-    // Si no, y hay un 'productId' (modo creación), úsalo. De lo contrario, valores por defecto.
     const [formData, setFormData] = useState<ProductDetailFormState>(() => {
-        if (productDetail) { // Modo edición: Usar los datos del detalle existente
+        if (productDetail) {
             return {
                 id: productDetail.id,
                 precioCompra: productDetail.precioCompra,
                 stockActual: productDetail.stockActual,
                 stockMaximo: productDetail.stockMaximo,
-                color: productDetail.color || null, // Asignar el objeto completo si viene
-                talle: productDetail.talle || null, // Asignar el objeto completo si viene
-                productoId: productDetail.productoId || null, // **CRÍTICO: Obtener productoId directamente**
+                color: productDetail.color || null,
+                talle: productDetail.talle || null,
+                productoId: productDetail.productoId || null,
                 activo: productDetail.activo
             };
-        } else if (productId) { // Modo creación: Usar el ID del producto padre proporcionado
+        } else if (productId) {
             return {
                 precioCompra: '',
                 stockActual: '',
                 stockMaximo: '',
                 color: null,
                 talle: null,
-                productoId: productId, // Se inicializa con el productId recibido por props
+                productoId: productId,
                 activo: true,
             };
         }
-        // Estado por defecto si no hay detalle existente ni productId (esto no debería ocurrir en un flujo normal)
         return {
             precioCompra: '',
             stockActual: '',
             stockMaximo: '',
             color: null,
             talle: null,
-            productoId: null, // Si no se conoce el ID del producto padre al inicio
+            productoId: null,
             activo: true,
         };
     });
 
-    // useEffect para re-inicializar el formulario si las props cambian (ej. se abre para un nuevo detalle o edición)
+    // Nuevo estado para manejar los errores de validación
+    const [errors, setErrors] = useState<ProductDetailFormErrors>({});
+
+    // useEffect para re-inicializar el formulario y limpiar errores
     useEffect(() => {
-        if (open) { // Solo si el modal está abierto
+        if (open) { 
             if (productDetail) { // Modo edición
                 setFormData({
                     id: productDetail.id,
                     precioCompra: productDetail.precioCompra,
                     stockActual: productDetail.stockActual,
                     stockMaximo: productDetail.stockMaximo,
-                    // Busca el objeto ColorDTO/TalleDTO completo por ID, o usa el objeto anidado si viene completo
                     color: colors.find(c => c.id === productDetail.color?.id) || productDetail.color || null,
                     talle: talles.find(t => t.id === productDetail.talle?.id) || productDetail.talle || null,
-                    productoId: productDetail.productoId || null, // **CRÍTICO: Ya lo tenemos en la inicialización, pero reafirmamos**
+                    productoId: productDetail.productoId || null,
                     activo: productDetail.activo
                 });
-                console.log('ProductDetailForm: Initializing form for EDIT - productDetail:', productDetail);
-                console.log('ProductDetailForm: Initializing form for EDIT - productDetail.productoId:', productDetail.productoId);
             } else { // Modo creación
-                const defaultColor = colors.find(c => c.nombreColor === 'NEGRO'); // Considera qué color por defecto quieres
-                const defaultTalle = talles.find(t => t.nombreTalle === 'L');    // Considera qué talle por defecto quieres
+                const defaultColor = colors.find(c => c.nombreColor === 'NEGRO'); 
+                const defaultTalle = talles.find(t => t.nombreTalle === 'L'); 
 
                 setFormData({
                     precioCompra: '',
@@ -123,20 +131,20 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
                     stockMaximo: '',
                     color: defaultColor ?? null,
                     talle: defaultTalle ?? null,
-                    productoId: productId, // Para creación, usa el productId de la prop
+                    productoId: productId, 
                     activo: true
                 });
-                console.log('ProductDetailForm: Initializing form for NEW - productId:', productId);
             }
+            setErrors({}); // Limpiar errores al abrir/reinicializar el formulario
         }
-        // Este log se ejecutará cada vez que formData cambie, incluyendo después de la inicialización
-        // Pero el log que nos interesa para la verificación es el del handleSubmit, que ocurre al enviar.
-        console.log('ProductDetailForm: Current formData after useEffect:', formData);
-    }, [open, productDetail, productId, colors, talles]); // Dependencias del useEffect
+    }, [open, productDetail, productId, colors, talles]); 
 
     // Manejador de cambios para los campos de texto numéricos
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
+        // Limpiar el error para el campo específico cuando el usuario empieza a escribir
+        setErrors(prev => ({ ...prev, [name]: undefined }));
+
         setFormData((prev) => ({
             ...prev,
             [name]: (name === 'precioCompra' || name === 'stockActual' || name === 'stockMaximo')
@@ -148,70 +156,87 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
     // Manejador de cambios para los Select (Color y Talle)
     const handleSelectChange = (event: SelectChangeEvent<string>) => {
         const { name, value } = event.target;
-        console.log(`ProductDetailForm: Select changed - Name: ${name}, Value: ${value}`);
+        // Limpiar el error para el campo específico cuando el usuario selecciona una opción
+        setErrors(prev => ({ ...prev, [name]: undefined }));
 
         if (name === "color") {
             const selectedColor = colors.find(c => c.nombreColor === value);
             setFormData((prev) => ({ ...prev, color: selectedColor ?? null }));
-            console.log('ProductDetailForm: Selected Color Object:', selectedColor);
         } else if (name === "talle") {
             const selectedTalle = talles.find(t => t.nombreTalle === value);
             setFormData((prev) => ({ ...prev, talle: selectedTalle ?? null }));
-            console.log('ProductDetailForm: Selected Talle Object:', selectedTalle);
         }
+    };
+
+    // Función para validar el formulario
+    const validateForm = () => {
+        let newErrors: ProductDetailFormErrors = {};
+        let isValid = true;
+
+        // Validación: precioCompra
+        if (formData.precioCompra === '' || formData.precioCompra === null || isNaN(Number(formData.precioCompra)) || Number(formData.precioCompra) <= 0) {
+            newErrors.precioCompra = "El precio de compra es obligatorio y debe ser un número positivo.";
+            isValid = false;
+        }
+
+        // Validación: stockActual
+        if (formData.stockActual === '' || formData.stockActual === null || isNaN(Number(formData.stockActual)) || Number(formData.stockActual) < 0) {
+            newErrors.stockActual = "El stock actual es obligatorio y no puede ser negativo.";
+            isValid = false;
+        }
+
+        // Validación: stockMaximo
+        if (formData.stockMaximo === '' || formData.stockMaximo === null || isNaN(Number(formData.stockMaximo)) || Number(formData.stockMaximo) <= 0) {
+            newErrors.stockMaximo = "El stock máximo es obligatorio y debe ser un número positivo.";
+            isValid = false;
+        } else if (Number(formData.stockMaximo) < Number(formData.stockActual)) {
+            newErrors.stockMaximo = "El stock máximo no puede ser menor que el stock actual.";
+            isValid = false;
+        }
+
+        // Validación: Color
+        if (!formData.color) {
+            newErrors.color = "Debe seleccionar un color.";
+            isValid = false;
+        }
+
+        // Validación: Talle
+        if (!formData.talle) {
+            newErrors.talle = "Debe seleccionar un talle.";
+            isValid = false;
+        }
+
+        // Validación: productoId (aunque esto debería venir siempre del padre)
+        if (!formData.productoId) {
+            newErrors.productoId = "El ID del producto padre es obligatorio."; // Mensaje de error interno, no visible al usuario
+            isValid = false;
+        }
+
+        setErrors(newErrors);
+        return isValid;
     };
 
     // Manejador del envío del formulario
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validaciones de formulario
-        if (formData.precioCompra === '' || formData.precioCompra === null || formData.precioCompra <= 0) {
-            console.error("El precio de compra es obligatorio y debe ser mayor que 0.");
-            return;
-        }
-        if (formData.stockActual === '' || formData.stockActual === null || formData.stockActual < 0) {
-            console.error("El stock actual es obligatorio y no puede ser negativo.");
-            return;
-        }
-        if (formData.stockMaximo === '' || formData.stockMaximo === null || formData.stockMaximo <= 0) {
-            console.error("El stock máximo es obligatorio y debe ser mayor que 0.");
+        if (!validateForm()) {
+            console.error("Errores de validación en el formulario.");
             return;
         }
 
-        console.log('--- ProductDetailForm: Submitting Form Data ---');
-        console.log('formData.color:', formData.color);
-        console.log('formData.color?.id (value to be sent as colorId):', formData.color?.id);
-        console.log('formData.talle:', formData.talle);
-        console.log('formData.talle?.id (value to be sent as talleId):', formData.talle?.id);
-        console.log('formData.productoId (value to be sent as productoId):', formData.productoId); // **Verificación clave**
-        console.log('--- End of form data inspection ---');
-
-        if (!formData.color) {
-            console.error("El color es obligatorio (validación de frontend).");
-            return;
-        }
-        if (!formData.talle) {
-            console.error("El talle es obligatorio (validación de frontend).");
-            return;
-        }
-        if (!formData.productoId) { // Esta validación ahora debería pasar en modo edición
-            console.error("El ID del producto es obligatorio (validación de frontend).");
-            return;
-        }
-
-        // Construir el DTO a enviar al backend - AHORA ES ProductoDetalleRequestDTO
+        // Construir el DTO a enviar al backend
         const detailDataToSubmit: ProductoDetalleRequestDTO = {
-            id: formData.id, // 'id' es opcional en ProductoDetalleRequestDTO para creaciones
-            precioCompra: formData.precioCompra as number, // Asegurarse que es number
-            stockActual: formData.stockActual as number,   // Asegurarse que es number
-            stockMaximo: formData.stockMaximo as number,  // Asegurarse que es number
-            activo: formData.activo ?? true,
+            id: formData.id, 
+            precioCompra: formData.precioCompra as number, 
+            stockActual: formData.stockActual as number, 
+            stockMaximo: formData.stockMaximo as number, 
+            activo: formData.activo ?? true, // Mantener el estado activo si no se especifica
 
             // MANDAMOS LOS IDs AL BACKEND, NO LOS OBJETOS COMPLETOS
-            colorId: formData.color.id as number,
-            talleId: formData.talle.id as number,
-            productoId: formData.productoId as number, // **Asegurarse que es number y que viene de formData**
+            colorId: formData.color!.id as number, // ! para asegurar que no es null (ya validado)
+            talleId: formData.talle!.id as number, // ! para asegurar que no es null (ya validado)
+            productoId: formData.productoId as number,
         };
 
         console.log('ProductDetailForm: Final payload (detailDataToSubmit) ready for backend:', detailDataToSubmit);
@@ -238,6 +263,8 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
                         required
                         inputProps={{ step: "0.01", min: "0" }}
                         className={styles.textField}
+                        error={!!errors.precioCompra} // Si existe un error para precioCompra, marcar como error
+                        helperText={errors.precioCompra} // Mostrar el mensaje de error
                     />
                     <TextField
                         name="stockActual"
@@ -250,6 +277,8 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
                         required
                         inputProps={{ min: "0" }}
                         className={styles.textField}
+                        error={!!errors.stockActual}
+                        helperText={errors.stockActual}
                     />
                     <TextField
                         name="stockMaximo"
@@ -262,10 +291,18 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
                         required
                         inputProps={{ min: "0" }}
                         className={styles.textField}
+                        error={!!errors.stockMaximo}
+                        helperText={errors.stockMaximo}
                     />
 
                     {/* Selector de Color */}
-                    <FormControl fullWidth margin="normal" required className={styles.formControl}>
+                    <FormControl 
+                        fullWidth 
+                        margin="normal" 
+                        required 
+                        className={styles.formControl}
+                        error={!!errors.color} // Aplicar el estilo de error al FormControl
+                    >
                         <InputLabel id="color-select-label">Color</InputLabel>
                         <Select
                             labelId="color-select-label"
@@ -290,10 +327,18 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
                                 ))
                             )}
                         </Select>
+                        {/* Mostrar el mensaje de error para el selector de color */}
+                        {errors.color && <FormHelperText>{errors.color}</FormHelperText>}
                     </FormControl>
 
                     {/* Selector de Talle */}
-                    <FormControl fullWidth margin="normal" required className={styles.formControl}>
+                    <FormControl 
+                        fullWidth 
+                        margin="normal" 
+                        required 
+                        className={styles.formControl}
+                        error={!!errors.talle} // Aplicar el estilo de error al FormControl
+                    >
                         <InputLabel id="talle-select-label">Talle</InputLabel>
                         <Select
                             labelId="talle-select-label"
@@ -318,6 +363,8 @@ const ProductDetailForm: React.FC<ProductDetailFormProps> = ({
                                 ))
                             )}
                         </Select>
+                        {/* Mostrar el mensaje de error para el selector de talle */}
+                        {errors.talle && <FormHelperText>{errors.talle}</FormHelperText>}
                     </FormControl>
                 </form>
             </DialogContent>

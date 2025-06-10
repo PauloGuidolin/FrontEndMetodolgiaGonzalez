@@ -1,9 +1,9 @@
-// src/pages/CheckoutSuccess.tsx
 import React, { useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useCartStore } from '../../../store/cartStore';
-
+// Este componente no necesita estilos directamente porque redirige casi inmediatamente.
+// Mantenemos el div base por si hay un ligero retraso en la redirección.
 
 const CheckoutSuccess: React.FC = () => {
     const location = useLocation();
@@ -19,7 +19,6 @@ const CheckoutSuccess: React.FC = () => {
         if (collectionStatus === 'approved') {
             toast.success(`Pago aprobado. ID de pago: ${paymentId}. Orden: ${externalReference}.`);
             clearCart(); // Limpiar el carrito en pago exitoso
-            // Opcionalmente, navegar a una página real de confirmación de orden
             navigate(`/order-confirmation/${externalReference}`, { replace: true });
         } else if (collectionStatus === 'rejected') {
             toast.error(`Pago rechazado. Motivo: ${queryParams.get('reason')}.`);
@@ -28,13 +27,14 @@ const CheckoutSuccess: React.FC = () => {
             toast.info(`Pago pendiente. ID de pago: ${paymentId}.`);
             navigate('/checkout/pending', { replace: true });
         } else {
-            // Manejar casos donde el estado no es explícitamente "approved" pero podría ser exitoso
             toast.info("Pago procesado. Verifique el estado de su orden.");
-            navigate('/orders', { replace: true }); // Redirigir a las órdenes del usuario o a la página de inicio
+            navigate('/orders', { replace: true });
         }
     }, [location, navigate, clearCart]);
 
     return (
+        // Se mantiene el estilo inline básico, ya que este componente es una página de "carga"
+        // y se redirige rápidamente. Los estilos compartidos se aplicarán en las páginas de destino.
         <div style={{ padding: '20px', textAlign: 'center' }}>
             <h1>Procesando tu pago...</h1>
             <p>Por favor, espera mientras confirmamos el estado de tu transacción.</p>

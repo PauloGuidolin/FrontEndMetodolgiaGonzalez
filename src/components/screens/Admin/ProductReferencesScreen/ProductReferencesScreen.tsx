@@ -90,7 +90,7 @@ export const ProductReferencesScreen = () => {
             talles: state.talles,
             loading: state.loading,
             error: state.error,
-            fetchAllTalles: state.fetchAllTalles,
+            fetchAllTalles: state.fetchAllTallesForAdmin,
             createTalle: state.createTalle,
             updateTalle: state.updateTalle,
             toggleTalleStatus: state.toggleTalleStatus, 
