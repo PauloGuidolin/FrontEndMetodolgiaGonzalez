@@ -1,11 +1,10 @@
-// Archivo: src/AppRouter.tsx
+// Archivo: src/AppRouter.tsx (CON ESTE CAMBIO)
 
 import { Navigate, Route, Routes } from "react-router";
 import { HomeScreen } from "../components/screens/HomeScreen/HomeScreen";
 import { HelpScreen } from "../components/screens/HelpScreen/HelpScreen";
 import CartScreen from "../components/screens/CartScreen/CartScreen";
-import { UserProfile }  from "../components/screens/UserProfile/UserProfile";
-// IMPORTANTE: Asegúrate de que esta ruta sea la correcta, yo la he cambiado a 'ProductScreen'
+import { UserProfile  } from "../components/screens/UserProfile/UserProfile";
 import ProductDetailPage from "../components/screens/ProductDetailPage/ProductDetailPage";
 import OrderConfirmation from "../components/screens/MecadoPagoScreens/OrderConfirmation";
 import AdminProductScreen from "../components/screens/Admin/AdminProductScreen/AdminProductScreen";
@@ -26,10 +25,13 @@ export const AppRouter = () => {
         <Route path="/UserProfile" element={<UserProfile />} />
         <Route path="/productos" element={<ProductScreen />} />
         <Route path="/product/:id" element={<ProductDetailPage />} />
+        {/* ⭐ Rutas de Mercado Pago - No necesitan ":param" si los datos vienen por query params */}
         <Route path="/checkout/success" element={<OrderConfirmation />} />
         <Route path="/checkout/failure" element={<OrderConfirmation />} />
         <Route path="/checkout/pending" element={<OrderConfirmation />} />
-        <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+        {/* Mantienes esta ruta para cuando quieras navegar directamente a una orden ya confirmada */}
+        <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} /> 
+        {/* Rutas de Admin */}
         <Route path="/admin/productos" element={<AdminProductScreen />} />
         <Route path="/admin/ProductReferencesScreen" element={<ProductReferencesScreen />} />
         <Route path="/admin/AdminUsersScreen" element={<AdminUsersScreen />} />

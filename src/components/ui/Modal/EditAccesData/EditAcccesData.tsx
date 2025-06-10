@@ -1,59 +1,80 @@
 import { FC, useState, useEffect } from "react";
-import styles from './EditAcccesData.module.css';
+import styles from './EditAcccesData.module.css'; // Importa los estilos CSS para el modal.
 
-import { useAuthStore } from "../../../../store/authStore";
-import { toast } from "react-toastify";
-import { UserDTO } from "../../../dto/UserDTO";
-import { UpdateCredentialsRequest } from "../../../dto/UpdateCredentialsRequest";
-import Swal from 'sweetalert2';
+import { useAuthStore } from "../../../../store/authStore"; // Importa el hook del store de autenticación (Zustand, etc.).
+import { toast } from "react-toastify"; // Para mostrar notificaciones toast.
+import { UserDTO } from "../../../dto/UserDTO"; // Define la estructura del objeto de usuario.
+import { UpdateCredentialsRequest } from "../../../dto/UpdateCredentialsRequest"; // Define la estructura del payload para la actualización de credenciales.
+import Swal from 'sweetalert2'; // Para mostrar alertas modales de confirmación.
 
+/**
+ * Define las propiedades (props) que el componente `EditAcccesData` espera recibir.
+ */
 interface EditAcccesDataProps {
-    // AÑADE ESTAS DOS PROPIEDADES
-    isOpen: boolean; // Indica si el modal está abierto o cerrado
-    onClose: () => void; // Función para cerrar el modal
-    user: UserDTO;
+    isOpen: boolean; // Indica si el modal debe estar visible (true) u oculto (false).
+    onClose: () => void; // Función callback para cerrar el modal.
+    user: UserDTO; // Objeto `UserDTO` con los datos actuales del usuario.
 }
 
-// CAMBIA LA DESESTRUCTURACIÓN DE LAS PROPS
+/**
+ * `EditAcccesData` es un componente funcional de React que actúa como un modal
+ * para que el usuario pueda editar su correo electrónico y/o contraseña.
+ * Requiere la contraseña actual para confirmar cualquier cambio.
+ *
+ * @param {EditAcccesDataProps} { isOpen, onClose, user } Las propiedades del componente.
+ * @returns {JSX.Element | null} Un elemento de modal React si `isOpen` es true, de lo contrario `null`.
+ */
 const EditAcccesData: FC<EditAcccesDataProps> = ({ isOpen, onClose, user }) => {
-    // AÑADE ESTE RENDERIZADO CONDICIONAL AL PRINCIPIO DEL COMPONENTE
+    // Si `isOpen` es `false`, el componente no renderiza nada, ocultando el modal.
     if (!isOpen) {
-        return null; // Si isOpen es false, el componente no renderiza nada (está oculto)
+        return null;
     }
 
-    const [email, setEmail] = useState(user.email || '');
-    const [currentPassword, setCurrentPassword] = useState('');
-    const [newPassword, setNewPassword] = useState('');
-    const [confirmNewPassword, setConfirmNewPassword] = useState('');
+    // Estados locales para los campos del formulario.
+    const [email, setEmail] = useState(user.email || ''); // Email actual del usuario o cadena vacía.
+    const [currentPassword, setCurrentPassword] = useState(''); // Contraseña actual del usuario.
+    const [newPassword, setNewPassword] = useState(''); // Nueva contraseña.
+    const [confirmNewPassword, setConfirmNewPassword] = useState(''); // Confirmación de la nueva contraseña.
 
+    // Destructura funciones y estados del store de autenticación.
     const { updateUserCredentials, loadingUser, logout } = useAuthStore();
 
+    // `useEffect` para actualizar el estado `email` si la prop `user.email` cambia.
     useEffect(() => {
         if (user?.email) {
             setEmail(user.email);
         }
-    }, [user]);
+    }, [user]); // Dependencia: el objeto `user`.
 
+    /**
+     * Manejador asíncrono para el botón de guardar.
+     * Realiza validaciones, muestra confirmaciones y llama a la lógica de actualización.
+     */
     const handleSave = async () => {
+        // Determina si el email o la contraseña han sido modificados.
         const emailChanged = email !== user.email;
-        const passwordChanged = newPassword.length > 0;
+        const passwordChanged = newPassword.length > 0; // Se considera cambiada si se ha introducido algo.
 
+        // Validación: la nueva contraseña y su confirmación deben coincidir.
         if (passwordChanged && newPassword !== confirmNewPassword) {
             toast.error("La nueva contraseña y la confirmación no coinciden.");
             return;
         }
 
+        // Validación: si hay cambios en email o contraseña, la contraseña actual es requerida.
         if ((emailChanged || passwordChanged) && !currentPassword) {
             toast.error("Por favor, introduce tu contraseña actual para confirmar los cambios.");
             return;
         }
 
+        // Si no hay ningún cambio, informa al usuario y cierra el modal.
         if (!emailChanged && !passwordChanged) {
             toast.info("No hay cambios en el email o la contraseña.");
-            onClose(); // Usa onClose aquí
+            onClose();
             return;
         }
 
+        // Prepara los mensajes de confirmación para SweetAlert2.
         let confirmationText = '';
         let showConfirmation = false;
 
@@ -68,6 +89,7 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ isOpen, onClose, user }) => {
             showConfirmation = true;
         }
 
+        // Si se requiere confirmación (hubo cambios), muestra la alerta de SweetAlert2.
         if (showConfirmation) {
             const result = await Swal.fire({
                 title: '¿Estás seguro?',
@@ -81,42 +103,46 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ isOpen, onClose, user }) => {
             });
 
             if (!result.isConfirmed) {
-                return; // Si el usuario cancela, no hacemos nada
+                return; // Si el usuario cancela la confirmación, la función termina aquí.
             }
         }
 
+        // Construye el objeto `UpdateCredentialsRequest` con los datos a enviar.
         const updateData: UpdateCredentialsRequest = {
-            currentPassword: currentPassword,
+            currentPassword: currentPassword, // La contraseña actual es siempre necesaria si hay cambios.
         };
 
         if (emailChanged) {
-            updateData.newEmail = email;
+            updateData.newEmail = email; // Añade el nuevo email si ha cambiado.
         }
 
         if (passwordChanged) {
-            updateData.newPassword = newPassword;
+            updateData.newPassword = newPassword; // Añade la nueva contraseña si ha cambiado.
         }
 
         try {
+            // Llama a la función del store para actualizar las credenciales.
             await updateUserCredentials(updateData);
             toast.success("Datos de acceso actualizados exitosamente.");
 
-            // Si hubo algún cambio en email o contraseña, cerramos la sesión
+            // Si hubo algún cambio en email o contraseña, cierra la sesión del usuario.
             if (emailChanged || passwordChanged) {
                 logout();
             }
-            onClose(); // Usa onClose aquí
+            onClose(); // Cierra el modal después de una actualización exitosa.
         } catch (error: any) {
+            // Manejo de errores en caso de fallo en la actualización.
             console.error("Error al guardar los datos de acceso:", error);
             const errorMessage = error.response?.data?.message || error.message || "Error desconocido al actualizar los datos de acceso.";
-            toast.error(errorMessage);
+            toast.error(errorMessage); // Muestra un mensaje de error al usuario.
         }
     };
 
     return (
         <>
-            {/* CAMBIA closeEditAccesData POR onClose */}
+            {/* Fondo oscuro del modal que también lo cierra al hacer clic fuera */}
             <div className={styles.background} onClick={onClose}></div>
+            {/* Contenedor principal del modal */}
             <div className={styles.containerPrincipal}>
                 <h3>Editar Contraseñas y correo</h3>
                 <div className={styles.containerData}>
@@ -126,7 +152,7 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ isOpen, onClose, user }) => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         className={styles.inputText}
-                        disabled={loadingUser}
+                        disabled={loadingUser} // Deshabilita el input mientras la carga está activa.
                     />
                     <label>Contraseña Actual</label>
                     <input
@@ -154,15 +180,16 @@ const EditAcccesData: FC<EditAcccesDataProps> = ({ isOpen, onClose, user }) => {
                     />
                 </div>
                 <div className={styles.containerButtons}>
-                    {/* CAMBIA closeEditAccesData POR onClose */}
+                    {/* Botón para cancelar la edición, que cierra el modal */}
                     <button onClick={onClose} disabled={loadingUser}>Cancelar</button>
+                    {/* Botón para guardar los cambios */}
                     <button onClick={handleSave} disabled={loadingUser}>
-                        {loadingUser ? 'Guardando...' : 'Aceptar'}
+                        {loadingUser ? 'Guardando...' : 'Aceptar'} {/* Muestra "Guardando..." durante la carga. */}
                     </button>
                 </div>
             </div>
         </>
-    )
+    );
 }
 
 export default EditAcccesData;

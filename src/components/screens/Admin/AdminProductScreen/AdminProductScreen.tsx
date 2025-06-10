@@ -440,7 +440,7 @@ const AdminProductScreen: React.FC = () => {
     useShallow((state) => ({
       colors: state.colors,
       loading: state.loading,
-      fetchAllColors: state.fetchAllColors,
+      fetchAllColors: state.fetchActiveColors,
     }))
   );
 

@@ -1,75 +1,67 @@
 import { FC, useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom"; // Puedes eliminar esta línea si solo usas el useNavigate de 'react-router'
 import { Footer } from "../../ui/Footer/Footer";
 import { Header } from "../../ui/Header/Header";
 import styles from "./HomeScreen.module.css";
-// import { ProductoDTO } from "../../dto/ProductoDTO"; // Ya no necesitas importar ProductoDTO aquí si solo lo usas en el Store/Card
-import {  useProductStore } from "../../../store/productStore"; // Verifica la ruta
+import { useProductStore } from "../../../store/productStore";
 import CardList from "../../ui/Cards/CardList/CardList";
 import { useShallow } from "zustand/shallow";
 
+/**
+ * Componente HomeScreen
+ * Muestra la página de inicio de la aplicación, incluyendo un banner,
+ * productos destacados y listados de productos generales y promocionales.
+ * Utiliza el store de Zustand para gestionar el estado de los productos.
+ */
 export const HomeScreen = () => {
-
-  // Consumimos el estado y las acciones del store de productos
+  // Consumimos el estado y las acciones del store de productos utilizando `useShallow`
+  // para optimizar las re-renderizaciones, solo re-renderiza si los valores seleccionados cambian superficialmente.
   const {
-    // Accedemos a originalProducts del estado y lo renombramos a 'products'
-    products, // Lista general de productos (originalProducts renombrado)
-    loading: loadingProducts, // Estado de carga general (mapeado de state.loading)
-    error: errorProducts, // Error general (mapeado de state.error)
-    promotionalProducts, // Lista de productos promociales (del estado promotionalProducts)
-    loadingPromotional, // Estado de carga para promocionales
-    errorPromotional, // Error para promocionales
+    // Lista general de productos (mapeado de state.originalProducts)
+    products,
+    // Estado de carga para los productos generales
+    loading: loadingProducts,
+    // Estado de error para los productos generales
+    error: errorProducts,
+    // Lista de productos promocionales
+    promotionalProducts,
+    // Estado de carga para los productos promocionales
+    loadingPromotional,
+    // Estado de error para los productos promocionales
+    errorPromotional,
   } = useProductStore(
     useShallow((state) => ({
-      // Usamos originalProducts del estado del store para la sección "Descubrí lo nuevo"
       products: state.originalProducts,
-      loading: state.loading, // Estado de carga para la carga general/filtrada
-      error: state.error, // Estado de error para la carga general/filtrada
-
-      promotionalProducts: state.promotionalProducts, // Estado para productos promocionales
-      loadingPromotional: state.loadingPromotional, // Estado de carga para promocionales
-      errorPromotional: state.errorPromotional, // Error para promocionales
+      loading: state.loading,
+      error: state.error,
+      promotionalProducts: state.promotionalProducts,
+      loadingPromotional: state.loadingPromotional,
+      errorPromotional: state.errorPromotional,
     }))
   );
 
-  // Obtenemos las acciones directamente del hook (no con useShallow si no dependen del estado mismo para su definición)
+  // Obtenemos las acciones directamente del hook del store.
   const fetchProductsAction = useProductStore((state) => state.fetchProducts);
   const fetchPromotionalProductsAction = useProductStore(
     (state) => state.fetchPromotionalProducts
   );
 
-  // Usamos useEffect para llamar a las acciones de fetching cuando el componente se monta
+  // `useEffect` para llamar a las acciones de fetching cuando el componente se monta.
+  // La lógica de carga se ejecuta solo si los datos aún no están presentes y no hay carga/error previo.
   useEffect(() => {
-    console.log("HomeScreen useEffect triggered.");
-    console.log("Current state selected in HomeScreen:", {
-      productsArray: products, // <-- LOG: Muestra el array de productos generales
-      productsLength: products?.length, // <-- LOG: Muestra la longitud
-      loadingProducts,
-      errorProducts,
-      promotionalProductsArray: promotionalProducts, // <-- LOG: Muestra el array de promocionales
-      promotionalProductsLength: promotionalProducts?.length, // <-- LOG: Muestra la longitud de promocionales
-      loadingPromotional,
-      errorPromotional,
-    });
-
-    // Lógica para fetchear todos los productos DTOs (los "nuevos" o generales)
-    // Usamos products?.length para seguridad si en algún estado inicial products fuera null/undefined
+    // Lógica para obtener todos los productos generales si no han sido cargados.
     if (products?.length === 0 && !loadingProducts && !errorProducts) {
-      console.log(
-        "HomeScreen: Condition met for fetching all products DTOs. Calling fetchProductsAction()."
-      );
       fetchProductsAction();
     }
-    // Lógica para fetchear productos promocionales DTOs ("tendencias")
-    // Actualmente comentado, pero la estructura está lista si la necesitas.
-    // if (promotionalProducts?.length === 0 && !loadingPromotional && !errorPromotional) {
-    //     console.log("HomeScreen: Condition met for fetching promotional products DTOs. Calling fetchPromotionalProductsAction().");
-    //     fetchPromotionalProductsAction();
-    // }
-
-    // Dependencias:
-    // Incluimos acciones, longitudes de arrays y estados de error.
-    // Excluimos estados de carga para evitar bucles infinitos si cambian durante la carga.
+    // Lógica para obtener productos promocionales si no han sido cargados.
+    if (
+      promotionalProducts?.length === 0 &&
+      !loadingPromotional &&
+      !errorPromotional
+    ) {
+      fetchPromotionalProductsAction();
+    }
+    // Dependencias del efecto: Aseguran que el efecto se re-ejecute
+    // si alguna de estas acciones o propiedades del estado cambian.
   }, [
     fetchProductsAction,
     products?.length,
@@ -84,7 +76,7 @@ export const HomeScreen = () => {
       <div>
         <Header />
         <div className={styles.containerHome}>
-          {/* Sección del Banner */}
+          {/* Sección del Banner principal */}
           <div className={styles.banner}>
             <img
               src="../../../../images/bannerAdidas.png"
@@ -93,9 +85,8 @@ export const HomeScreen = () => {
           </div>
 
           {/* Sección de Producto Destacado (Camiseta Boca) - Contenido estático */}
-          {/* IMPORTANTE: Cada item del grid ahora tiene su propio div.imgRelative */}
           <div className={styles.shirt}>
-            {/* Primer item del grid: Camiseta Boca principal */}
+            {/* Primer item del grid: Camiseta Boca principal con texto descriptivo */}
             <div className={styles.imgRelative}>
               <img
                 src="../../../../images/camisetaboca.jpeg"
@@ -103,11 +94,11 @@ export const HomeScreen = () => {
               />
               <div className={styles.text}>
                 <h3>120 AÑOS DE GLORIA</h3>
-                <h4>Remera Boca Juniors: inspirada en los titulos</h4>
+                <h4>Remera Boca Juniors: inspirada en los títulos</h4>
               </div>
             </div>
 
-            {/* Segundo item del grid: Escudo Boca */}
+            {/* Segundo item del grid: Escudo de Boca */}
             <div className={styles.imgRelative}>
               <img
                 src="../../../../images/escudoboca.jpg"
@@ -115,7 +106,7 @@ export const HomeScreen = () => {
               />
             </div>
 
-            {/* Tercer item del grid: Camiseta Boca Entrenamiento */}
+            {/* Tercer item del grid: Camiseta Boca de Entrenamiento */}
             <div className={styles.imgRelative}>
               <img
                 src="../../../../images/camisetabocaentrenamiento.avif"
@@ -124,22 +115,20 @@ export const HomeScreen = () => {
             </div>
           </div>
 
-          {/* Sección "Descubrí lo nuevo" - Usando CardList con todos los productos */}
+          {/* Sección "Descubrí lo nuevo" - Muestra una lista de productos generales */}
           <div className={styles.sliderShoes}>
             <h2>Descubrí lo nuevo</h2>
+            {/* Mensajes condicionales para estados de carga y error */}
             {loadingProducts && <p>Cargando productos nuevos...</p>}
             {errorProducts && (
               <p>Error al cargar productos nuevos: {errorProducts}</p>
             )}
-            {/* Renderizado condicional para CardList de productos nuevos */}
-            {/* PASAR products a CardList solo si NO está cargando, NO hay error y products es un array con elementos */}
+            {/* Renderiza CardList solo si no hay carga, no hay error y hay productos */}
             {!loadingProducts &&
               !errorProducts &&
               Array.isArray(products) &&
-              products.length > 0 && (
-                <CardList products={products} /> // <-- Aquí CardList es el componente que necesito asegurar que genera un .sliderTrack
-              )}
-            {/* Mostrar mensaje "No se encontraron" si terminó de cargar sin error y el array está vacío */}
+              products.length > 0 && <CardList products={products} />}
+            {/* Mensaje si no se encuentran productos nuevos */}
             {!loadingProducts &&
               !errorProducts &&
               Array.isArray(products) &&
@@ -148,11 +137,8 @@ export const HomeScreen = () => {
               )}
           </div>
 
-          {/* Sección "Tendencias de las tiendas" - Usando CardList con productos promocionales */}
-          <div className={styles.sliderClothes}>
-            <h2>Tendencias de las tiendas</h2>
-          </div>
-          {/*Footer*/}
+          {/* Sección "Tendencias de las tiendas" - Muestra una lista de productos promocionales */}
+         
           <Footer />
         </div>
       </div>

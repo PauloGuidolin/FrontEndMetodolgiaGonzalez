@@ -1,38 +1,38 @@
-// src/ui/FilterPanel/FilterPanel.tsx
-
 import React, { useState, useEffect, useCallback } from 'react';
 import styles from './FilterPanel.module.css';
-import { ProductFilters } from '../../../store/productStore';
-import { Sexo } from '../../../types/ISexo'; // Asegúrate de que esta ruta sea correcta
+import { ProductFilters } from '../../../store/productStore'; // Define la estructura de los filtros de productos.
+import { Sexo } from '../../../types/ISexo'; // Enumeración para el tipo de sexo.
 
-// Importar íconos si los vas a usar en el JSX.
-// Por ejemplo, si usas react-icons:
+// Importación de íconos de 'react-icons' para mejorar la UI.
 import { FaPercent, FaTshirt, FaPaintBrush, FaRulerCombined, FaDollarSign, FaSortAlphaDown, FaSearch } from 'react-icons/fa';
-// O si es una imagen local para el ícono de promoción (considera que esto no se usa directamente en el checkbox)
-// import promotionIcon from '../../../assets/icons/promotion-icon.svg'; // Ejemplo de importación si tuvieras un ícono SVG
 
+/**
+ * Define las propiedades del componente FilterPanel.
+ */
 export interface FilterPanelProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onApplyFilters: (filters: ProductFilters) => void;
-    onClearFilters: () => void;
-    availableCategories: string[];
-    availableColors: string[];
-    availableSizes: string[];
-    initialFilters?: ProductFilters;
+    isOpen: boolean; // Controla la visibilidad del panel.
+    onClose: () => void; // Callback para cerrar el panel.
+    onApplyFilters: (filters: ProductFilters) => void; // Callback para aplicar los filtros seleccionados.
+    onClearFilters: () => void; // Callback para limpiar todos los filtros.
+    availableCategories: string[]; // Lista de categorías disponibles para filtrar.
+    availableColors: string[]; // Lista de colores disponibles para filtrar.
+    availableSizes: string[]; // Lista de tallas disponibles para filtrar.
+    initialFilters?: ProductFilters; // Filtros iniciales para pre-llenar el panel.
 }
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({
-  isOpen,
-  onClose,
-  onApplyFilters,
-  onClearFilters,
-  availableCategories,
-  availableColors,
-  availableSizes,
-  initialFilters,
+    isOpen,
+    onClose,
+    onApplyFilters,
+    onClearFilters,
+    availableCategories,
+    availableColors,
+    availableSizes,
+    initialFilters,
 }) => {
+    // Estado local para almacenar los filtros seleccionados por el usuario.
     const [selectedFilters, setSelectedFilters] = useState<ProductFilters>(() => {
+        // Define los filtros por defecto.
         const defaultFilters: ProductFilters = {
             categorias: [],
             sexo: null,
@@ -45,12 +45,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             orderDirection: null,
             denominacion: null,
         };
+        // Combina los filtros por defecto con los filtros iniciales proporcionados.
         const combinedFilters: ProductFilters = {
             ...defaultFilters,
             ...initialFilters,
             categorias: Array.isArray(initialFilters?.categorias) ? initialFilters.categorias : [],
             colores: Array.isArray(initialFilters?.colores) ? initialFilters.colores : [],
             talles: Array.isArray(initialFilters?.talles) ? initialFilters.talles : [],
+            // Asegura que los precios sean números finitos o null.
             minPrice: typeof initialFilters?.minPrice === 'number' && isFinite(initialFilters.minPrice) ? initialFilters.minPrice : null,
             maxPrice: typeof initialFilters?.maxPrice === 'number' && isFinite(initialFilters.maxPrice) ? initialFilters.maxPrice : null,
             sexo: initialFilters?.sexo ?? null,
@@ -63,6 +65,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         return combinedFilters;
     });
 
+    // Sincroniza el estado local de los filtros cuando `initialFilters` cambian.
     useEffect(() => {
         const syncedFilters: ProductFilters = {
             denominacion: initialFilters?.denominacion ?? null,
@@ -80,6 +83,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         setSelectedFilters(syncedFilters);
     }, [initialFilters]);
 
+    /**
+     * Maneja los cambios en los inputs de texto y selectores.
+     * @param filterName El nombre del filtro a actualizar.
+     * @param value El nuevo valor para el filtro.
+     */
     const handleFilterChange = useCallback((filterName: keyof ProductFilters, value: any) => {
         setSelectedFilters(prevFilters => {
             const newValue = (typeof value === 'string' && value.trim() === '') ? null : value;
@@ -88,6 +96,12 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         });
     }, []);
 
+    /**
+     * Maneja los cambios en los checkboxes de categorías, colores y tallas.
+     * @param filterName El nombre del filtro de array ('categorias', 'colores', 'talles').
+     * @param value El valor del checkbox (nombre de la categoría/color/talla).
+     * @param isChecked Si el checkbox está marcado o desmarcado.
+     */
     const handleCheckboxChange = useCallback((filterName: 'categorias' | 'colores' | 'talles', value: string, isChecked: boolean) => {
         setSelectedFilters(prevFilters => {
             const currentValues = Array.isArray(prevFilters[filterName]) ? (prevFilters[filterName] as string[]) : [];
@@ -99,20 +113,30 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
         });
     }, []);
 
+    /**
+     * Maneja el cambio en el checkbox de "Solo productos en promoción".
+     * @param isChecked Si el checkbox de promoción está marcado o desmarcado.
+     */
     const handlePromotionChange = useCallback((isChecked: boolean) => {
         setSelectedFilters(prevFilters => {
-            const newValue = isChecked ? true : null;
+            const newValue = isChecked ? true : null; // Si está marcado, true; si no, null.
             console.log("Promotion checkbox change, newValue:", newValue);
             return { ...prevFilters, tienePromocion: newValue };
         });
     }, []);
 
+    /**
+     * Aplica los filtros actuales y cierra el panel.
+     */
     const handleApplyClick = useCallback(() => {
         console.log("Applying filters:", selectedFilters);
         onApplyFilters(selectedFilters);
-        // onClose(); // Decisión de diseño si el panel debe cerrarse automáticamente
+        // onClose(); // Puedes descomentar esto si quieres que el panel se cierre automáticamente al aplicar.
     }, [onApplyFilters, selectedFilters]);
 
+    /**
+     * Limpia todos los filtros y restablece el estado del panel a los valores por defecto.
+     */
     const handleClearClick = useCallback(() => {
         console.log("Clearing filters.");
         const defaultFilters: ProductFilters = {
@@ -128,10 +152,11 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
             orderDirection: null,
         };
         setSelectedFilters(defaultFilters);
-        onClearFilters();
-        // onClose(); // Decisión de diseño si el panel debe cerrarse automáticamente
+        onClearFilters(); // Notifica al componente padre que los filtros se han limpiado.
+        // onClose(); // Puedes descomentar esto si quieres que el panel se cierre automáticamente al limpiar.
     }, [onClearFilters]);
 
+    // Si el panel no está abierto, no renderiza nada.
     if (!isOpen) return null;
 
     return (
@@ -219,7 +244,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                     {/* Sección de Sexo */}
                     <div className={styles.filterSection}>
                         <h3 className={styles.sectionTitleWithIcon}>
-                            <FaTshirt className={styles.sectionIcon} aria-hidden="true" /> {/* Un ícono de camiseta o similar para ropa/sexo */}
+                            <FaTshirt className={styles.sectionIcon} aria-hidden="true" />
                             SEXO
                         </h3>
                         <select
@@ -256,7 +281,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                     {/* Sección de Categoría (Checkboxes) */}
                     <div className={styles.filterSection}>
                         <h3 className={styles.sectionTitleWithIcon}>
-                            <FaTshirt className={styles.sectionIcon} aria-hidden="true" /> {/* Otro ícono de camiseta o similar */}
+                            <FaTshirt className={styles.sectionIcon} aria-hidden="true" />
                             CATEGORÍA
                         </h3>
                         {Array.isArray(availableCategories) && availableCategories.length === 0 && <p className={styles.noFiltersMessage}>No hay categorías disponibles.</p>}
@@ -342,23 +367,23 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
                 </div>
 
-        <div className={styles.filterPanelFooter}>
-          <button
-            className={styles.clearFilterButton}
-            onClick={handleClearClick}
-          >
-            Limpiar Filtros
-          </button>
-          <button
-            className={styles.applyFilterButton}
-            onClick={handleApplyClick}
-          >
-            Aplicar
-          </button>
+                <div className={styles.filterPanelFooter}>
+                    <button
+                        className={styles.clearFilterButton}
+                        onClick={handleClearClick}
+                    >
+                        Limpiar Filtros
+                    </button>
+                    <button
+                        className={styles.applyFilterButton}
+                        onClick={handleApplyClick}
+                    >
+                        Aplicar
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default FilterPanel;

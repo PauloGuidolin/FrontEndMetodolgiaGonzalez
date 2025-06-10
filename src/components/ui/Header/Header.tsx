@@ -1,97 +1,123 @@
-// src/components/ui/Header/Header.tsx
 import styles from "./Header.module.css";
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { DropDownClothes } from "../Modal/DropDownClothes/DropDownClothes";
-import { Link, useNavigate } from "react-router-dom";
-import LoginModal from "../Modal/LogIn/LoginModal";
+import { DropDownClothes } from "../Modal/DropDownClothes/DropDownClothes"; // Componente para menú desplegable de ropa.
+import { Link, useNavigate } from "react-router-dom"; // Hooks para navegación de React Router.
+import LoginModal from "../Modal/LogIn/LoginModal"; // Modal para inicio de sesión.
 
-import { DropDownShoes } from "../Modal/DropDownShoes/DropDownShoes";
-import { DropDownSport } from "../Modal/DropDownSport/DropDownSport";
-import { FaSearch } from "react-icons/fa";
-import { useAuthStore } from "../../../store/authStore";
-import { AiOutlineShopping } from "react-icons/ai";
-import RegisterModal from "../Modal/Register/RegisterModal";
+import { DropDownShoes } from "../Modal/DropDownShoes/DropDownShoes"; // Componente para menú desplegable de calzado.
+import { DropDownSport } from "../Modal/DropDownSport/DropDownSport"; // Componente para menú desplegable de deporte.
+import { FaSearch } from "react-icons/fa"; // Icono de búsqueda de Font Awesome.
+import { useAuthStore } from "../../../store/authStore"; // Hook del store de autenticación (Zustand).
+import { AiOutlineShopping } from "react-icons/ai"; // Icono de carrito de compras.
+import RegisterModal from "../Modal/Register/RegisterModal"; // Modal para registro.
 
-import Avatar from "@mui/material/Avatar";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import Avatar from "@mui/material/Avatar"; // Componente Avatar de Material-UI.
+import AccountCircleIcon from "@mui/icons-material/AccountCircle"; // Icono de círculo de cuenta de Material-UI.
 
+/**
+ * `Header` es el componente de la cabecera de la aplicación.
+ * Gestiona la visibilidad de los menús desplegables, la autenticación de usuarios,
+ * la búsqueda de productos y la navegación.
+ */
 export const Header = () => {
-  const [dropClothes, setDropClothes] = useState(false);
-  const [dropShoes, setDropShoes] = useState(false);
-  const [dropSport, setDropSport] = useState(false);
+    // Estados para controlar la visibilidad de los menús desplegables.
+    const [dropClothes, setDropClothes] = useState(false);
+    const [dropShoes, setDropShoes] = useState(false);
+    const [dropSport, setDropSport] = useState(false);
 
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+    // Estados para controlar la visibilidad de los modales de login y registro.
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
-  const [displayedProfileImageUrl, setDisplayedProfileImageUrl] =
-    useState<string>("");
+    // Estado para la URL de la imagen de perfil del usuario.
+    const [displayedProfileImageUrl, setDisplayedProfileImageUrl] =
+        useState<string>("");
 
-  // Nuevo estado para el valor del input de búsqueda
-  const [searchQuery, setSearchQuery] = useState<string>("");
+    // Estado para el valor del input de búsqueda.
+    const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const navigate = useNavigate();
+    const navigate = useNavigate(); // Hook para navegar programáticamente.
 
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
-  const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
-  const checkAuth = useAuthStore((state) => state.checkAuth);
+    // Acceso al estado y acciones del store de autenticación.
+    const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+    const user = useAuthStore((state) => state.user);
+    const logout = useAuthStore((state) => state.logout);
+    const checkAuth = useAuthStore((state) => state.checkAuth);
 
-  const closeDropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    // Ref para manejar el timeout de cierre de los dropdowns.
+    const closeDropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const clothesMenuRef = useRef<HTMLHeadingElement>(null);
-  const shoesMenuRef = useRef<HTMLHeadingElement>(null);
-  const sportMenuRef = useRef<HTMLHeadingElement>(null);
-  const megaDropDownWrapperRef = useRef<HTMLDivElement>(null);
+    // Refs para los elementos H3 de los menús (útil para detectar eventos de mouse).
+    const clothesMenuRef = useRef<HTMLHeadingElement>(null);
+    const shoesMenuRef = useRef<HTMLHeadingElement>(null);
+    const sportMenuRef = useRef<HTMLHeadingElement>(null);
+    // Ref para el contenedor principal de los dropdowns (mega menú).
+    const megaDropDownWrapperRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
+    // Efecto para verificar la autenticación al cargar el componente.
+    useEffect(() => {
+        checkAuth();
+    }, [checkAuth]);
 
-  useEffect(() => {
-    if (isAuthenticated && user?.imagenUser?.url) {
-      setDisplayedProfileImageUrl(user.imagenUser.url);
-    } else {
-      setDisplayedProfileImageUrl("");
-    }
-  }, [isAuthenticated, user]);
+    // Efecto para actualizar la URL de la imagen de perfil cuando cambian la autenticación o el usuario.
+    useEffect(() => {
+        if (isAuthenticated && user?.imagenUser?.url) {
+            setDisplayedProfileImageUrl(user.imagenUser.url);
+        } else {
+            setDisplayedProfileImageUrl("");
+        }
+    }, [isAuthenticated, user]);
 
-  useEffect(() => {
-    console.log("Header - Estado de autenticación:", isAuthenticated);
-    if (isAuthenticated && user) {
-      console.log("Header - Objeto 'user' completo:", user);
-      console.log(
-        "Header - URL de imagen de perfil (imagenUser.url):",
-        user.imagenUser?.url
-      );
-    } else {
-      console.log(
-        "Header - Usuario no autenticado o el objeto 'user' es null/undefined."
-      );
-    }
-    console.log(
-      "Header - displayedProfileImageUrl (para Avatar de MUI):",
-      displayedProfileImageUrl
-    );
-  }, [isAuthenticated, user, displayedProfileImageUrl]);
+    // Efecto para loguear el estado de autenticación y la información del usuario (para depuración).
+    useEffect(() => {
+        console.log("Header - Estado de autenticación:", isAuthenticated);
+        if (isAuthenticated && user) {
+            console.log("Header - Objeto 'user' completo:", user);
+            console.log(
+                "Header - URL de imagen de perfil (imagenUser.url):",
+                user.imagenUser?.url
+            );
+        } else {
+            console.log(
+                "Header - Usuario no autenticado o el objeto 'user' es null/undefined."
+            );
+        }
+        console.log(
+            "Header - displayedProfileImageUrl (para Avatar de MUI):",
+            displayedProfileImageUrl
+        );
+    }, [isAuthenticated, user, displayedProfileImageUrl]);
 
-  const openLoginModal = useCallback(() => {
-    console.log("Se hizo clic en Iniciar Sesion");
-    setIsLoginModalOpen(true);
-    setIsRegisterModalOpen(false);
-  }, []);
+    /**
+     * Abre el modal de inicio de sesión y cierra el de registro.
+     */
+    const openLoginModal = useCallback(() => {
+        console.log("Se hizo clic en Iniciar Sesion");
+        setIsLoginModalOpen(true);
+        setIsRegisterModalOpen(false);
+    }, []);
 
-  const closeLoginModal = useCallback(() => {
-    setIsLoginModalOpen(false);
-  }, []);
+    /**
+     * Cierra el modal de inicio de sesión.
+     */
+    const closeLoginModal = useCallback(() => {
+        setIsLoginModalOpen(false);
+    }, []);
 
-  const openRegisterModal = useCallback(() => {
-    setIsRegisterModalOpen(true);
-    setIsLoginModalOpen(false);
-  }, []);
+    /**
+     * Abre el modal de registro y cierra el de inicio de sesión.
+     */
+    const openRegisterModal = useCallback(() => {
+        setIsRegisterModalOpen(true);
+        setIsLoginModalOpen(false);
+    }, []);
 
-  const closeRegisterModal = useCallback(() => {
-    setIsRegisterModalOpen(false);
-  }, []);
+    /**
+     * Cierra el modal de registro.
+     */
+    const closeRegisterModal = useCallback(() => {
+        setIsRegisterModalOpen(false);
+    }, []);
 
   const handleRegisterClick = useCallback(() => {
     closeLoginModal();
