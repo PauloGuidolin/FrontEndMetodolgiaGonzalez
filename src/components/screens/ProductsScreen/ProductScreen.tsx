@@ -1,78 +1,165 @@
 // Archivo: src/screens/ProductScreen/ProductScreen.tsx
 
 import React, { useEffect, useState } from "react";
+// IMPORTANTE: Importa useNavigate para cambiar la URL
+import { useLocation, useNavigate } from "react-router-dom";
 
-import styles from "./ProductScreen.module.css"; // Importa los estilos CSS Module
+import styles from "./ProductScreen.module.css";
 import { ProductoDTO } from "../../dto/ProductoDTO";
 
-// *** Importamos el store y la interfaz ProductFilters CORRECTA y UNIFICADA desde el store ***
-import { useProductStore, ProductFilters } from "../../../store/productStore"; // AJUSTA LA RUTA si es necesario
-import { useShallow } from "zustand/shallow"; // Para seleccionar estado eficientemente
+import { useProductStore, ProductFilters } from "../../../store/productStore";
+import { useShallow } from "zustand/shallow";
 
-// *** Importamos el servicio API para obtener opciones de filtro ***
-import { productService } from "../../../https/productApi"; // Asegúrate de que la ruta sea correcta
+import { productService } from "../../../https/productApi";
 
-import FilterPanel from "../../ui/FilterPanel/FilterPanel"; // Importa el componente FilterPanel
-// Importa ProductCard (si lo renderizas directamente)
-import ProductCard from "../../ui/Cards/ProductCard/ProductCard"; // Asegúrate de que la ruta sea correcta
-import { Footer } from "../../ui/Footer/Footer"; // Asegúrate de que la ruta sea correcta
-import { Header } from "../../ui/Header/Header"; // Asegúrate de que la ruta sea correcta
+import FilterPanel from "../../ui/FilterPanel/FilterPanel";
+import ProductCard from "../../ui/Cards/ProductCard/ProductCard";
+import { Footer } from "../../ui/Footer/Footer";
+import { Header } from "../../ui/Header/Header";
 
 const ProductScreen: React.FC = () => {
-  // *** Consumimos el estado y las acciones del store ***
-  // Usamos useShallow para obtener solo las partes del estado que necesitamos y evitar rerenders innecesarios
-  const {
-    filteredProducts, // Lista de productos ya filtrados (la que mostraremos)
-    loading, // Estado de carga del store (para la lista principal)
-    error, // Error del store (para la lista principal)
-    currentFilters, // Filtros actuales aplicados (desde el store)
-  } = useProductStore(
+  const location = useLocation(); // Hook para acceder al objeto de localización de React Router
+  const navigate = useNavigate(); // <-- AÑADIDO: Hook para cambiar la URL
+
+  const { filteredProducts, loading, error, currentFilters } = useProductStore(
     useShallow((state) => ({
       filteredProducts: state.filteredProducts,
       loading: state.loading,
       error: state.error,
-      currentFilters: state.currentFilters, // Este es del tipo ProductFilters corregido
+      currentFilters: state.currentFilters,
     }))
   );
 
-  // Obtenemos las acciones del store directamente (zustand recomienda obtener acciones sin shallow)
   const {
-    fetchProducts: fetchProductsAction, // Acción para cargar todos los productos iniciales
-    setAndFetchFilteredProducts: setAndFetchFilteredProductsAction, // Acción para setear filtros y fetchear
-    clearFilters: clearFiltersAction, // Acción para limpiar filtros
+    fetchProducts: fetchProductsAction,
+    setAndFetchFilteredProducts: setAndFetchFilteredProductsAction,
+    clearFilters: clearFiltersAction,
   } = useProductStore();
-  // *** Fin Consumo del store ***
 
-  // --- Estado local para controlar la visibilidad del panel de filtros ---
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-
-  // --- Estado local para las listas de opciones de filtro disponibles ---
-  // Estas listas se pasarán al FilterPanel. Esperamos string[] del backend vía productService.
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const [availableColors, setAvailableColors] = useState<string[]>([]);
-  const [availableSizes, setAvailableSizes] = useState<string[]>([]);
+  const [availableSizes, setAvailableSizes] = useState<string[]>([]); // Función auxiliar para parsear los filtros de la URL
 
-  // *** Efecto para cargar los productos iniciales Y las opciones de filtro disponibles ***
+  const parseFiltersFromUrl = (search: string): ProductFilters => {
+    const queryParams = new URLSearchParams(search);
+    return {
+      // CAMBIO CRUCIAL: Usar .getAll() para parámetros repetidos (arrays)
+      categorias: queryParams.getAll("categorias") || [], // ¡IMPORTANTE!
+      colores: queryParams.getAll("colores") || [], // ¡IMPORTANTE!
+      talles: queryParams.getAll("talles") || [], // ¡IMPORTANTE!
+      denominacion: queryParams.get("denominacion") || null,
+      sexo:
+        (queryParams.get("sexo") as "MASCULINO" | "FEMENINO" | "UNISEX") ||
+        null,
+      minPrice: queryParams.get("minPrice")
+        ? parseFloat(queryParams.get("minPrice")!)
+        : null,
+      maxPrice: queryParams.get("maxPrice")
+        ? parseFloat(queryParams.get("maxPrice")!)
+        : null,
+      tienePromocion:
+        queryParams.get("tienePromocion") === "true"
+          ? true
+          : queryParams.get("tienePromocion") === "false"
+          ? false
+          : null,
+      orderBy:
+        (queryParams.get("orderBy") as "precioVenta" | "denominacion") || null,
+      orderDirection:
+        (queryParams.get("orderDirection") as "asc" | "desc") || null, // Añade aquí cualquier otro filtro que puedas tener en la URL
+    };
+  }; // Función auxiliar para comparar si dos objetos de filtros son iguales (deep comparison para arrays)
+
+  const areFiltersEqual = (f1: ProductFilters, f2: ProductFilters): boolean => {
+    // Normaliza los arrays para comparación, ignorando el orden
+    const normalize = (filters: ProductFilters) => {
+      const sortedFilters: ProductFilters = { ...filters };
+      if (sortedFilters.categorias) sortedFilters.categorias.sort();
+      if (sortedFilters.colores) sortedFilters.colores.sort();
+      if (sortedFilters.talles) sortedFilters.talles.sort(); // Asegura que las propiedades que pueden ser null sean tratadas consistentemente
+      for (const key in sortedFilters) {
+        if (
+          sortedFilters[key as keyof ProductFilters] === null ||
+          sortedFilters[key as keyof ProductFilters] === undefined
+        ) {
+          delete sortedFilters[key as keyof ProductFilters]; // Eliminar para que JSON.stringify no incluya `null` explícitamente
+        } else if (
+          typeof sortedFilters[key as keyof ProductFilters] === "string" &&
+          (sortedFilters[key as keyof ProductFilters] as string).trim() === ""
+        ) {
+          delete sortedFilters[key as keyof ProductFilters];
+        } else if (
+          Array.isArray(sortedFilters[key as keyof ProductFilters]) &&
+          (sortedFilters[key as keyof ProductFilters] as any[]).length === 0
+        ) {
+          delete sortedFilters[key as keyof ProductFilters];
+        }
+      }
+      return sortedFilters;
+    };
+    return JSON.stringify(normalize(f1)) === JSON.stringify(normalize(f2));
+  }; // --- EFECTO PRINCIPAL PARA CARGA INICIAL Y APLICACIÓN DE FILTROS DE URL ---
+
   useEffect(() => {
-    console.log("ProductScreen useEffect triggered.");
+    console.log("ProductScreen useEffect triggered by URL or store change.");
 
-    // --- Cargar productos iniciales (si la lista está vacía) ---
-    // Utilizamos filteredProducts.length para decidir si cargar.
-    if (filteredProducts.length === 0 && !loading && !error) {
+    const filtersFromUrl = parseFiltersFromUrl(location.search); // Debugging logs added here:
+
+    console.log("ProductScreen - filtersFromUrl (raw parsed):", filtersFromUrl); // Filtra para eliminar propiedades con valores "vacíos" (null, [], '')
+    const cleanFiltersFromUrl: ProductFilters = Object.fromEntries(
+      Object.entries(filtersFromUrl).filter(([key, value]) => {
+        if (Array.isArray(value)) return value.length > 0;
+        if (typeof value === "string") return value.trim() !== "";
+        return value !== null && value !== undefined;
+      })
+    ) as ProductFilters;
+
+    console.log(
+      "ProductScreen - cleanFiltersFromUrl (cleaned):",
+      cleanFiltersFromUrl
+    );
+    console.log(
+      "ProductScreen - currentFilters (from Zustand store):",
+      currentFilters
+    ); // Compara los filtros de la URL con los filtros actuales del store. // Solo actualiza y re-busca si hay una diferencia significativa.
+
+    if (!areFiltersEqual(cleanFiltersFromUrl, currentFilters)) {
       console.log(
-        "ProductScreen: Filtered products list is empty. Calling fetchProducts action."
+        "ProductScreen: URL filters differ from store. Applying filters from URL:",
+        cleanFiltersFromUrl
       );
-      // Llama a la acción del store para cargar *todos* los productos
+      setAndFetchFilteredProductsAction(cleanFiltersFromUrl);
+    } else if (
+      Object.keys(cleanFiltersFromUrl).length === 0 &&
+      filteredProducts.length === 0 &&
+      !loading &&
+      !error
+    ) {
+      // Si no hay filtros en la URL y el store está vacío, y no estamos cargando/con error,
+      // esto es una carga inicial sin filtros, entonces pedimos todos los productos.
+      console.log(
+        "ProductScreen: No URL filters, store filters empty, and product list empty. Fetching all products."
+      );
       fetchProductsAction();
+    } else {
+      console.log(
+        "ProductScreen: URL filters are already in sync with store or no fetch needed."
+      );
     }
+  }, [
+    location.search, // Dependencia clave: re-ejecuta este efecto cuando la URL cambia
+    fetchProductsAction,
+    setAndFetchFilteredProductsAction,
+    currentFilters, // Importante para evitar re-fetches si los filtros de URL ya están en el store
+    filteredProducts.length, // Para la carga inicial
+    loading, // Para la carga inicial
+    error, // Para la carga inicial
+  ]); // --- EFECTO PARA CARGAR LAS OPCIONES DE FILTRO DISPONIBLES (categorías, colores, talles) ---
 
-    // --- Cargar opciones de filtro disponibles ---
-    // Fetcheamos las listas de opciones disponibles (categorías, colores, talles)
-    // Estas deberían venir como string[] del backend a través de productService.
+  useEffect(() => {
     const fetchAvailableOptions = async () => {
       try {
-        // Asegúrate de que estos métodos en productService llamen a los endpoints correctos
-        // /productos/categorias, /productos/colores, /productos/talles y devuelvan string[]
         const categories = await productService.getAllAvailableCategories();
         setAvailableCategories(categories);
 
@@ -93,119 +180,137 @@ const ProductScreen: React.FC = () => {
       } catch (err) {
         console.error("Error fetching available filter options:", err);
       }
-    };
+    }; // Cargar las opciones disponibles solo si aún no se han cargado
 
-    // Ejecutar la carga de opciones disponibles al montar el componente
-    fetchAvailableOptions();
+    if (
+      availableCategories.length === 0 &&
+      availableColors.length === 0 &&
+      availableSizes.length === 0
+    ) {
+      fetchAvailableOptions();
+    }
+  }, [
+    availableCategories.length,
+    availableColors.length,
+    availableSizes.length,
+  ]); // Dependencias: solo si las listas de opciones están vacías // --- Funciones de manejo del FilterPanel ---
 
-    // Dependencias del useEffect:
-    // Añadimos fetchProductsAction porque es una función externa.
-    // Añadimos filteredProducts.length, loading, error para controlar la carga inicial.
-    // No necesitamos fetchAvailableOptions ni los setters de estado en las dependencias.
-  }, [fetchProductsAction, filteredProducts.length, loading, error]);
-
-  // *** Función para manejar la aplicación de filtros desde el FilterPanel ***
   const handleApplyFilters = (filtersFromPanel: ProductFilters) => {
     console.log(
       "Filters applied from panel (ProductScreen):",
       filtersFromPanel
-    ); // LOG AQUI
-    // Llama a la acción del store para actualizar los filtros y fetchear los productos filtrados
-    // filtersFromPanel ya es del tipo ProductFilters corregido.
-    setAndFetchFilteredProductsAction(filtersFromPanel);
-    setIsFilterPanelOpen(false); // Cierra el panel después de aplicar
+    ); // --- Lógica para construir y actualizar la URL ---
+
+    const params = new URLSearchParams();
+    Object.entries(filtersFromPanel).forEach(([key, value]) => {
+      // Ignorar valores nulos, indefinidos o cadenas vacías
+      if (
+        value === null ||
+        value === undefined ||
+        (typeof value === "string" && value.trim() === "")
+      ) {
+        return;
+      }
+      if (Array.isArray(value)) {
+        // Para arrays (categorias, colores, talles), añadir cada elemento individualmente
+        value.forEach((item) => {
+          if (
+            item !== null &&
+            item !== undefined &&
+            typeof item === "string" &&
+            item.trim() !== ""
+          ) {
+            params.append(key, String(item));
+          }
+        });
+      } else {
+        // Para otros tipos de valores, establecer el parámetro
+        params.set(key, String(value));
+      }
+    });
+
+    const newSearch = params.toString();
+    console.log(
+      "ProductScreen - Navigating to new URL search:",
+      `?${newSearch}`
+    ); // Debug log
+    navigate(`?${newSearch}`, { replace: true }); // <-- AÑADIDO: Actualiza la URL // --- FIN Lógica para construir y actualizar la URL --- // La acción de `setAndFetchFilteredProductsAction` se disparará automáticamente // debido al `useEffect` que escucha `location.search`. // Por lo tanto, no es necesario llamarla aquí directamente. // setAndFetchFilteredProductsAction(filtersFromPanel); // Esto ya no es necesario aquí.
+    setIsFilterPanelOpen(false); // Cierra el panel de filtros
   };
 
-  // *** Función para manejar la limpieza de filtros desde el FilterPanel ***
   const handleClearFilters = () => {
-    console.log("Clearing filters (ProductScreen):"); // LOG AQUI
-    // Llama a la acción del store para limpiar los filtros y recargar todos los productos
-    clearFiltersAction(); // Esta acción resetea currentFilters a {} y llama a fetchProductsAction()
-    setIsFilterPanelOpen(false); // Cierra el panel después de limpiar
+    console.log("Clearing filters (ProductScreen):");
+    clearFiltersAction(); // Limpia los filtros en el store
+    navigate("", { replace: true }); // <-- AÑADIDO: Limpia los parámetros de la URL
+    setIsFilterPanelOpen(false); // Cierra el panel
   };
 
-  // Manejadores para abrir/cerrar el panel de filtros
   const openFilterPanel = () => setIsFilterPanelOpen(true);
-  const closeFilterPanel = () => setIsFilterPanelOpen(false);
+  const closeFilterPanel = () => setIsFilterPanelOpen(false); // --- Renderizado condicional ---
 
-  // --- Renderizado condicional (Carga, Error, Resultados) ---
-
-  // Mostrar "Cargando" si loading es true. Si ya hay productos mostrados, quizás mostrar un indicador diferente.
   if (loading && filteredProducts.length === 0) {
     return <div className={styles.loading}>Cargando productos...</div>;
   }
 
-  // Mostrar mensaje de error si hay un error y no hay productos cargados para mostrar.
-  // Si error es true pero filteredProducts.length > 0, un error al refiltrar podría ser menos crítico.
   if (error && filteredProducts.length === 0) {
     return <div className={styles.error}>Error: {error}</div>;
   }
 
-  // Renderiza la pantalla de productos
   return (
     <>
-    <Header />
-    <div className={styles.container}>
-      
-      {/* Asegúrate de que Header no cause problemas de renderizado o estilos */}
-      {/* Botón o elemento para abrir el panel de filtros */}
-      {/* Puedes añadir un botón aquí en tu UI principal */}
-      <button className={styles.openFilterButton} onClick={openFilterPanel}>
-        Abrir Filtros
-      </button>
-      <FilterPanel
-        isOpen={isFilterPanelOpen}
-        onClose={closeFilterPanel}
-        onApplyFilters={handleApplyFilters}
-        onClearFilters={handleClearFilters}
-        availableCategories={availableCategories} // Pasa las listas de opciones disponibles
-        availableColors={availableColors}
-        availableSizes={availableSizes}
-        initialFilters={currentFilters} // Pasa los filtros actuales del store al panel
-      />
-      {/* Contenedor de la lista de productos */}
-      <div className={styles.productList}>
-        {/* Mapea sobre los productos FILTRADOS solo si filteredProducts es un array válido */}
-        {Array.isArray(filteredProducts) && filteredProducts.length > 0
-          ? filteredProducts.map((product) => (
-              // La key es crucial para el rendimiento de las listas en React
-              // Usamos product.id si existe, o un fallback seguro si no
-              <ProductCard
-                key={
-                  product.id !== undefined && product.id !== null
-                    ? product.id
-                    : `product-${Math.random()}`
-                }
-                product={product}
-              />
-            ))
-          : // Mostrar mensajes si no hay productos o no hay resultados
-            // Solo si NO estamos cargando y filteredProducts está vacío
-            !loading &&
-            (currentFilters && Object.keys(currentFilters).length > 0 ? (
-              // Si hay filtros aplicados pero no hay resultados
-              <div className={styles.noResults}>
-                No se encontraron productos que coincidan con los filtros
-                seleccionados.
-              </div>
-            ) : (
-              // Si no hay filtros aplicados y la lista está vacía (puede que no haya productos en total)
-              !error && ( // Solo muestra este mensaje si no hay un error general
-                <div className={styles.noProductsMessage}>
-                  No hay productos disponibles.
+            <Header />     {" "}
+      <div className={styles.container}>
+               {" "}
+        <button className={styles.openFilterButton} onClick={openFilterPanel}>
+                    Abrir Filtros        {" "}
+        </button>
+               {" "}
+        <FilterPanel
+          isOpen={isFilterPanelOpen}
+          onClose={closeFilterPanel}
+          onApplyFilters={handleApplyFilters}
+          onClearFilters={handleClearFilters}
+          availableCategories={availableCategories}
+          availableColors={availableColors}
+          availableSizes={availableSizes}
+          initialFilters={currentFilters} // Asegúrate de que currentFilters siempre refleje los filtros actuales
+        />
+               {" "}
+        <div className={styles.productList}>
+                   {" "}
+          {Array.isArray(filteredProducts) && filteredProducts.length > 0
+            ? filteredProducts.map((product) => (
+                <ProductCard
+                  key={
+                    product.id !== undefined && product.id !== null
+                      ? product.id
+                      : `product-${Math.random()}`
+                  }
+                  product={product}
+                />
+              ))
+            : !loading &&
+              (currentFilters && Object.keys(currentFilters).length > 0 ? (
+                <div className={styles.noResults}>
+                                    No se encontraron productos que coincidan
+                  con los filtros                   seleccionados.              
+                   {" "}
                 </div>
-              )
-            ))}
-
-        
+              ) : (
+                !error && (
+                  <div className={styles.noProductsMessage}>
+                                        No hay productos disponibles.          
+                           {" "}
+                  </div>
+                )
+              ))}
+                 {" "}
+        </div>
+             {" "}
       </div>
-      
-    </div>
-    <Footer />
+            <Footer />   {" "}
     </>
   );
-  
 };
-
 
 export default ProductScreen;

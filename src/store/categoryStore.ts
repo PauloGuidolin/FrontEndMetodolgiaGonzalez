@@ -1,6 +1,7 @@
 // src/store/categoryStore.ts
 
 import { create } from 'zustand';
+import { produce } from 'immer'; // Importa produce para manejo inmutable de estados
 import { CategoriaDTO } from '../components/dto/CategoriaDTO';
 import { categoryService } from '../https/categoryApi';
 
@@ -48,42 +49,28 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
 
     // Implementación de la acción fetchSubcategories
     fetchSubcategories: async (parentId: number) => {
-        const currentLoading = new Set(get().loadingSubcategories);
+        const currentLoading = get().loadingSubcategories;
         if (currentLoading.has(parentId)) {
             console.log(`Subcategories for parent ${parentId} are already loading. Skipping redundant fetch.`);
             return;
         }
 
-        currentLoading.add(parentId);
-        set(state => ({
-            loadingSubcategories: currentLoading,
-            errorSubcategories: (() => {
-                const newErrorMap = new Map(state.errorSubcategories);
-                newErrorMap.delete(parentId);
-                return newErrorMap;
-            })()
+        set(produce((state: CategoryState) => {
+            state.loadingSubcategories.add(parentId);
+            state.errorSubcategories.delete(parentId);
         }));
 
         try {
             const subcategoriesData = await categoryService.getSubcategories(parentId);
-            set(state => ({
-                // Replace the subcategory list for this parent in the map
-                fetchedSubcategories: new Map(state.fetchedSubcategories).set(parentId, subcategoriesData),
-                loadingSubcategories: (() => {
-                    const updatedLoading = new Set(state.loadingSubcategories);
-                    updatedLoading.delete(parentId);
-                    return updatedLoading;
-                })()
+            set(produce((state: CategoryState) => {
+                state.fetchedSubcategories.set(parentId, subcategoriesData);
+                state.loadingSubcategories.delete(parentId);
             }));
         } catch (err: any) {
             console.error(`Error fetching subcategories for parent ID ${parentId} in store:`, err);
-            set(state => ({
-                errorSubcategories: new Map(state.errorSubcategories).set(parentId, err.response?.data?.message || err.message || 'Error al cargar subcategorías'),
-                loadingSubcategories: (() => {
-                    const updatedLoading = new Set(state.loadingSubcategories);
-                    updatedLoading.delete(parentId);
-                    return updatedLoading;
-                })()
+            set(produce((state: CategoryState) => {
+                state.errorSubcategories.set(parentId, err.response?.data?.message || err.message || 'Error al cargar subcategorías');
+                state.loadingSubcategories.delete(parentId);
             }));
         }
     },
@@ -93,40 +80,24 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         try {
             const newCategory = await categoryService.create(categoryData);
 
-            set(state => {
-                const updatedCategories = [...state.categories];
-                const updatedFetchedSubcategories = new Map(state.fetchedSubcategories);
-
+            set(produce((state: CategoryState) => {
+                // Si es una categoría raíz, la añadimos a la lista principal
                 if (!newCategory.categoriaPadre) {
-                    // It's a root category, add to the main 'categories' array
-                    updatedCategories.push(newCategory);
+                    state.categories.push(newCategory);
                 } else {
-                    // It's a subcategory
+                    // Si es una subcategoría, la añadimos a las fetchedSubcategories de su padre
                     const parentId = newCategory.categoriaPadre.id!;
-
-                    // Optimistically add the new category to the parent's fetched subcategories list
-                    // ONLY if that parent's subcategories are already loaded (i.e., exists in the map).
-                    if (updatedFetchedSubcategories.has(parentId)) {
-                        const existingSubcategories = updatedFetchedSubcategories.get(parentId) || [];
-                        updatedFetchedSubcategories.set(parentId, [...existingSubcategories, newCategory]);
+                    if (state.fetchedSubcategories.has(parentId)) {
+                        const existingSubcategories = state.fetchedSubcategories.get(parentId) || [];
+                        state.fetchedSubcategories.set(parentId, [...existingSubcategories, newCategory]);
                     }
-                    // If the parent's subcategories were NOT yet fetched,
-                    // we don't add it here; it will be visible after expansion and subsequent fetch.
                 }
+            }));
 
-                return {
-                    categories: updatedCategories,
-                    fetchedSubcategories: updatedFetchedSubcategories
-                };
-            });
-
-            // After optimistic update, trigger a re-fetch of the relevant list
-            // to ensure UI consistency and sync with the backend. This is crucial for immediate visibility.
+            // Después de la actualización optimista, dispara un re-fetch de la lista relevante
             if (newCategory.categoriaPadre?.id) {
-                // If it's a subcategory, re-fetch its parent's subcategories
                 get().fetchSubcategories(newCategory.categoriaPadre.id);
             } else {
-                // If it's a root category, re-fetch all root categories
                 get().fetchRootCategories();
             }
 
@@ -142,57 +113,22 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         try {
             const updatedCategory = await categoryService.update(category);
 
-            set(state => {
-                // Update root categories
-                const newCategories = state.categories.map(cat => cat.id === updatedCategory.id ? updatedCategory : cat);
-                let newFetchedSubcategories = new Map(state.fetchedSubcategories);
+            set(produce((state: CategoryState) => {
+                // Actualiza en la lista principal de categorías
+                state.categories = state.categories.map(cat => cat.id === updatedCategory.id ? updatedCategory : cat);
+                // Actualiza en las subcategorías si existe allí
+                state.fetchedSubcategories.forEach((subList, parentId) => {
+                    state.fetchedSubcategories.set(parentId, subList.map(sub => sub.id === updatedCategory.id ? updatedCategory : sub));
+                });
+            }));
 
-                let oldParentId: number | undefined;
-
-                // 1. Remove from old parent's list if parent has changed or it was a subcategory
-                for (const [parentId, subs] of newFetchedSubcategories.entries()) {
-                    if (subs.some(sub => sub.id === updatedCategory.id)) {
-                        oldParentId = parentId;
-                        newFetchedSubcategories.set(parentId, subs.filter(sub => sub.id !== updatedCategory.id)); // Remove from old parent
-                        break;
-                    }
-                }
-
-                // 2. Add to new parent's list OR root list
-                if (updatedCategory.categoriaPadre === null) {
-                    // It's now a root category
-                    if (!newCategories.some(cat => cat.id === updatedCategory.id)) {
-                        newCategories.push(updatedCategory); // Ensure it's in the root list
-                    }
-                } else {
-                    // It's now a subcategory
-                    const newParentId = updatedCategory.categoriaPadre.id!;
-                    if (newFetchedSubcategories.has(newParentId)) {
-                        // If new parent's subcategories are loaded, add/update it there
-                        const existingSubs = newFetchedSubcategories.get(newParentId) || [];
-                        const updatedSubs = existingSubs.map(sub => sub.id === updatedCategory.id ? updatedCategory : sub);
-                        if (!updatedSubs.some(sub => sub.id === updatedCategory.id)) { // If not found, add it
-                            updatedSubs.push(updatedCategory);
-                        }
-                        newFetchedSubcategories.set(newParentId, updatedSubs);
-                    }
-                }
-
-                return {
-                    categories: newCategories,
-                    fetchedSubcategories: newFetchedSubcategories
-                };
-            });
-
-            // After optimistic update, force a re-fetch of the relevant list to guarantee UI consistency.
-            // This is especially important if the parent changed or if the child count for a parent was affected.
+            // Después de la actualización, fuerza un re-fetch de la lista relevante
             if (updatedCategory.categoriaPadre?.id) {
-                // If it's a subcategory, re-fetch its new parent's subcategories
                 get().fetchSubcategories(updatedCategory.categoriaPadre.id);
-            } else if (category.categoriaPadre?.id) { // If it *was* a subcategory but became a root
-                get().fetchSubcategories(category.categoriaPadre.id); // Re-fetch old parent's children to remove it
-                get().fetchRootCategories(); // And re-fetch root categories
-            } else { // It was a root category and remained a root category
+            } else if (category.categoriaPadre?.id) {
+                get().fetchSubcategories(category.categoriaPadre.id);
+                get().fetchRootCategories();
+            } else {
                 get().fetchRootCategories();
             }
 
@@ -203,97 +139,89 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
         }
     },
 
-    // Implementación de la acción deleteCategory
+    // Implementación de la acción deleteCategory (para el soft delete)
     deleteCategory: async (id: number) => {
         try {
-            const currentState = get();
-            // Try to find the category to determine its parent before deleting from backend
-            const categoryToDelete = currentState.categories.find(cat => cat.id === id) ||
-                                     Array.from(currentState.fetchedSubcategories.values()).flat().find(cat => cat.id === id);
+            // El backend maneja 'eliminar' como un soft delete (cambiar 'activo' a false)
+            await categoryService.delete(id);
 
-            const parentId = categoryToDelete?.categoriaPadre?.id; // Store parent ID if it exists
-
-            await categoryService.delete(id); // Perform backend deletion
-
-            set(state => {
-                const newCategories = state.categories.filter(cat => cat.id !== id);
-                let newFetchedSubcategories = new Map(state.fetchedSubcategories);
-
-                // Filter the deleted category from all loaded subcategory lists
-                newFetchedSubcategories.forEach((subs, pId) => {
-                    newFetchedSubcategories.set(pId, subs.filter(sub => sub.id !== id));
+            set(produce((state: CategoryState) => {
+                // Actualiza el estado 'activo' a false en la categoría correspondiente
+                state.categories = state.categories.map(cat =>
+                    cat.id === id ? { ...cat, activo: false } : cat
+                );
+                state.fetchedSubcategories.forEach((subs, pId) => {
+                    state.fetchedSubcategories.set(pId, subs.map(sub =>
+                        sub.id === id ? { ...sub, activo: false } : sub
+                    ));
                 });
-                // If the deleted category itself was a parent, remove its entry (children) from the map
-                newFetchedSubcategories.delete(id);
+            }));
 
-                return {
-                    categories: newCategories,
-                    fetchedSubcategories: newFetchedSubcategories
-                };
-            });
+            // No es necesario un re-fetch completo si solo cambiamos el estado activo en el frontend
+            // El soft delete mantiene la categoría en la lista, solo cambia su estado.
+            // Si tu UI filtra por activo, entonces un re-fetch sí sería útil si listar() solo trae activos.
+            // Si listar() trae todos (activos e inactivos), no necesitas re-fetch.
+            // Para simplificar, dejaremos los re-fetches al final, asumiendo que tu UI podría necesitarlo.
+            const categoryToToggle = get().categories.find(c => c.id === id) ||
+                                     Array.from(get().fetchedSubcategories.values()).flat().find(c => c.id === id);
 
-            // After optimistic deletion, re-fetch the relevant list to reflect changes accurately
-            if (parentId) {
-                get().fetchSubcategories(parentId); // Re-fetch the parent's list
+            if (categoryToToggle?.categoriaPadre?.id) {
+                get().fetchSubcategories(categoryToToggle.categoriaPadre.id);
             } else {
-                get().fetchRootCategories(); // If it was a root, re-fetch root categories
+                get().fetchRootCategories();
             }
 
         } catch (error) {
-            console.error(`Error deleting category with ID ${id} in store:`, error);
+            console.error(`Error deleting (desactivating) category with ID ${id} in store:`, error);
             throw error;
         }
     },
 
-    // Implementación de la acción toggleCategoryActive
+    // --- Implementación de la acción toggleCategoryActive ---
+    // Este método es ahora el ÚNICO responsable de cambiar el estado activo/inactivo
     toggleCategoryActive: async (id: number, currentStatus: boolean) => {
+        set({ loading: true, error: null }); // Muestra un loader general
         try {
-            const currentState = get();
-            // Find the category to update from currently loaded root or subcategories
-            const categoryToUpdate = currentState.categories.find(cat => cat.id === id) ||
-                                     Array.from(currentState.fetchedSubcategories.values()).flat().find(cat => cat.id === id);
-
-            if (!categoryToUpdate) {
-                console.error('Category not found for toggling active status.');
-                throw new Error('Category not found.');
-            }
-
-            // Prepare the object to send to the backend (only parent ID if exists)
-            const parentIdForBackend = categoryToUpdate.categoriaPadre ? { id: categoryToUpdate.categoriaPadre.id } as CategoriaDTO : null;
-
-            const updatedCategoryData: CategoriaDTO = {
-                ...categoryToUpdate,
-                activo: !currentStatus,
-                categoriaPadre: parentIdForBackend // Send the parent ID to maintain relationship
-            };
-
-            const response = await categoryService.update(updatedCategoryData); // Perform backend update
-
-            // Optimistically update the store state
-            set(state => {
-                const updatedCategories = state.categories.map(cat => cat.id === id ? response : cat);
-                const updatedFetchedSubcategories = new Map(state.fetchedSubcategories);
-
-                // Update in fetched subcategories lists as well
-                for (const [parentId, subs] of updatedFetchedSubcategories.entries()) {
-                    updatedFetchedSubcategories.set(parentId, subs.map(sub => sub.id === id ? response : sub));
-                }
-
-                return {
-                    categories: updatedCategories,
-                    fetchedSubcategories: updatedFetchedSubcategories
-                };
-            });
-
-            // After optimistic update, re-fetch the relevant list to ensure accurate status and consistency
-            if (response.categoriaPadre?.id) {
-                get().fetchSubcategories(response.categoriaPadre.id); // Re-fetch the parent's list
+            if (currentStatus) {
+                // Si la categoría está ACTIVA, queremos DESACTIVARLA (soft delete)
+                await categoryService.delete(id); // Llama al DELETE del backend
+                console.log(`Categoría ${id} desactivada correctamente.`);
             } else {
-                get().fetchRootCategories(); // Re-fetch root categories
+                // Si la categoría está INACTIVA, queremos ACTIVARLA
+                await categoryService.activate(id); // Llama al NUEVO método ACTIVATE del backend
+                console.log(`Categoría ${id} activada correctamente.`);
             }
 
-        } catch (error) {
-            console.error(`Error toggling active status for category ${id}:`, error);
+            // Actualiza el estado en el store después de la operación exitosa
+            set(produce((state: CategoryState) => {
+                state.categories = state.categories.map(cat =>
+                    cat.id === id ? { ...cat, activo: !currentStatus } : cat
+                );
+                state.fetchedSubcategories.forEach((subs, pId) => {
+                    state.fetchedSubcategories.set(pId, subs.map(sub =>
+                        sub.id === id ? { ...sub, activo: !currentStatus } : sub
+                    ));
+                });
+                state.loading = false;
+            }));
+
+            // Dispara un re-fetch de la lista relevante para asegurar que la UI se actualice correctamente
+            // (esto es útil si la visibilidad depende del estado 'activo' o si hay reordenamiento)
+            const categoryAfterToggle = get().categories.find(c => c.id === id) ||
+                                        Array.from(get().fetchedSubcategories.values()).flat().find(c => c.id === id);
+
+            if (categoryAfterToggle?.categoriaPadre?.id) {
+                get().fetchSubcategories(categoryAfterToggle.categoriaPadre.id);
+            } else {
+                get().fetchRootCategories();
+            }
+
+        } catch (error: any) {
+            set({
+                error: `Error al ${currentStatus ? 'desactivar' : 'activar'} la categoría: ${error.response?.data?.message || error.message || 'Error desconocido'}`,
+                loading: false,
+            });
+            console.error(`Error al ${currentStatus ? 'desactivar' : 'activar'} categoría ${id}:`, error);
             throw error;
         }
     },

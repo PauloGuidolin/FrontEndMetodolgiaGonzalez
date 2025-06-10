@@ -31,6 +31,7 @@ import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import RestartAltIcon from '@mui/icons-material/RestartAlt'; // Importar el icono de activación
 
 import { useShallow } from "zustand/react/shallow";
 import styles from "./AdminProductScreen.module.css";
@@ -66,7 +67,7 @@ const Alert = React.forwardRef<HTMLDivElement, any>(function Alert(props, ref) {
 interface ProductRowProps {
   product: ProductoDTO;
   onEditProduct: (product: ProductoDTO) => void;
-  onDeleteProduct: (productId: number, isActive: boolean) => void;
+  onDeleteProduct: (productId: number, isActive: boolean) => void; // Renombrado a onDeleteProduct para reflejar mejor la acción de cambiar estado
   fetchProductDetails: (productId: number) => void;
   productDetails: ProductoDetalleDTO[];
   loadingDetails: boolean;
@@ -74,13 +75,14 @@ interface ProductRowProps {
   onAddProductDetail: (productId: number) => void;
   onEditProductDetail: (detail: ProductoDetalleDTO) => void;
   onDeleteProductDetail: (detailId: number, parentProductId: number) => void;
+  onActivateProductDetail: (detailId: number, parentProductId: number) => void; // NUEVO: Prop para activar detalle
 }
 
 // --- Componente ProductRow: Muestra una fila de producto y sus detalles anidados ---
 const ProductRow: React.FC<ProductRowProps> = ({
   product,
   onEditProduct,
-  onDeleteProduct,
+  onDeleteProduct, // Recibe la función de cambiar estado
   fetchProductDetails,
   productDetails,
   loadingDetails,
@@ -88,6 +90,7 @@ const ProductRow: React.FC<ProductRowProps> = ({
   onAddProductDetail,
   onEditProductDetail,
   onDeleteProductDetail,
+  onActivateProductDetail, // NUEVO: Recibe la prop
 }) => {
   const [open, setOpen] = useState(false);
 
@@ -161,12 +164,8 @@ const ProductRow: React.FC<ProductRowProps> = ({
             ? product.categorias.map((cat) => cat.denominacion).join(", ")
             : "N/A"}
         </TableCell>
-        {/* NUEVA CELDA PARA SUBCATEGORIAS */}
-        <TableCell>
-          {product.categorias && product.categorias.length > 0
-            ? product.categorias.map((subcat) => subcat.denominacion).join(", ")
-            : "N/A"}
-        </TableCell>
+
+        {/* NUEVO: Columna para subcategorías */}
         <TableCell align="center">
           <Box sx={{ display: "flex", gap: 0.5, justifyContent: "center" }}>
             <Button
@@ -194,7 +193,9 @@ const ProductRow: React.FC<ProductRowProps> = ({
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}> {/* Aumenta colSpan a 9 por la nueva columna */}
+        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={9}>
+          {" "}
+          {/* Aumenta colSpan a 9 por la nueva columna */}
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1, py: 2 }}>
               <Box
@@ -264,7 +265,6 @@ const ProductRow: React.FC<ProductRowProps> = ({
                       <TableCell align="right">Stock Actual</TableCell>
                       <TableCell align="right">Stock Máximo</TableCell>
                       <TableCell align="center">Estado</TableCell>
-                      <TableCell align="center">Acciones</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -329,19 +329,37 @@ const ProductRow: React.FC<ProductRowProps> = ({
                             >
                               <EditIcon fontSize="small" />
                             </IconButton>
-                            <IconButton
-                              aria-label="delete detail"
-                              size="small"
-                              color="error"
-                              onClick={() =>
-                                onDeleteProductDetail(
-                                  detail.id as number,
-                                  product.id as number
-                                )
-                              }
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
+                            {detail.activo ? (
+                              // Botón para desactivar si está activo
+                              <IconButton
+                                aria-label="delete detail"
+                                size="small"
+                                color="error"
+                                onClick={() =>
+                                  onDeleteProductDetail(
+                                    detail.id as number,
+                                    product.id as number
+                                  )
+                                }
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            ) : (
+                              // Botón para activar si está inactivo
+                              <IconButton
+                                aria-label="activate detail"
+                                size="small"
+                                color="success" // Color verde para activar
+                                onClick={() =>
+                                  onActivateProductDetail(
+                                    detail.id as number,
+                                    product.id as number
+                                  )
+                                }
+                              >
+                                <RestartAltIcon fontSize="small" /> {/* Icono de activación */}
+                              </IconButton>
+                            )}
                           </Box>
                         </TableCell>
                       </TableRow>
@@ -361,18 +379,18 @@ const ProductRow: React.FC<ProductRowProps> = ({
 const AdminProductScreen: React.FC = () => {
   // --- Stores de datos con Zustand (useShallow para optimización de render) ---
   const {
-    originalProducts,
-    loading: loadingProducts,
-    error: errorProducts,
-    fetchProducts,
+    adminProducts: originalProducts, // Renombrado para usar 'adminProducts' para la tabla principal
+    loadingAdminProducts: loadingProducts, // Usar loading para admin
+    errorAdminProducts: errorProducts, // Usar error para admin
+    fetchAllAdminProducts: fetchProducts, // Usar fetchAllAdminProducts
     addProduct,
     updateProduct,
   } = useProductStore(
     useShallow((state) => ({
-      originalProducts: state.originalProducts,
-      loading: state.loading,
-      error: state.error,
-      fetchProducts: state.fetchProducts,
+      adminProducts: state.adminProducts, // Asegúrate de usar adminProducts aquí
+      loadingAdminProducts: state.loadingAdminProducts, // Asegúrate de usar loadingAdminProducts
+      errorAdminProducts: state.errorAdminProducts, // Asegúrate de usar errorAdminProducts
+      fetchAllAdminProducts: state.fetchAllAdminProducts, // Asegúrate de usar fetchAllAdminProducts
       addProduct: state.addProduct,
       updateProduct: state.updateProduct,
     }))
@@ -380,19 +398,21 @@ const AdminProductScreen: React.FC = () => {
 
   const {
     productDetailsByProductId,
-    fetchProductDetailsByProductId,
+    fetchProductDetailsByProductId: fetchProductDetailsForAdmin, // Renombrado para usar en este contexto
     addProductDetail,
-    updateProductDetail,
-    deleteProductDetail,
+    updateProductDetail, // <-- ¡CORREGIDO!
+    deleteProductDetail, // Para desactivar
+    activateProductDetail, // NUEVO: Importar la acción de activación
     loadingByProduct: loadingDetailsByProduct,
     errorByProduct: errorDetailsByProduct,
   } = useProductDetailStore(
     useShallow((state) => ({
       productDetailsByProductId: state.productDetailsByProductId,
-      fetchProductDetailsByProductId: state.fetchProductDetailsByProductId,
+      fetchProductDetailsByProductId: state.fetchProductDetailsByProductIdForAdmin,
       addProductDetail: state.addProductDetail,
-      updateProductDetail: state.updateProductDetail,
+      updateProductDetail: state.updateProductDetail, // <-- ¡CORREGIDO!
       deleteProductDetail: state.deleteProductDetail,
+      activateProductDetail: state.activateProductDetail, // NUEVO: Acceder a la acción de activación
       loadingByProduct: state.loadingByProduct,
       errorByProduct: state.errorByProduct,
     }))
@@ -400,14 +420,12 @@ const AdminProductScreen: React.FC = () => {
 
   const {
     categories,
-    subCategories, // AÑADIDO: Para obtener subcategorías
     loading: loadingCategorias,
     fetchCategories, // Renombrado a fetchRootCategories para mayor claridad si solo trae raíces
     fetchSubcategories, // AÑADIDO: Función para obtener subcategorías
   } = useCategoryStore(
     useShallow((state) => ({
       categories: state.categories,
-      subCategories: state.categories, // Asegúrate de que tu categoryStore tenga este estado
       loading: state.loading,
       fetchCategories: state.fetchRootCategories, // Asumo que fetchRootCategories es el método para categorías de nivel superior
       fetchSubcategories: state.fetchSubcategories, // Asegúrate de que tu categoryStore tenga este método
@@ -478,6 +496,15 @@ const AdminProductScreen: React.FC = () => {
   const [parentProductIdForDetailDelete, setParentProductIdForDetailDelete] =
     useState<number | null>(null);
 
+  // Estados para el diálogo de confirmación de ACTIVACIÓN de Detalle de Producto
+  const [isConfirmDetailActivateOpen, setIsConfirmDetailActivateOpen] =
+    useState(false);
+  const [productDetailIdToActivate, setProductDetailIdToActivate] = useState<
+    number | null
+  >(null);
+  const [parentProductIdForDetailActivate, setParentProductIdForDetailActivate] =
+    useState<number | null>(null);
+
   // --- Estados para Snackbar de notificaciones ---
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -508,12 +535,11 @@ const AdminProductScreen: React.FC = () => {
 
   // --- Efecto: Carga datos iniciales al montar el componente ---
   useEffect(() => {
-    fetchProducts();
+    fetchProducts(); // Ahora llama a fetchAllAdminProducts para traer todos
     fetchCategories(); // Trae las categorías principales
-    fetchSubcategories(); // AÑADIDO: Trae las subcategorías
     fetchAllColors();
     fetchAllTalles();
-  }, [fetchProducts, fetchCategories, fetchSubcategories, fetchAllColors, fetchAllTalles]);
+  }, [fetchProducts, fetchCategories, fetchAllColors, fetchAllTalles]);
 
   // --- Manejadores para Productos ---
 
@@ -561,7 +587,7 @@ const AdminProductScreen: React.FC = () => {
         activo: productStatusAction === "activate", // Establece 'activo' basado en la acción (true para activar, false para desactivar)
         categoriaIds: product.categorias?.map((cat) => cat.id as number) || [],
         subcategoriaIds:
-          product.categorias?.map((subcat) => subcat.id as number) || [], // CORREGIDO: Usar product.subCategorias
+          product.subCategorias?.map((subcat) => subcat.id as number) || [], // CORREGIDO: Usar product.subCategorias
         imagenes:
           product.imagenes?.map((img) => ({
             id: img.id,
@@ -585,14 +611,14 @@ const AdminProductScreen: React.FC = () => {
           : undefined,
       };
 
-      await updateProduct(updatedProductDto);
+      await updateProduct(updatedProductDto); // Llama a updateProduct del store
       showSnackbar(
         `Producto ${
           productStatusAction === "activate" ? "activado" : "desactivado"
         } correctamente.`,
         "success"
       );
-      await fetchProducts(); // Refresca la lista de productos
+      await fetchProducts(); // Refresca la lista de productos de administración
     } catch (error: any) {
       showSnackbar(
         `Error al ${
@@ -721,7 +747,7 @@ const AdminProductScreen: React.FC = () => {
         showSnackbar("Producto agregado correctamente.", "success");
       }
 
-      await fetchProducts(); // Refresca la lista principal de productos
+      await fetchProducts(); // Refresca la lista principal de productos (ahora fetchAllAdminProducts)
       // Después de refrescar, si estábamos editando, sincroniza el estado `selectedProduct`
       if (selectedProduct) {
         const updatedProductInStore = originalProducts.find(
@@ -782,15 +808,15 @@ const AdminProductScreen: React.FC = () => {
 
     try {
       await deleteProductDetail(productDetailIdToDelete); // Llama a la función de eliminación del store
-      showSnackbar("Detalle de producto eliminado correctamente.", "success");
+      showSnackbar("Detalle de producto desactivado correctamente.", "success");
       // Refresca los detalles del producto padre para actualizar la UI
-      fetchProductDetailsByProductId(parentProductIdForDetailDelete);
+      fetchProductDetailsForAdmin(parentProductIdForDetailDelete);
     } catch (error: any) {
       showSnackbar(
-        `Error al eliminar el detalle: ${error.message || "Error desconocido"}`,
+        `Error al desactivar el detalle: ${error.message || "Error desconocido"}`,
         "error"
       );
-      console.error("Error al eliminar detalle de producto:", error);
+      console.error("Error al desactivar detalle de producto:", error);
     } finally {
       setIsConfirmDetailDeleteOpen(false);
       setProductDetailIdToDelete(null);
@@ -803,6 +829,49 @@ const AdminProductScreen: React.FC = () => {
     setIsConfirmDetailDeleteOpen(false);
     setProductDetailIdToDelete(null);
     setParentProductIdForDetailDelete(null);
+  };
+
+  // NUEVO: Prepara el diálogo de confirmación para activar un detalle de producto
+  const handleActivateProductDetailClick = (
+    detailId: number,
+    parentProductId: number
+  ) => {
+    setProductDetailIdToActivate(detailId);
+    setParentProductIdForDetailActivate(parentProductId);
+    setIsConfirmDetailActivateOpen(true);
+  };
+
+  // NUEVO: Confirma y ejecuta la activación de un detalle de producto
+  const handleConfirmProductDetailActivate = async () => {
+    if (
+      productDetailIdToActivate === null ||
+      parentProductIdForDetailActivate === null
+    )
+      return;
+
+    try {
+      await activateProductDetail(productDetailIdToActivate); // Llama a la función de activación del store
+      showSnackbar("Detalle de producto activado correctamente.", "success");
+      // Refresca los detalles del producto padre para actualizar la UI
+      fetchProductDetailsForAdmin(parentProductIdForDetailActivate);
+    } catch (error: any) {
+      showSnackbar(
+        `Error al activar el detalle: ${error.message || "Error desconocido"}`,
+        "error"
+      );
+      console.error("Error al activar detalle de producto:", error);
+    } finally {
+      setIsConfirmDetailActivateOpen(false);
+      setProductDetailIdToActivate(null);
+      setParentProductIdForDetailActivate(null);
+    }
+  };
+
+  // NUEVO: Cancela la activación de un detalle de producto
+  const handleCancelProductDetailActivate = () => {
+    setIsConfirmDetailActivateOpen(false);
+    setProductDetailIdToActivate(null);
+    setParentProductIdForDetailActivate(null);
   };
 
   // Maneja el envío del formulario de detalle de producto (agregar o editar)
@@ -833,7 +902,7 @@ const AdminProductScreen: React.FC = () => {
 
       // Refresca los detalles del producto padre para actualizar la UI
       if (detailData.productoId) {
-        fetchProductDetailsByProductId(detailData.productoId);
+        fetchProductDetailsForAdmin(detailData.productoId);
       }
       setIsProductDetailFormOpen(false); // Cierra el formulario
     } catch (error: any) {
@@ -878,7 +947,7 @@ const AdminProductScreen: React.FC = () => {
   return (
     <>
       <Header />
-      <AdminHeader/>
+      <AdminHeader />
       <Box className={styles.adminProductScreen}>
         <Typography variant="h4" component="h1" gutterBottom>
           Administración de Productos
@@ -904,7 +973,7 @@ const AdminProductScreen: React.FC = () => {
                 <TableCell align="right">Precio Final</TableCell>
                 <TableCell align="center">Sexo</TableCell>
                 <TableCell>Categorías</TableCell>
-                <TableCell>Subcategorías</TableCell> {/* AÑADIDO: Encabezado para Subcategorías */}
+
                 <TableCell align="center">Acciones</TableCell>
               </TableRow>
             </TableHead>
@@ -925,7 +994,7 @@ const AdminProductScreen: React.FC = () => {
                     product={product}
                     onEditProduct={handleEditProductClick}
                     onDeleteProduct={handleDeleteProductClick}
-                    fetchProductDetails={fetchProductDetailsByProductId}
+                    fetchProductDetails={fetchProductDetailsForAdmin}
                     productDetails={
                       productDetailsByProductId[product.id as number] || []
                     }
@@ -938,6 +1007,7 @@ const AdminProductScreen: React.FC = () => {
                     onAddProductDetail={handleAddProductDetailClick}
                     onEditProductDetail={handleEditProductDetailClick}
                     onDeleteProductDetail={handleDeleteProductDetailClick}
+                    onActivateProductDetail={handleActivateProductDetailClick} // NUEVO: Pasar el manejador
                   />
                 ))
               )}
@@ -952,9 +1022,7 @@ const AdminProductScreen: React.FC = () => {
           product={selectedProduct}
           onSubmit={handleProductFormSubmit}
           categorias={categories}
-          subCategorias={subCategories} // AÑADIDO: Pasa las subcategorías al ProductForm
           loadingCategorias={loadingCategorias}
-          loadingSubCategorias={loadingCategorias} // Puedes tener un loading separado para subCategorias si tu store lo maneja
         />
 
         {/* Modal para Agregar/Editar Detalle de Producto */}
@@ -998,7 +1066,9 @@ const AdminProductScreen: React.FC = () => {
             </Button>
             <Button
               onClick={handleConfirmProductStatusChange}
-              color={productStatusAction === "deactivate" ? "error" : "success"}
+              color={
+                productStatusAction === "deactivate" ? "error" : "success"
+              }
               variant="contained"
               autoFocus
             >
@@ -1007,7 +1077,7 @@ const AdminProductScreen: React.FC = () => {
           </DialogActions>
         </Dialog>
 
-        {/* Diálogo de Confirmación de Eliminación de Detalle de Producto */}
+        {/* Diálogo de Confirmación de Eliminación (Desactivación) de Detalle de Producto */}
         <Dialog
           open={isConfirmDetailDeleteOpen}
           onClose={handleCancelProductDetailDelete}
@@ -1015,12 +1085,12 @@ const AdminProductScreen: React.FC = () => {
           aria-describedby="confirm-detail-delete-description"
         >
           <DialogTitle id="confirm-detail-delete-title">
-            {"Confirmar Eliminación de Detalle"}
+            {"Confirmar Desactivación de Detalle"}
           </DialogTitle>
           <DialogContent>
             <DialogContentText id="confirm-detail-delete-description">
-              ¿Estás seguro de que deseas eliminar este detalle de producto de
-              forma permanente? Esta acción no se puede deshacer.
+              ¿Estás seguro de que deseas **desactivar** este detalle de producto?
+              Dejará de ser visible en la tienda, pero sus datos se conservarán.
             </DialogContentText>
           </DialogContent>
           <DialogActions>
@@ -1033,7 +1103,38 @@ const AdminProductScreen: React.FC = () => {
               variant="contained"
               autoFocus
             >
-              Eliminar
+              Desactivar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* NUEVO: Diálogo de Confirmación de Activación de Detalle de Producto */}
+        <Dialog
+          open={isConfirmDetailActivateOpen}
+          onClose={handleCancelProductDetailActivate}
+          aria-labelledby="confirm-detail-activate-title"
+          aria-describedby="confirm-detail-activate-description"
+        >
+          <DialogTitle id="confirm-detail-activate-title">
+            {"Confirmar Activación de Detalle"}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="confirm-detail-activate-description">
+              ¿Estás seguro de que deseas **activar** este detalle de producto?
+              Volverá a ser visible y disponible en la tienda.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancelProductDetailActivate} color="inherit">
+              Cancelar
+            </Button>
+            <Button
+              onClick={handleConfirmProductDetailActivate}
+              color="success"
+              variant="contained"
+              autoFocus
+            >
+              Activar
             </Button>
           </DialogActions>
         </Dialog>

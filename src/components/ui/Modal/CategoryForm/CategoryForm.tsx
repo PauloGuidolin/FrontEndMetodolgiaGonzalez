@@ -11,7 +11,8 @@ interface CategoryFormProps {
     onCategoriaChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
     onSubmitCategoria: (e: React.FormEvent) => Promise<void>;
     onClearForm: () => void;
-    availableCategories: CategoriaDTO[]; // Nueva prop: lista de categorías para el select padre
+    // availableCategories ya no es necesaria si no hay selector de padre
+    // availableCategories: CategoriaDTO[]; 
 }
 
 export const CategoryForm: React.FC<CategoryFormProps> = ({
@@ -19,13 +20,13 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
     onCategoriaChange,
     onSubmitCategoria,
     onClearForm,
-    availableCategories // Recibe las categorías disponibles
+    // availableCategories ya no es necesaria
+    // availableCategories 
 }) => {
-    // Filtramos las categorías disponibles para que una categoría no pueda ser su propia padre,
-    // ni una de sus subcategorías (aunque la recursividad puede ser compleja de manejar aquí)
-    const filteredAvailableCategories = availableCategories.filter(
-        cat => cat.id !== currentCategoria.id
-    );
+    // filteredAvailableCategories ya no es necesaria
+    // const filteredAvailableCategories = availableCategories.filter(
+    //     cat => cat.id !== currentCategoria.id
+    // );
 
     return (
         <form onSubmit={onSubmitCategoria} className={styles.form}>
@@ -42,27 +43,6 @@ export const CategoryForm: React.FC<CategoryFormProps> = ({
                     className={styles.input}
                 />
             </div>
-
-            <div className={styles.formGroup}>
-                <label htmlFor="categoriaPadre">Categoría Padre:</label>
-                <select
-                    id="categoriaPadre"
-                    name="categoriaPadre"
-                    // Si currentCategoria.categoriaPadre existe, usa su id. Si no, usa una cadena vacía.
-                    // Convertir a cadena para el valor del select
-                    value={currentCategoria.categoriaPadre?.id?.toString() || ''}
-                    onChange={onCategoriaChange}
-                    className={styles.select} // Puedes crear este estilo en CategoryForm.module.css
-                >
-                    <option value="">-- Sin categoría padre --</option>
-                    {filteredAvailableCategories.map(cat => (
-                        <option key={cat.id} value={cat.id}>
-                            {cat.denominacion}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
 
             <div className={styles.buttonGroup}>
                 <button type="submit" className={styles.primaryButton}>

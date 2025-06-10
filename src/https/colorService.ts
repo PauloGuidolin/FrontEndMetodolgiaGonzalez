@@ -1,7 +1,8 @@
 // src/services/colorService.ts
-import { http } from './httpService';
+import { http } from './httpService'; // Asegúrate de que esta ruta sea correcta para tu httpService
 import { ColorDTO } from '../components/dto/ColorDTO'; // Asegúrate de que la ruta sea correcta
 
+// Obtenemos la URL base del servidor desde las variables de entorno
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080';
 const COLOR_ENDPOINT = `${API_BASE_URL}/colores`; // Coincide con @RequestMapping("/colores") en tu backend
 
@@ -14,17 +15,18 @@ export const colorService = {
 
     /**
      * @method getAll
-     * @description Obtiene una lista de todos los colores activos.
-     * Corresponde al endpoint GET /colores (heredado de BaseController).
+     * @description Obtiene una lista de TODOS los colores (activos e inactivos) para la administración.
+     * Corresponde al endpoint GET /colores/all (heredado de BaseController).
      * @returns {Promise<ColorDTO[]>} Una promesa que resuelve con un array de ColorDTO.
      * @throws {Error} Si la solicitud falla.
      */
     getAll: async (): Promise<ColorDTO[]> => {
         try {
-            const response = await http.get<ColorDTO[]>(COLOR_ENDPOINT);
+            // ¡CAMBIO CLAVE AQUÍ! Llama a /colores/all para obtener todos
+            const response = await http.get<ColorDTO[]>(`${COLOR_ENDPOINT}/all`);
             return response || [];
         } catch (error) {
-            console.error("Error al obtener todos los colores:", error);
+            console.error("Error al obtener todos los colores (activos e inactivos):", error);
             throw error;
         }
     },
@@ -81,8 +83,6 @@ export const colorService = {
      */
     create: async (colorData: Partial<Omit<ColorDTO, 'id'>>): Promise<ColorDTO> => {
         try {
-            // No es necesario desestructurar 'id' aquí, ya que el tipo Partial<Omit<ColorDTO, 'id'>>
-            // ya garantiza que 'id' no se pasará. Simplemente enviamos los datos.
             const response = await http.post<ColorDTO>(COLOR_ENDPOINT, colorData);
             if (!response) {
                 throw new Error("No se recibió respuesta al crear el color.");
@@ -119,14 +119,44 @@ export const colorService = {
     },
 
     /**
+     * @method toggleStatus
+     * @description Cambia el estado 'activo' de un color (de activo a inactivo y viceversa).
+     * Corresponde al endpoint PUT /colores/toggleStatus/{id}?currentStatus={currentStatus}
+     * @param {number | string} id El ID del color a actualizar.
+     * @param {boolean} currentStatus El estado 'activo' actual del color en el momento de la llamada.
+     * @returns {Promise<void>} Una promesa que resuelve cuando el cambio de estado es exitoso.
+     * @throws {Error} Si la solicitud falla.
+     */
+    toggleStatus: async (id: number | string, currentStatus: boolean): Promise<void> => {
+        try {
+            // Pasamos currentStatus como un parámetro de consulta
+            await http.put<void>(`${COLOR_ENDPOINT}/toggleStatus/${id}?currentStatus=${currentStatus}`);
+        } catch (error) {
+            console.error(`Error al cambiar el estado del color con ID ${id}:`, error);
+            throw error;
+        }
+    },
+
+    // Estos métodos `deactivate` y `activate` pueden ser eliminados o adaptados
+    // si ahora solo usarás `toggleStatus` para estas operaciones.
+    // Si los mantienes, asegúrate de que `deactivate` llame a `toggleStatus(id, true)`
+    // y `activate` llame a `toggleStatus(id, false)`.
+    // Por simplicidad, y siguiendo la lógica del store, podrías eliminarlos y usar solo toggleStatus.
+
+    /**
      * @method deactivate
      * @description Desactiva lógicamente un color por su ID (soft delete).
      * Corresponde al endpoint DELETE /colores/{id} (heredado de BaseController).
+     * Opcional: considerar reemplazar por `toggleStatus(id, true)`
      * @param {number | string} id El ID del color a desactivar.
      * @returns {Promise<void>} Una promesa que resuelve cuando la desactivación es exitosa.
      * @throws {Error} Si la solicitud falla.
      */
     deactivate: async (id: number | string): Promise<void> => {
+        // Opción 1: Reutilizar toggleStatus si tu backend ya lo hace
+        // return colorService.toggleStatus(id, true); // true porque queremos desactivarlo
+        
+        // Opción 2: Mantener el delete original si DELETE /colores/{id} sigue siendo soft delete en el backend
         try {
             await http.delete<void>(`${COLOR_ENDPOINT}/${id}`);
         } catch (error) {
@@ -139,13 +169,18 @@ export const colorService = {
      * @method activate
      * @description Activa un color por su ID.
      * Corresponde al endpoint PUT /colores/activar/{id} (heredado de BaseController).
+     * Opcional: considerar reemplazar por `toggleStatus(id, false)`
      * @param {number | string} id El ID del color a activar.
      * @returns {Promise<ColorDTO>} Una promesa que resuelve con el ColorDTO activado.
      * @throws {Error} Si la solicitud falla.
      */
     activate: async (id: number | string): Promise<ColorDTO> => {
+        // Opción 1: Reutilizar toggleStatus si tu backend ya lo hace
+        // return colorService.toggleStatus(id, false); // false porque queremos activarlo y asumimos que está inactivo
+        
+        // Opción 2: Mantener el activar original si PUT /colores/activar/{id} sigue existiendo
         try {
-            const response = await http.put<ColorDTO>(`${COLOR_ENDPOINT}/activar/${id}`, undefined); // PUT sin body, asumiendo que el backend no espera uno
+            const response = await http.put<ColorDTO>(`${COLOR_ENDPOINT}/activar/${id}`, undefined);
             if (!response) {
                 throw new Error(`No se recibió respuesta al activar el color con ID ${id}.`);
             }

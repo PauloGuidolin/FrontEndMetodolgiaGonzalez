@@ -1,139 +1,390 @@
 /* Archivo: src/ui/FilterPanel/FilterPanel.module.css */
 
+/* Variables CSS para consistencia (pueden ir en un archivo global si lo prefieres) */
+:root {
+    --primary-blue: #007bff; /* Azul vibrante */
+    --primary-blue-dark: #0056b3; /* Azul más oscuro para hover */
+    --text-color-dark: #212529; /* Casi negro */
+    --text-color-medium: #495057; /* Gris oscuro para texto secundario */
+    --text-color-light: #6c757d; /* Gris más claro */
+    --border-color-light: #e9ecef; /* Borde muy claro */
+    --border-color-medium: #dee2e6; /* Borde medio */
+    --background-light: #f8f9fa; /* Fondo muy claro */
+    --spacing-xs: 5px;
+    --spacing-sm: 10px;
+    --spacing-md: 15px;
+    --spacing-lg: 20px;
+    --spacing-xl: 25px;
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --transition-speed: 0.3s;
+    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
+    --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ----------------------------------------------------- */
+/* OVERLAY DEL PANEL */
+/* ----------------------------------------------------- */
 .filterPanelOverlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente */
     display: flex;
     justify-content: flex-end; /* Alinea el panel a la derecha */
     z-index: 1000;
-    /* Animación de entrada (opcional) */
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
+    transition: opacity var(--transition-speed) ease-in-out, visibility var(--transition-speed) ease-in-out;
 }
 
-/* Clase para mostrar el overlay */
 .filterPanelOverlay.isOpen {
     opacity: 1;
     visibility: visible;
 }
 
-
+/* ----------------------------------------------------- */
+/* PANEL PRINCIPAL */
+/* ----------------------------------------------------- */
 .filterPanel {
-    background-color: #fff;
-    width: 300px; /* Ancho del panel */
-    max-width: 90%; /* Máximo 90% del ancho de la pantalla en móviles */
+    background-color: #fff; /* Fondo blanco */
+    width: 320px; /* Ancho fijo para el panel */
+    max-width: 90%; /* Máximo 90% del ancho en pantallas pequeñas */
     height: 100%;
-    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow-medium); /* Sombra más definida */
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    /* Animación de entrada (opcional) */
-    transform: translateX(100%);
-    transition: transform 0.3s ease;
+    overflow-y: auto; /* Permite scroll vertical */
+    transform: translateX(100%); /* Inicia fuera de la pantalla */
+    transition: transform var(--transition-speed) ease-in-out;
+    padding-bottom: env(safe-area-inset-bottom); /* Manejo de áreas seguras en iOS */
 }
 
-/* Clase para mostrar el panel con animación */
 .filterPanelOverlay.isOpen .filterPanel {
-     transform: translateX(0);
+    transform: translateX(0); /* Desliza a la vista */
 }
 
-
+/* ----------------------------------------------------- */
+/* ENCABEZADO DEL PANEL */
+/* ----------------------------------------------------- */
 .filterPanelHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #eee;
+    padding: var(--spacing-lg) var(--spacing-xl); /* Padding generoso */
+    border-bottom: 1px solid var(--border-color-light); /* Borde sutil */
+    background-color: var(--background-light); /* Fondo ligeramente gris */
+    position: sticky; /* Se mantiene arriba al hacer scroll */
+    top: 0;
+    z-index: 10;
 }
 
 .filterPanelHeader h2 {
     margin: 0;
-    font-size: 1.2em;
+    font-size: 1.4em;
+    color: var(--text-color-dark);
+    font-weight: 600;
 }
 
 .closeFilterButton {
     background: none;
     border: none;
-    font-size: 1.5em;
+    font-size: 1.8em;
     cursor: pointer;
-    color: #333;
+    color: var(--text-color-light);
+    padding: var(--spacing-xs);
+    border-radius: 50%;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
+.closeFilterButton:hover {
+    background-color: var(--border-color-light);
+    color: var(--text-color-medium);
+}
+
+/* ----------------------------------------------------- */
+/* CONTENIDO DE FILTROS */
+/* ----------------------------------------------------- */
 .filterPanelContent {
     flex-grow: 1;
-    padding: 20px;
+    padding: var(--spacing-xl);
 }
 
 .filterSection {
-    margin-bottom: 20px;
-    padding-bottom: 15px;
-    border-bottom: 1px solid #eee;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color-light);
 }
 
-.filterSection h3 {
+.filterSection:last-child {
+    border-bottom: none; /* Elimina el borde de la última sección */
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.sectionTitleWithIcon {
+    display: flex;
+    align-items: center;
     margin-top: 0;
-    margin-bottom: 10px;
-    font-size: 1em;
-    color: #555;
+    margin-bottom: var(--spacing-md);
+    font-size: 1.05em;
+    color: var(--text-color-dark);
     text-transform: uppercase;
+    font-weight: 700;
+    letter-spacing: 0.5px;
 }
 
-.filterSelect,
-.priceInput { /* Estilos para select e inputs de precio */
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-    box-sizing: border-box; /* Incluye padding y borde en el ancho */
+.sectionIcon {
+    margin-right: var(--spacing-sm); /* Espacio entre el ícono y el texto */
+    font-size: 1.2em; /* Tamaño del ícono */
+    color: var(--primary-blue); /* Color del ícono */
 }
 
-.priceInput {
-    margin-bottom: 10px; /* Espacio entre inputs de precio */
-}
-
-/* Estilos para checkboxes (ejemplo en la sección de Color y Talla) */
-.filterSection input[type="checkbox"] {
-    margin-right: 5px;
-}
-
-.filterSection label {
+.noFiltersMessage {
     font-size: 0.9em;
+    color: var(--text-color-light);
+    margin-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
 }
 
+/* ----------------------------------------------------- */
+/* INPUTS DE TEXTO Y SELECTS */
+/* ----------------------------------------------------- */
+.filterInputText,
+.filterSelect,
+.filterInputNumber {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border-color-medium);
+    border-radius: var(--border-radius-sm);
+    font-size: 1em;
+    color: var(--text-color-medium);
+    box-sizing: border-box;
+    margin-bottom: var(--spacing-sm); /* Espacio entre elementos */
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+}
 
+.filterInputText:focus,
+.filterSelect:focus,
+.filterInputNumber:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.filterSelect {
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23495057"><path d="M7 10l5 5 5-5z"/></svg>'); /* Flecha SVG custom */
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px;
+    padding-right: 30px; /* Espacio para la flecha */
+}
+
+/* Estado deshabilitado para inputs */
+.filterInputText[disabled],
+.filterSelect[disabled],
+.filterInputNumber[disabled] {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: var(--background-light);
+    border-color: var(--border-color-light);
+}
+
+/* ----------------------------------------------------- */
+/* INPUTS DE PRECIO */
+/* ----------------------------------------------------- */
+.priceInputs {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.priceInputs .filterInputNumber {
+    flex: 1;
+    margin-bottom: 0; /* Eliminar margen inferior aquí */
+}
+
+.priceInputs span {
+    color: var(--text-color-medium);
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+/* ----------------------------------------------------- */
+/* CHECKBOXES PERSONALIZADOS */
+/* ----------------------------------------------------- */
+.checkboxItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    cursor: pointer;
+    padding: var(--spacing-xs); /* Padding para aumentar el área de hover */
+    border-radius: var(--border-radius-sm);
+    transition: background-color 0.2s ease;
+}
+
+.checkboxItem:last-child {
+    margin-bottom: 0;
+}
+
+.checkboxItem:hover {
+    background-color: var(--background-light); /* Fondo claro al pasar el mouse */
+}
+
+.checkboxItem input[type="checkbox"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--border-color-medium);
+    border-radius: var(--border-radius-sm);
+    margin-right: var(--spacing-sm);
+    display: grid;
+    place-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    flex-shrink: 0; /* Evita que el checkbox se encoja */
+}
+
+.checkboxItem input[type="checkbox"]::before {
+    content: "";
+    width: 12px;
+    height: 12px;
+    transform: scale(0);
+    transition: transform 0.2s ease-in-out;
+    box-shadow: inset 1em 1em var(--primary-blue);
+    background-color: CanvasText;
+    clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 60%);
+}
+
+.checkboxItem input[type="checkbox"]:checked {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+}
+
+.checkboxItem input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+.checkboxItem input[type="checkbox"]:focus {
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.checkboxItem label {
+    font-size: 1em;
+    color: var(--text-color-dark); /* Texto de la etiqueta */
+    cursor: pointer;
+    flex-grow: 1; /* Permite que la etiqueta ocupe el espacio restante */
+}
+
+/* ----------------------------------------------------- */
+/* PIE DEL PANEL (BOTONES) */
+/* ----------------------------------------------------- */
 .filterPanelFooter {
-    padding: 15px 20px;
-    border-top: 1px solid #eee;
-    text-align: center;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-top: 1px solid var(--border-color-light);
+    display: flex;
+    gap: var(--spacing-md);
+    background-color: var(--background-light);
+    position: sticky; /* Se mantiene abajo al hacer scroll */
+    bottom: 0;
+    z-index: 10;
+}
+
+.clearFilterButton,
+.applyFilterButton {
+    flex: 1;
+    padding: 12px var(--spacing-md);
+    border: none;
+    border-radius: var(--border-radius-md);
+    cursor: pointer;
+    font-size: 1.05em;
+    font-weight: 600;
+    transition: background-color var(--transition-speed) ease, transform 0.1s ease, box-shadow var(--transition-speed) ease;
+}
+
+.clearFilterButton {
+    background-color: var(--border-color-medium);
+    color: var(--text-color-medium);
+}
+
+.clearFilterButton:hover {
+    background-color: #c9d2da; /* Un gris ligeramente más oscuro */
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
 }
 
 .applyFilterButton {
-    width: 100%;
-    padding: 12px 20px;
-    background-color: #000;
+    background-color: var(--primary-blue);
     color: #fff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1.1em;
-    transition: background-color 0.3s ease;
 }
 
 .applyFilterButton:hover {
-    background-color: #333;
+    background-color: var(--primary-blue-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-light);
 }
 
-/* --- Media Queries para Responsividad --- */
+.applyFilterButton:active,
+.clearFilterButton:active {
+    transform: translateY(0); /* Vuelve a la posición normal al hacer clic */
+    box-shadow: none; /* Elimina la sombra al hacer clic */
+}
+
+/* Estado deshabilitado para botones */
+.clearFilterButton[disabled],
+.applyFilterButton[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: var(--border-color-light);
+    color: var(--text-color-light);
+    transform: none; /* Sin transformaciones al estar deshabilitado */
+    box-shadow: none;
+}
+
+
+/* ----------------------------------------------------- */
+/* MEDIA QUERIES (RESPONSIVIDAD) */
+/* ----------------------------------------------------- */
 @media (max-width: 768px) {
     .filterPanel {
         width: 100%;
         max-width: 100%;
+        border-radius: 0; /* Sin bordes redondeados en móviles */
+    }
+
+    .filterPanelHeader,
+    .filterPanelContent,
+    .filterPanelFooter {
+        padding-left: var(--spacing-lg);
+        padding-right: var(--spacing-lg);
+    }
+
+    .filterPanelFooter {
+        flex-direction: column; /* Botones apilados */
+        gap: var(--spacing-sm);
+    }
+
+    .clearFilterButton,
+    .applyFilterButton {
+        padding: 14px var(--spacing-md); /* Más padding en botones para móvil */
     }
 }
 
+@media (max-width: 380px) {
+    .filterPanelHeader h2 {
+        font-size: 1.3em;
+    }
+    .closeFilterButton {
+        font-size: 1.6em;
+    }
+    .filterPanelContent {
+        padding: var(--spacing-md); /* Reducir padding en pantallas muy pequeñas */
+    }
+    .filterPanelFooter {
+        padding: var(--spacing-md);
+    }
+}

@@ -1,9 +1,9 @@
-// src/components/ui/CategoryComp/CategoryTable/CategoryTable.tsx
+
 
 import React, { useState } from 'react';
 import styles from './CategoryTable.module.css';
-import { CategoriaDTO } from '../../dto/CategoriaDTO';
 import { useCategoryStore } from '../../../store/categoryStore';
+import { CategoriaDTO } from '../../dto/CategoriaDTO';
 
 const ChevronRight = () => <span className={styles.chevron}>▶</span>;
 const ChevronDown = () => <span className={styles.chevron}>▼</span>;
@@ -14,7 +14,7 @@ interface CategoryTableProps {
     error: string | null;
     onEditCategoria: (categoria: CategoriaDTO) => void;
     onToggleCategoriaActive: (id: number, currentStatus: boolean, denominacion: string) => void;
-    onDeleteCategoria: (categoria: CategoriaDTO) => void;
+    onDeleteCategoria: (categoria: CategoriaDTO) => void; 
     onCreateSubcategoria: (parentCategory: CategoriaDTO) => void;
     depth?: number;
 }
@@ -25,7 +25,7 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
     error,
     onEditCategoria,
     onToggleCategoriaActive,
-    onDeleteCategoria,
+    onDeleteCategoria, 
     onCreateSubcategoria,
     depth = 0
 }) => {
@@ -62,15 +62,13 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
     if (!categories || categories.length === 0) {
         return (
             <tr>
-                <td colSpan={6} style={{ paddingLeft: `${(depth + 1) * 20}px`, fontStyle: 'italic', color: '#555', textAlign: 'left' }}>
+                <td colSpan={5} style={{ paddingLeft: `${(depth + 1) * 20}px`, fontStyle: 'italic', color: '#555', textAlign: 'left' }}>
                     {depth === 0 ? 'No hay categorías principales para mostrar.' : 'No hay subcategorías para este nivel.'}
                 </td>
             </tr>
         );
     }
 
-    // This part wraps the table creation for depth 0,
-    // and the table rows for depth > 0 to simplify rendering logic
     const renderCategoryRows = (categoryList: CategoriaDTO[], currentDepth: number) => {
         return categoryList.map((categoria) => {
             const isExpanded = expandedCategories.has(categoria.id!);
@@ -107,7 +105,7 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                                 {categoria.activo ? 'Activo' : 'Inactivo'}
                             </span>
                         </td>
-                        <td>{categoria.categoriaPadre?.denominacion || 'N/A (Categoría Raíz)'}</td>
+                        {/* <td>{categoria.categoriaPadre?.denominacion || 'N/A (Categoría Raíz)'}</td> <-- ELIMINADO */}
                         <td className={styles.actions}>
                             <button onClick={() => onEditCategoria(categoria)} className={styles.editButton}>
                                 Editar
@@ -118,10 +116,6 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                             >
                                 {categoria.activo ? 'Desactivar' : 'Activar'}
                             </button>
-                            <button onClick={() => onDeleteCategoria(categoria)} className={styles.deleteButton}>
-                                Eliminar
-                            </button>
-                            {/* Condición para mostrar el botón de crear subcategoría */}
                             {showCreateSubcategoryButton && (
                                 <button
                                     onClick={() => onCreateSubcategoria(categoria)}
@@ -134,7 +128,8 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                     </tr>
                     {isExpanded && (
                         <tr>
-                            <td colSpan={6}>
+                            {/* Ajusta colSpan a 5 porque ahora hay 5 columnas (toggle, ID, Denominación, Estado, Acciones) */}
+                            <td colSpan={5}> 
                                 {isLoadingSub && <p className={styles.loadingSubText} style={{ paddingLeft: `${(currentDepth + 1) * 20}px` }}>Cargando subcategorías...</p>}
                                 {subError && <p className={styles.errorSubText} style={{ paddingLeft: `${(currentDepth + 1) * 20}px` }}>Error: {subError}</p>}
                                 {!isLoadingSub && !subError && subcategoriesForThisParent.length > 0 && (
@@ -144,7 +139,7 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                                         error={null}
                                         onEditCategoria={onEditCategoria}
                                         onToggleCategoriaActive={onToggleCategoriaActive}
-                                        onDeleteCategoria={onDeleteCategoria}
+                                        onDeleteCategoria={onDeleteCategoria} 
                                         onCreateSubcategoria={onCreateSubcategoria}
                                         depth={currentDepth + 1}
                                     />
@@ -171,7 +166,7 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                                 <th>ID</th>
                                 <th>Denominación</th>
                                 <th>Estado</th>
-                                <th>Categoría Padre</th>
+                                {/* <th>Categoría Padre</th> <-- ELIMINADO */}
                                 <th>Acciones</th>
                             </tr>
                         </thead>
@@ -181,7 +176,6 @@ export const CategoryTable: React.FC<CategoryTableProps> = ({
                     </table>
                 </div>
             ) : (
-                // If depth > 0, we are already inside a <tbody>, so just render the rows
                 <tbody>
                     {renderCategoryRows(categories, depth)}
                 </tbody>

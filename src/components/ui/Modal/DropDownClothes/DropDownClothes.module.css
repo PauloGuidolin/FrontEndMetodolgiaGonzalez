@@ -1,64 +1,127 @@
+/* src/ui/DropDownClothes/DropDownClothes.module.css */
+
 .containerPrincipal {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-evenly;
-  align-items: center;
-  right: 0;
-  z-index: 1000;
-  animation: fadeSlide 0.3s ease-out;
-  width: 100%;
-  margin-top: 10px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background-color: #ffffff;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    padding: 20px 0;
+    z-index: 1000;
+    animation: fadeSlide 0.3s ease-out forwards;
+    width: 100%;
+    margin-top: 10px;
+    box-sizing: border-box;
 }
 
-.containerInfo{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100vh;
+.containerInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    max-width: 1000px;
+    padding: 0 20px;
+    box-sizing: border-box;
 }
 
-.containerTable{
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+.containerTable {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 30px;
 }
 
-.containerColumn1{
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  justify-content: start;
+/* Estilos comunes para todas las columnas */
+.containerColumn1,
+.containerColumn2,
+.containerColumn3 {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: flex-start;
+    flex: 1;
+    min-width: 150px;
+    padding: 0 10px;
 }
 
-.containerColumn2{
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  justify-content: start;
+/* Estilos para los títulos de las columnas (h2) */
+.containerColumn1 h2,
+.containerColumn2 h2,
+.containerColumn3 h2 {
+    font-size: 1.1em;
+    color: inherit;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 5px;
 }
 
-.containerColumn3{
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  justify-content: start;
-  margin-right: 20px;
+/* Estilos para los links (p.filterLink) */
+.filterLink {
+    cursor: pointer;
+    transition: transform 0.2s ease, text-decoration 0.2s ease;
+    font-size: 0.95em;
+    white-space: nowrap;
 }
 
-img{
-  width: 100%;
+.filterLink:hover {
+    transform: translateX(5px);
+    text-decoration: underline;
+}
+
+.filterLink:active {
+    transform: translateX(2px) scale(0.98);
+    opacity: 0.8;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Animación fade + slide hacia abajo */
 @keyframes fadeSlide {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================== */
+/* MEDIA QUERIES (AHORA FUERA DE CUALQUIER REGLA) */
+/* ============================================== */
+
+/* Media query para pantallas más pequeñas (ancho máximo de 768px) */
+@media (max-width: 768px) {
+    .containerTable {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .containerColumn1,
+    .containerColumn2,
+    .containerColumn3 {
+        width: 80%; /* Ocupar más ancho en pantallas pequeñas */
+        text-align: center; /* Centrar texto en móviles */
+        margin-right: 0; /* Eliminar margen derecho específico para móviles */
+    }
+    /* Si necesitas ajustar la imagen en móvil, también lo harías aquí: */
+    /* img {
+        width: 80%;
+        height: auto;
+    } */
 }

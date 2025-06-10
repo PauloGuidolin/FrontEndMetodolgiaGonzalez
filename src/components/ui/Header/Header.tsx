@@ -1,6 +1,6 @@
 // src/components/ui/Header/Header.tsx
 import styles from "./Header.module.css";
-import React, { useState, useEffect, useCallback } from "react"; // Importa useCallback
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { DropDownClothes } from "../Modal/DropDownClothes/DropDownClothes";
 import { Link, useNavigate } from "react-router-dom";
 import LoginModal from "../Modal/LogIn/LoginModal";
@@ -26,19 +26,26 @@ export const Header = () => {
   const [displayedProfileImageUrl, setDisplayedProfileImageUrl] =
     useState<string>("");
 
+  // Nuevo estado para el valor del input de búsqueda
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   const navigate = useNavigate();
 
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
-  // Obtenemos checkAuth del store de Zustand
   const checkAuth = useAuthStore((state) => state.checkAuth);
 
-  // Este useEffect solo debe ejecutarse una vez al montar el componente.
-  // La función 'checkAuth' de Zustand es estable y no necesita estar en el array de dependencias.
+  const closeDropdownTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const clothesMenuRef = useRef<HTMLHeadingElement>(null);
+  const shoesMenuRef = useRef<HTMLHeadingElement>(null);
+  const sportMenuRef = useRef<HTMLHeadingElement>(null);
+  const megaDropDownWrapperRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     checkAuth();
-  }, []); // <--- ¡ARRAY DE DEPENDENCIAS VACÍO!
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user?.imagenUser?.url) {
@@ -48,7 +55,6 @@ export const Header = () => {
     }
   }, [isAuthenticated, user]);
 
-  // >>>>> CONSOLE.LOGS PARA DEPURACIÓN (déjalos para verificar que el bucle desaparece) <<<<<
   useEffect(() => {
     console.log("Header - Estado de autenticación:", isAuthenticated);
     if (isAuthenticated && user) {
@@ -68,50 +74,44 @@ export const Header = () => {
     );
   }, [isAuthenticated, user, displayedProfileImageUrl]);
 
-
-  // ********** INICIO DE LA CORRECCIÓN CRÍTICA: APLICAR useCallback **********
-
   const openLoginModal = useCallback(() => {
     console.log("Se hizo clic en Iniciar Sesion");
     setIsLoginModalOpen(true);
-    setIsRegisterModalOpen(false); // Asegúrate de cerrar el de registro si estaba abierto
-  }, []); // Dependencias vacías: esta función nunca cambiará
+    setIsRegisterModalOpen(false);
+  }, []);
 
   const closeLoginModal = useCallback(() => {
     setIsLoginModalOpen(false);
-  }, []); // Dependencias vacías: esta función nunca cambiará
+  }, []);
 
   const openRegisterModal = useCallback(() => {
     setIsRegisterModalOpen(true);
-    setIsLoginModalOpen(false); // Asegúrate de cerrar el de login si estaba abierto
-  }, []); // Dependencias vacías: esta función nunca cambiará
+    setIsLoginModalOpen(false);
+  }, []);
 
   const closeRegisterModal = useCallback(() => {
     setIsRegisterModalOpen(false);
-  }, []); // Dependencias vacías: esta función nunca cambiará
+  }, []);
 
   const handleRegisterClick = useCallback(() => {
-    closeLoginModal(); // closeLoginModal ya está memoizada
-    openRegisterModal(); // openRegisterModal ya está memoizada
-  }, [closeLoginModal, openRegisterModal]); // Depende de las funciones memoizadas
+    closeLoginModal();
+    openRegisterModal();
+  }, [closeLoginModal, openRegisterModal]);
 
-  // Nueva función para manejar el éxito del registro: cierra el modal de registro y abre el de login
   const handleRegisterSuccess = useCallback(() => {
-    closeRegisterModal(); // closeRegisterModal ya está memoizada
-    openLoginModal(); // openLoginModal ya está memoizada
-  }, [closeRegisterModal, openLoginModal]); // Depende de las funciones memoizadas
+    closeRegisterModal();
+    openLoginModal();
+  }, [closeRegisterModal, openLoginModal]);
 
-  // La función que se llama cuando se hace clic en "Ya tengo una cuenta" desde RegisterModal
-  // o cuando se cierra el RegisterModal sin completar el registro y se quiere volver al Login.
   const handleBackToLogin = useCallback(() => {
-    closeRegisterModal(); // closeRegisterModal ya está memoizada
-    openLoginModal(); // openLoginModal ya está memoizada
-  }, [closeRegisterModal, openLoginModal]); // Depende de las funciones memoizadas
+    closeRegisterModal();
+    openLoginModal();
+  }, [closeRegisterModal, openLoginModal]);
 
   const handleLogout = useCallback(() => {
     logout();
     navigate("/");
-  }, [logout, navigate]); // Depende de logout (de Zustand) y navigate (de react-router-dom)
+  }, [logout, navigate]);
 
   const handleProfileClick = useCallback(() => {
     if (isAuthenticated) {
@@ -119,27 +119,70 @@ export const Header = () => {
     } else {
       openLoginModal();
     }
-  }, [isAuthenticated, navigate, openLoginModal]); // Depende de isAuthenticated, navigate, y openLoginModal
+  }, [isAuthenticated, navigate, openLoginModal]);
 
-  // --- Lógica del menú desplegable (dropdown) ---
-
-  // Función para cerrar todos los drops
+  // --- Lógica del menú desplegable (dropdown) CON RETRASO ---
   const closeAllDrops = useCallback(() => {
-    setDropShoes(false);
-    setDropClothes(false);
-    setDropSport(false);
-  }, []); // Dependencias vacías: esta función nunca cambiará
+    if (closeDropdownTimeoutRef.current) {
+      clearTimeout(closeDropdownTimeoutRef.current);
+      closeDropdownTimeoutRef.current = null;
+    }
+    closeDropdownTimeoutRef.current = setTimeout(() => {
+      setDropShoes(false);
+      setDropClothes(false);
+      setDropSport(false);
+      closeDropdownTimeoutRef.current = null;
+    }, 300);
+  }, []);
 
-  // Función para abrir un drop específico y asegurar que solo uno esté abierto
   const handleMouseEnterH3 = useCallback(
     (setter: React.Dispatch<React.SetStateAction<boolean>>) => {
-      closeAllDrops(); // closeAllDrops ya está memoizada
-      setter(true); // Abre el drop específico
+      if (closeDropdownTimeoutRef.current) {
+        clearTimeout(closeDropdownTimeoutRef.current);
+        closeDropdownTimeoutRef.current = null;
+      }
+      setDropShoes(false);
+      setDropClothes(false);
+      setDropSport(false);
+      setter(true);
     },
-    [closeAllDrops]
-  ); // Depende de closeAllDrops
+    []
+  );
 
-  // ********** FIN DE LA CORRECCIÓN CRÍTICA **********
+  const handleMegaDropdownMouseEnter = useCallback(() => {
+    if (closeDropdownTimeoutRef.current) {
+      clearTimeout(closeDropdownTimeoutRef.current);
+      closeDropdownTimeoutRef.current = null;
+    }
+  }, []);
+
+  // --- Lógica del buscador ---
+  // Manejador de cambio para el input
+  const handleSearchInputChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(event.target.value);
+    },
+    []
+  );
+
+  // Manejador para cuando se envía la búsqueda (presionar Enter o clic en icono)
+  const handleSearchSubmit = useCallback(() => {
+    if (searchQuery.trim()) { // Solo navega si hay algo escrito
+      const params = new URLSearchParams();
+      // Asumiendo que tu backend/página de productos usa 'denominacion' para buscar por nombre
+      params.append('denominacion', searchQuery.trim());
+      navigate(`/productos?${params.toString()}`);
+      setSearchQuery(""); // Limpiar el input después de la búsqueda
+    }
+  }, [searchQuery, navigate]);
+
+  // Manejador para el evento keydown (para detectar 'Enter')
+  const handleSearchKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearchSubmit();
+    }
+  }, [handleSearchSubmit]);
+
 
   return (
     <>
@@ -155,46 +198,44 @@ export const Header = () => {
             alt="Logo de Adidas"
           />
         </div>
-        {/* NUEVO CONTENEDOR: Envuelve los h3 y el megaDropDownWrapper para el onMouseLeave */}
         <div
           className={styles.megaMenuArea}
-          onMouseLeave={closeAllDrops} // Cierra todos los drops cuando el ratón sale de TODA esta área
+          onMouseLeave={closeAllDrops}
         >
-          {/* Contenedor de los títulos (Calzado, Ropa, Deporte) */}
           <div className={styles.containerTitles}>
-            <h3 onMouseEnter={() => handleMouseEnterH3(setDropShoes)}>
+            <h3
+              onMouseEnter={() => handleMouseEnterH3(setDropShoes)}
+              ref={shoesMenuRef}
+            >
               Calzado
             </h3>
 
-            <h3 onMouseEnter={() => handleMouseEnterH3(setDropClothes)}>
+            <h3
+              onMouseEnter={() => handleMouseEnterH3(setDropClothes)}
+              ref={clothesMenuRef}
+            >
               Ropa
             </h3>
 
-            <h3 onMouseEnter={() => handleMouseEnterH3(setDropSport)}>
+            <h3
+              onMouseEnter={() => handleMouseEnterH3(setDropSport)}
+              ref={sportMenuRef}
+            >
               Deporte
             </h3>
           </div>
-          {/* Renderizado condicional del mega dropdown wrapper */}
           {(dropShoes || dropClothes || dropSport) && (
             <div
               className={styles.megaDropDownWrapper}
-              // onMouseEnter aquí es una medida de seguridad para evitar cierres prematuros
-              // si el ratón se mueve rápidamente. No debería ser estrictamente necesario
-              // si el onMouseLeave del padre funciona bien, pero no hace daño.
-              onMouseEnter={() => {
-                if (dropShoes) setDropShoes(true);
-                if (dropClothes) setDropClothes(true);
-                if (dropSport) setDropSport(true);
-              }}
+              onMouseEnter={handleMegaDropdownMouseEnter}
+              ref={megaDropDownWrapperRef}
             >
               {dropShoes && <DropDownShoes />}
               {dropClothes && <DropDownClothes />}
               {dropSport && <DropDownSport />}
             </div>
-          )}{" "}
-          {/* <-- ESTA ES LA ETIQUETA DE CIERRE QUE FALTABA */}
-        </div>{" "}
-        {/* Este div de cierre corresponde a styles.megaMenuArea */}
+          )}
+        </div>
         <div className={styles.containerRight}>
           <div className={styles.containerLogin}>
             {isAuthenticated ? (
@@ -225,10 +266,9 @@ export const Header = () => {
                 <Link to="/HelpScreen">
                   <h4>Ayuda</h4>
                 </Link>
-                {user?.role === "ADMIN" && ( // La condición envuelve todo el bloque JSX
+                {user?.role === "ADMIN" && (
                   <div onClick={() => navigate("/admin/productos")}>
                     {" "}
-                    {/* Un elemento clickeable, como un div o un Button */}
                     <h4>Panel Admin</h4>
                   </div>
                 )}
@@ -247,8 +287,20 @@ export const Header = () => {
           </div>
           <div className={styles.containerPurchase}>
             <div className={styles.containerSearch}>
-              <FaSearch className={styles.searchIcon} />
-              <input type="text" placeholder="Buscar" />
+              {/* Input de búsqueda */}
+              <input
+                type="text"
+                placeholder="Buscar"
+                value={searchQuery} // Conecta el valor del input al estado
+                onChange={handleSearchInputChange} // Actualiza el estado cuando el input cambia
+                onKeyDown={handleSearchKeyDown} // Permite buscar al presionar Enter
+              />
+              {/* Icono de búsqueda - ahora con onClick para disparar la búsqueda */}
+              <FaSearch
+                className={styles.searchIcon}
+                onClick={handleSearchSubmit} // Dispara la búsqueda al hacer clic
+                style={{ cursor: 'pointer' }} // Indica que es clickeable
+              />
             </div>
 
             <div className={styles.iconBag}>

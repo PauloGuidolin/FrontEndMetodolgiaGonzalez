@@ -8,9 +8,9 @@ import Swal from 'sweetalert2';
 
 // Importaciones de Stores
 import { useCategoryStore } from '../../../../store/categoryStore';
-import { useTalleStore } from '../../../../store/talleStore';
+import { useTalleStore } from '../../../../store/talleStore'; 
 import { useColorStore } from '../../../../store/colorStore';
-import { useDiscountStore } from '../../../../store/discountStore'; // Importa el store de descuentos
+import { useDiscountStore } from '../../../../store/discountStore'; 
 
 // Importaciones de Componentes UI
 import { Header } from '../../../ui/Header/Header';
@@ -18,33 +18,32 @@ import { Footer } from '../../../ui/Footer/Footer';
 import { CategoryTable } from '../../../ui/CategoryTable/CategoryTable';
 import { TalleTable } from '../../../ui/TalleTable/TalleTable';
 import { ColorTable } from '../../../ui/ColorTable/ColorTable';
-import { DiscountTable } from '../../../ui/DiscountTable/DiscountTable'; // Importa la tabla de descuentos
+import { DiscountTable } from '../../../ui/DiscountTable/DiscountTable'; 
 
 import { CategoryForm } from '../../../ui/Modal/CategoryForm/CategoryForm';
 import { TalleForm } from '../../../ui/Modal/TalleForm/TalleForm';
 import { ColorForm } from '../../../ui/Modal/ColorForm/ColorForm';
-import { DiscountForm } from '../../../ui/Modal/DiscountForm/DiscountForm'; // Importa el formulario de descuentos
+import { DiscountForm } from '../../../ui/Modal/DiscountForm/DiscountForm'; 
 
-// Importaciones de DTOs
+import { AdminHeader } from '../../../ui/AdminHeader/AdminHeader';
 import { CategoriaDTO } from '../../../dto/CategoriaDTO';
 import { TalleDTO } from '../../../dto/TalleDTO';
 import { ColorDTO } from '../../../dto/ColorDTO';
-import { DescuentoDTO } from '../../../dto/DescuentoDTO'; // Importa el DTO de descuentos
-import { AdminHeader } from '../../../ui/AdminHeader/AdminHeader';
+import { DescuentoDTO } from '../../../dto/DescuentoDTO';
 
 export const ProductReferencesScreen = () => {
     // Estados para los formularios de las referencias
     const [currentCategoria, setCurrentCategoria] = useState<Partial<CategoriaDTO>>({ denominacion: '', activo: true, categoriaPadre: null });
     const [currentTalle, setCurrentTalle] = useState<Partial<TalleDTO>>({ nombreTalle: '', activo: true });
     const [currentColor, setCurrentColor] = useState<Partial<ColorDTO>>({ nombreColor: '', activo: true });
-    const [currentDiscount, setCurrentDiscount] = useState<Partial<DescuentoDTO>>({ // Estado para descuentos
+    const [currentDiscount, setCurrentDiscount] = useState<Partial<DescuentoDTO>>({ 
         denominacion: '',
         fechaDesde: '',
         fechaHasta: '',
         horaDesde: '',
         horaHasta: '',
         descripcionDescuento: '',
-        precioPromocional: 0, // Inicializado como precio absoluto
+        precioPromocional: 0, 
         activo: true,
     });
 
@@ -82,11 +81,10 @@ export const ProductReferencesScreen = () => {
         talles,
         loading: loadingTalles,
         error: errorTalles,
-        fetchAllTalles,
+        fetchAllTalles, 
         createTalle,
         updateTalle,
-        deactivateTalle,
-        activateTalle,
+        toggleTalleStatus, 
     } = useTalleStore(
         useShallow((state) => ({
             talles: state.talles,
@@ -95,8 +93,7 @@ export const ProductReferencesScreen = () => {
             fetchAllTalles: state.fetchAllTalles,
             createTalle: state.createTalle,
             updateTalle: state.updateTalle,
-            deactivateTalle: state.deactivateTalle,
-            activateTalle: state.activateTalle,
+            toggleTalleStatus: state.toggleTalleStatus, 
         }))
     );
 
@@ -123,7 +120,7 @@ export const ProductReferencesScreen = () => {
         }))
     );
 
-    // --- Hooks para Descuentos (NUEVO) ---
+    // --- Hooks para Descuentos ---
     const {
         discounts,
         loading: loadingDescuentos,
@@ -131,9 +128,9 @@ export const ProductReferencesScreen = () => {
         fetchDiscounts,
         addDiscount,
         updateDiscount,
-        deleteDiscount,
+        // deleteDiscount, // Si es eliminación lógica, no necesitas esto en el store
         toggleDiscountActive,
-        clearSelectedDiscount, // Para limpiar el estado del descuento seleccionado
+        clearSelectedDiscount, 
     } = useDiscountStore(
         useShallow((state) => ({
             discounts: state.discounts,
@@ -142,13 +139,13 @@ export const ProductReferencesScreen = () => {
             fetchDiscounts: state.fetchDiscounts,
             addDiscount: state.addDiscount,
             updateDiscount: state.updateDiscount,
-            deleteDiscount: state.deleteDiscount,
+            // deleteDiscount: state.deleteDiscount, // Quitar si es eliminación lógica
             toggleDiscountActive: state.toggleDiscountActive,
             clearSelectedDiscount: state.clearSelectedDiscount,
         }))
     );
 
-    // --- Lógica de Categorías (se mantiene) ---
+    // --- Lógica de Categorías ---
     const clearCategoriaForm = useCallback(() => {
         setCurrentCategoria({ denominacion: '', activo: true, categoriaPadre: null });
     }, []);
@@ -295,7 +292,7 @@ export const ProductReferencesScreen = () => {
         }
     }, [deleteCategory]);
 
-    // --- Lógica de Talles (se mantiene) ---
+    // --- Lógica de Talles ---
     const clearTalleForm = useCallback(() => {
         setCurrentTalle({ nombreTalle: '', activo: true });
     }, []);
@@ -384,17 +381,12 @@ export const ProductReferencesScreen = () => {
         }
 
         try {
-            if (currentStatus) {
-                await deactivateTalle(id);
-            } else {
-                await activateTalle(id);
-            }
-            toast.success(`Talle ${action}do con éxito!`);
+            await toggleTalleStatus(id, currentStatus, nombreTalle); 
         } catch (error: any) {
             console.error(`Error al ${action} talle:`, error);
             toast.error(`Error al ${action} talle: ${error.response?.data?.message || error.message || 'Error desconocido'}`);
         }
-    }, [deactivateTalle, activateTalle]);
+    }, [toggleTalleStatus]); 
 
     const handleDeleteTalle = useCallback(async (talle: TalleDTO) => {
         if (!talle.id) {
@@ -404,12 +396,12 @@ export const ProductReferencesScreen = () => {
 
         const confirmResult = await Swal.fire({
             title: `¿Estás ABSOLUTAMENTE seguro?`,
-            text: `¡Esta acción eliminará el talle "${talle.nombreTalle}"! Esta acción es irreversible.`,
+            text: `¡Esta acción desactivará lógicamente el talle "${talle.nombreTalle}"!`, 
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, ¡eliminarlo!',
+            confirmButtonText: 'Sí, ¡desactivarlo!', 
             cancelButtonText: 'No, cancelar'
         });
 
@@ -419,15 +411,15 @@ export const ProductReferencesScreen = () => {
         }
 
         try {
-            await deactivateTalle(talle.id); // Usamos deactivate como "eliminar" lógico
-            toast.success('Talle eliminado lógicamente con éxito!');
+            await toggleTalleStatus(talle.id, true, talle.nombreTalle); // Desactivar el talle
+            toast.success('Talle desactivado lógicamente con éxito!'); // Mensaje ajustado
         } catch (error: any) {
-            console.error('Error al eliminar talle:', error);
-            toast.error(`Error al eliminar talle: ${error.response?.data?.message || error.message || 'Error desconocido'}`);
+            console.error('Error al desactivar talle:', error);
+            toast.error(`Error al desactivar talle: ${error.response?.data?.message || error.message || 'Error desconocido'}`);
         }
-    }, [deactivateTalle]);
+    }, [toggleTalleStatus]);
 
-    // --- Lógica de Colores (se mantiene) ---
+    // --- Lógica de Colores ---
     const clearColorForm = useCallback(() => {
         setCurrentColor({ nombreColor: '', activo: true });
     }, []);
@@ -536,12 +528,12 @@ export const ProductReferencesScreen = () => {
 
         const confirmResult = await Swal.fire({
             title: `¿Estás ABSOLUTAMENTE seguro?`,
-            text: `¡Esta acción eliminará el color "${color.nombreColor}"! Esta acción es irreversible.`,
+            text: `¡Esta acción desactivará lógicamente el color "${color.nombreColor}"!`, // Texto ajustado
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, ¡eliminarlo!',
+            confirmButtonText: 'Sí, ¡desactivarlo!', // Texto ajustado
             cancelButtonText: 'No, cancelar'
         });
 
@@ -551,16 +543,16 @@ export const ProductReferencesScreen = () => {
         }
 
         try {
-            await deactivateColor(color.id); // Usamos deactivate como "eliminar" lógico
-            toast.success('Color eliminado lógicamente con éxito!');
+            await deactivateColor(color.id); 
+            toast.success('Color desactivado lógicamente con éxito!'); // Mensaje ajustado
         } catch (error: any) {
-            console.error('Error al eliminar color:', error);
-            toast.error(`Error al eliminar color: ${error.response?.data?.message || error.message || 'Error desconocido'}`);
+            console.error('Error al desactivar color:', error);
+            toast.error(`Error al desactivar color: ${error.response?.data?.message || error.message || 'Error desconocido'}`);
         }
     }, [deactivateColor]);
 
 
-    // --- Lógica de Descuentos (NUEVO) ---
+    // --- Lógica de Descuentos ---
     const clearDiscountForm = useCallback(() => {
         setCurrentDiscount({
             denominacion: '',
@@ -572,7 +564,7 @@ export const ProductReferencesScreen = () => {
             precioPromocional: 0,
             activo: true,
         });
-        clearSelectedDiscount(); // Limpia el descuento seleccionado en el store
+        clearSelectedDiscount(); 
     }, [clearSelectedDiscount]);
 
     const handleNewDiscountClick = useCallback(() => {
@@ -593,7 +585,6 @@ export const ProductReferencesScreen = () => {
     const handleEditDiscount = useCallback((discount: DescuentoDTO) => {
         setCurrentDiscount({
             ...discount,
-            // Asegúrate de que las fechas y horas se manejen en el formato correcto para los inputs ('YYYY-MM-DD', 'HH:mm')
             fechaDesde: discount.fechaDesde ? new Date(discount.fechaDesde).toISOString().split('T')[0] : '',
             fechaHasta: discount.fechaHasta ? new Date(discount.fechaHasta).toISOString().split('T')[0] : '',
             horaDesde: discount.horaDesde?.substring(0, 5) || '',
@@ -613,12 +604,11 @@ export const ProductReferencesScreen = () => {
 
     const handleSubmitDiscount = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!currentDiscount.denominacion || !currentDiscount.fechaDesde || !currentDiscount.fechaHasta || !currentDiscount.precioPromocional) {
+        if (!currentDiscount.denominacion || !currentDiscount.fechaDesde || !currentDiscount.fechaHasta || currentDiscount.precioPromocional === undefined) {
             toast.error('Todos los campos obligatorios del descuento deben ser completados.');
             return;
         }
 
-        // Validación de fechas y horas para asegurar que Desde sea menor o igual que Hasta
         const fullDateDesde = new Date(`${currentDiscount.fechaDesde}T${currentDiscount.horaDesde || '00:00'}:00`);
         const fullDateHasta = new Date(`${currentDiscount.fechaHasta}T${currentDiscount.horaHasta || '23:59'}:59`);
 
@@ -632,8 +622,8 @@ export const ProductReferencesScreen = () => {
             denominacion: currentDiscount.denominacion,
             fechaDesde: currentDiscount.fechaDesde,
             fechaHasta: currentDiscount.fechaHasta,
-            horaDesde: currentDiscount.horaDesde || '00:00:00', // Asegura un valor por defecto si es opcional en el backend
-            horaHasta: currentDiscount.horaHasta || '23:59:59', // Asegura un valor por defecto
+            horaDesde: currentDiscount.horaDesde || '00:00:00', 
+            horaHasta: currentDiscount.horaHasta || '23:59:59', 
             descripcionDescuento: currentDiscount.descripcionDescuento || '',
             precioPromocional: currentDiscount.precioPromocional,
             activo: currentDiscount.activo ?? true,
@@ -684,34 +674,34 @@ export const ProductReferencesScreen = () => {
 
     const handleDeleteDiscount = useCallback(async (discount: DescuentoDTO) => {
         if (!discount.id) {
-            toast.error('No se puede eliminar un descuento sin ID.');
+            toast.error('No se puede operar con un descuento sin ID.');
             return;
         }
 
         const confirmResult = await Swal.fire({
             title: `¿Estás ABSOLUTAMENTE seguro?`,
-            text: `¡Esta acción eliminará el descuento "${discount.denominacion}"! Esta acción es irreversible.`,
+            text: `¡Esta acción desactivará lógicamente el descuento "${discount.denominacion}"!`, 
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#dc3545',
             cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Sí, ¡eliminarlo!',
+            confirmButtonText: 'Sí, ¡desactivarlo!', 
             cancelButtonText: 'No, cancelar'
         });
 
         if (!confirmResult.isConfirmed) {
-            toast.info('Eliminación cancelada.');
+            toast.info('Operación cancelada.');
             return;
         }
 
         try {
-            await deleteDiscount(discount.id);
-            toast.success('Descuento eliminado con éxito!');
+            await toggleDiscountActive(discount.id, true); // Desactivar el descuento
+            toast.success('Descuento desactivado lógicamente con éxito!'); 
         } catch (error: any) {
-            console.error('Error al eliminar descuento:', error);
-            toast.error(`Error al eliminar descuento: ${error.response?.data?.message || error.message || 'Error desconocido'}`);
+            console.error('Error al desactivar descuento:', error);
+            toast.error(`Error al desactivar descuento: ${error.response?.data?.message || error.message || 'Error desconocido'}`);
         }
-    }, [deleteDiscount]);
+    }, [toggleDiscountActive]);
 
     // --- Efectos para cargar datos iniciales ---
     useEffect(() => {
@@ -722,6 +712,7 @@ export const ProductReferencesScreen = () => {
     }, [rootCategories.length, loadingCategorias, errorCategorias, fetchRootCategories]);
 
     useEffect(() => {
+        // fetchAllTalles en useTalleStore ahora obtiene activos e inactivos
         if (talles.length === 0 && !loadingTalles && !errorTalles) {
             console.log('ProductReferencesScreen: Calling fetchAllTalles for initial load.');
             fetchAllTalles();
@@ -735,6 +726,7 @@ export const ProductReferencesScreen = () => {
         }
     }, [colors.length, loadingColores, errorColores, fetchAllColors]);
 
+    // Este useEffect asegura que se carguen todos los descuentos al inicio del componente
     useEffect(() => {
         if (discounts.length === 0 && !loadingDescuentos && !errorDescuentos) {
             console.log('ProductReferencesScreen: Calling fetchDiscounts for initial load.');
@@ -752,14 +744,13 @@ export const ProductReferencesScreen = () => {
     // --- Cierre de modal genérico ---
     const handleCloseModal = useCallback(() => {
         setIsModalOpen(false);
-        // Limpia el formulario activo según la pestaña
         if (activeTab === 'categories') {
             clearCategoriaForm();
         } else if (activeTab === 'talles') {
             clearTalleForm();
         } else if (activeTab === 'colors') {
             clearColorForm();
-        } else if (activeTab === 'discounts') { // Agregado para descuentos
+        } else if (activeTab === 'discounts') {
             clearDiscountForm();
         }
     }, [activeTab, clearCategoriaForm, clearTalleForm, clearColorForm, clearDiscountForm]);
@@ -773,7 +764,6 @@ export const ProductReferencesScreen = () => {
                 <h1 className={styles.title}>Gestión de Referencias de Productos</h1>
 
                 <div className={styles.tabContainer}>
-                    {/* Botones de Pestañas */}
                     <div className={styles.tabs}>
                         <button
                             className={`${styles.tabButton} ${activeTab === 'categories' ? styles.activeTab : ''}`}
@@ -801,7 +791,6 @@ export const ProductReferencesScreen = () => {
                         </button>
                     </div>
 
-                    {/* Contenido de la Pestaña Activa */}
                     <div className={styles.tabContent}>
                         {activeTab === 'categories' && (
                             <div className={styles.managementSection}>
@@ -876,7 +865,6 @@ export const ProductReferencesScreen = () => {
             </div>
             <Footer />
 
-            {/* Modal genérico para formularios */}
             {isModalOpen && (
                 <div className={styles.modalOverlay} onClick={handleCloseModal}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>

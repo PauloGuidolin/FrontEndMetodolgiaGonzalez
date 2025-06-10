@@ -4,12 +4,14 @@ import React from 'react';
 import styles from './TalleTable.module.css'; // Crea este archivo CSS
 import { TalleDTO } from '../../dto/TalleDTO';
 
+
 interface TalleTableProps {
     talles: TalleDTO[];
     loading: boolean;
     error: string | null;
     onEditTalle: (talle: TalleDTO) => void;
-    onToggleTalleActive: (id: number, currentStatus: boolean, nombreTalle: string) => void;
+    // Eliminado 'nombreTalle' de la firma si no se usa directamente en el store/lógica de toggle
+    onToggleTalleActive: (id: number, currentStatus: boolean) => void;
     onDeleteTalle: (talle: TalleDTO) => void;
 }
 
@@ -29,6 +31,7 @@ export const TalleTable: React.FC<TalleTableProps> = ({
         return <p className={styles.errorText}>Error al cargar talles: {error}</p>;
     }
 
+    // Renderiza este mensaje solo si talles es un array vacío después de cargar
     if (!talles || talles.length === 0) {
         return <p>No hay talles para mostrar.</p>;
     }
@@ -46,6 +49,7 @@ export const TalleTable: React.FC<TalleTableProps> = ({
                 </thead>
                 <tbody>
                     {talles.map((talle) => (
+                        // Asegúrate de que talle.id siempre esté presente aquí
                         <tr key={talle.id}>
                             <td>{talle.id}</td>
                             <td>{talle.nombreTalle}</td>
@@ -59,7 +63,7 @@ export const TalleTable: React.FC<TalleTableProps> = ({
                                     Editar
                                 </button>
                                 <button
-                                    onClick={() => onToggleTalleActive(talle.id!, talle.activo, talle.nombreTalle)}
+                                    onClick={() => onToggleTalleActive(talle.id!, talle.activo)} // Ya no paso nombreTalle si no se usa
                                     className={talle.activo ? styles.deactivateButton : styles.activateButton}
                                 >
                                     {talle.activo ? 'Desactivar' : 'Activar'}
