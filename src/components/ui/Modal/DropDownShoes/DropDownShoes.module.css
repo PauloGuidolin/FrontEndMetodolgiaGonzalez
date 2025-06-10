@@ -1,125 +1,79 @@
-/* src/ui/DropDownShoes/DropDownShoes.module.css */
-
 .containerPrincipal {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    align-items: center;
-    position: absolute; /* Asegúrate de que esto esté si es un dropdown */
-    top: 100%; /* Asegúrate de que esto esté si es un dropdown */
-    left: 0; /* Asegúrate de que esto esté si es un dropdown */
-    background-color: #ffffff; /* Fondo para el dropdown */
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra para el dropdown */
-    padding: 20px 0; /* Padding vertical para el contenido del dropdown */
-    z-index: 1000;
-    animation: fadeSlide 0.3s ease-out forwards; /* 'forwards' mantiene el estado final de la animación */
-    width: 100%;
-    margin-top: 10px;
-    box-sizing: border-box; /* Para que el padding no aumente el ancho total */
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+  right: 0;
+  z-index: 1000;
+  animation: fadeSlide 0.3s ease-out;
+  width: 100%;
+  margin-top: 10px;
 }
 
 .containerInfo {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    /* Ajustado el ancho para que no dependa de vh, y sea más responsive */
-    width: 90%; /* Ajusta el ancho relativo al contenedor principal */
-    max-width: 1000px; /* Limita el ancho máximo para pantallas muy grandes */
-    padding: 0 20px; /* Añadido: Padding horizontal para el contenido */
-    box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  width: 100vh;
 }
 
 .containerTable {
-    width: 100%;
-    display: flex;
-    justify-content: space-around; /* Cambiado de space-between a space-around para mejor distribución */
-    align-items: flex-start; /* Alinear arriba para que las columnas empiecen igual */
-    margin-bottom: 20px; /* Aumentado el margen para más espacio debajo de la tabla */
-    gap: 30px; /* Añadido: Espacio entre columnas */
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 10px;
 }
 
-/* Estilos comunes para todas las columnas */
-.containerColumn1,
-.containerColumn2,
+.containerColumn1 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: start;
+}
+
+.containerColumn2 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: start;
+}
+
 .containerColumn3 {
-    display: flex;
-    flex-direction: column;
-    gap: 12px; /* Aumentado el espacio entre los links */
-    justify-content: flex-start; /* Asegura que el contenido empiece desde arriba */
-    flex: 1; /* Permite que las columnas se distribuyan uniformemente */
-    min-width: 150px; /* Asegura un ancho mínimo para cada columna */
-    padding: 0 10px; /* Pequeño padding interno para las columnas */
-}
-
-/* Estilos para los títulos de las columnas (h2) */
-.containerColumn1 h2,
-.containerColumn2 h2,
-.containerColumn3 h2 {
-    font-size: 1.1em;
-    color: inherit; /* Mantiene el color de texto existente, no lo fuerza */
-    margin-bottom: 10px;
-    border-bottom: 1px solid #ddd; /* Añadido: Línea sutil debajo del título */
-    padding-bottom: 5px; /* Espacio entre el texto y la línea */
-}
-
-/* Estilos para los links (p.filterLink) */
-.filterLink {
-    cursor: pointer;
-    transition: transform 0.2s ease, text-decoration 0.2s ease;
-    font-size: 0.95em;
-    white-space: nowrap; /* Evita saltos de línea en el texto del enlace */
-}
-
-.filterLink:hover {
-    transform: translateX(5px);
-    text-decoration: underline;
-    /* No se modifica el color */
-}
-
-.filterLink:active {
-    transform: translateX(2px) scale(0.98);
-    opacity: 0.8;
-    /* No se modifica el color */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: start;
+  margin-right: 20px;
 }
 
 img {
-    max-width: 100%; /* La imagen será responsive dentro de su contenedor */
-    height: auto; /* Mantiene la proporción de la imagen */
-    display: block; /* Elimina el espacio extra debajo de la imagen */
-    margin: 0 auto; /* Centra la imagen */
-    border-radius: 8px; /* Bordes ligeramente redondeados */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave para la imagen */
+  width: 100%;
 }
+
+p,
+h2 {
+  cursor: pointer;
+}
+
+p {
+  border-bottom: 2px solid transparent;
+  transition: border-bottom 0.3s ease-in-out;
+}
+
+p:hover {
+  border-bottom: 2px solid grey;
+}
+
 
 /* Animación fade + slide hacia abajo */
 @keyframes fadeSlide {
-    from {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* ============================================== */
-/* MEDIA QUERIES (AHORA FUERA DE CUALQUIER REGLA) */
-/* ============================================== */
-
-/* Media query para pantallas más pequeñas (ancho máximo de 768px) */
-@media (max-width: 768px) {
-    .containerTable {
-        flex-direction: column;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .containerColumn1,
-    .containerColumn2,
-    .containerColumn3 {
-        width: 80%; /* Ocupar más ancho en pantallas pequeñas */
-        text-align: center; /* Centrar texto en móviles */
-        margin-right: 0; /* Eliminar margen derecho específico si lo había */
-    }
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

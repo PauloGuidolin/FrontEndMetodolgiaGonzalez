@@ -151,25 +151,6 @@ export const HomeScreen = () => {
           {/* Sección "Tendencias de las tiendas" - Usando CardList con productos promocionales */}
           <div className={styles.sliderClothes}>
             <h2>Tendencias de las tiendas</h2>
-            {loadingPromotional && <p>Cargando tendencias...</p>}
-            {errorPromotional && (
-              <p>Error al cargar tendencias: {errorPromotional}</p>
-            )}
-            {/* Renderizado condicional para CardList de productos promocionales */}
-            {/* PASAR promotionalProducts a CardList solo si NO está cargando, NO hay error y es un array con elementos */}
-            {!loadingPromotional &&
-              !errorPromotional &&
-              Array.isArray(promotionalProducts) &&
-              promotionalProducts.length > 0 && (
-                <CardList products={promotionalProducts} />
-              )}
-            {/* Mostrar mensaje "No se encontraron" si terminó de cargar sin error y el array está vacío */}
-            {!loadingPromotional &&
-              !errorPromotional &&
-              Array.isArray(promotionalProducts) &&
-              promotionalProducts.length === 0 && (
-                <p>No se encontraron productos promocionales.</p>
-              )}
           </div>
           {/*Footer*/}
           <Footer />

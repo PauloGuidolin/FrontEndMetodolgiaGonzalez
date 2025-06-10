@@ -1,79 +1,133 @@
+/* Estilos base para pantallas grandes (desktop first) */
 .cartCard {
-    display: flex;
-    border: 1px solid #ccc;
-    margin-bottom: 20px;
-    padding: 15px;
-    align-items: center;
-    background-color: #f9f9f9;
+  display: flex;
+  border: 1px solid #ccc;
+  margin-bottom: 20px;
+  padding: 15px;
+  align-items: center;
+  background-color: #f9f9f9;
+}
+
+.imageContainer {
+  width: 30vh;
+  height: 30vh;
+  margin-right: 15px;
+  overflow: hidden;
+  border-radius: 4px;
+  flex-shrink: 0; /* Evita que la imagen se achique más de lo deseado */
+}
+
+.productImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Asegura que la imagen cubra el contenedor sin distorsionarse */
+}
+
+.productDetails {
+  flex-grow: 1;
+  margin-right: 15px;
+}
+
+.productName {
+  font-size: 1.2em;
+  margin-bottom: 5px;
+}
+
+.productCategory,
+.productGender,
+.productColor,
+.productSize,
+.productPrice,
+.productDiscount {
+  font-size: 1.5rem;
+  color: #555;
+  margin-bottom: 3px;
+}
+
+.productDiscount {
+  color: #d9534f; /* Color rojo para destacar el descuento */
+  font-weight: bold;
+}
+
+.quantityControls {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Empuja los controles de cantidad y el botón de eliminar a la derecha */
+}
+
+.quantityControls label {
+  font-size: 1.5rem;
+  margin-right: 5px;
+}
+
+.quantityControls select {
+  padding: 5px;
+  border: 1px solid #ccc;
+  font-size: 1.5rem;
+  width: 80px;
+}
+
+.removeButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+  margin-left: 15px;
+  color: #d9534f;
+}
+
+.removeButton:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .cartCard {
+    flex-direction: column; /* Apila los elementos verticalmente */
+    align-items: flex-start; /* Alinea los elementos a la izquierda */
+    padding: 10px; /* Reduce el padding */
   }
-  
-  
+
   .imageContainer {
-    width: 30vh;
-    height: 30vh;
-    margin-right: 15px;
-    overflow: hidden;
-    border-radius: 4px;
+    width: 100%; /* La imagen ocupa todo el ancho disponible */
+    height: 20vh; /* Ajusta la altura de la imagen para móviles */
+    margin-right: 0; /* Elimina el margen derecho */
+    margin-bottom: 10px; /* Añade margen inferior para separar de los detalles */
   }
-  
-  .productImage {
-    width: 100%;
-    height: 100%;
-  }
-  
+
   .productDetails {
-    flex-grow: 1;
-    margin-right: 15px;
+    margin-right: 0; /* Elimina el margen derecho */
+    margin-bottom: 10px; /* Añade margen inferior */
   }
-  
+
   .productName {
-    font-size: 1.2em;
-    margin-bottom: 5px;
+    font-size: 1em; /* Reduce el tamaño de la fuente */
   }
-  
+
   .productCategory,
   .productGender,
   .productColor,
   .productSize,
   .productPrice,
-  .productDiscount {
-    font-size: 1.5rem;
-    color: #555;
-    margin-bottom: 3px;
-  }
-  
-  .productDiscount {
-    color: #d9534f; /* Color rojo para destacar el descuento */
-    font-weight: bold;
-  }
-  
-  .quantityControls {
-    display: flex;
-    align-items: center;
-    margin-left: auto; /* Empuja los controles de cantidad y el botón de eliminar a la derecha */
-  }
-  
+  .productDiscount,
   .quantityControls label {
-    font-size: 1.5rem;
-    margin-right: 5px;
+    font-size: 1rem; /* Reduce el tamaño de la fuente */
   }
-  
+
+  .quantityControls {
+    flex-direction: column; /* Apila los controles de cantidad */
+    align-items: flex-start;
+    width: 100%;
+    margin-left: 0; /* Elimina el margen izquierdo */
+  }
+
   .quantityControls select {
-    padding: 5px;
-    border: 1px solid #ccc;
-    font-size: 1.5rem;
-    width: 80px;
+    width: 100%; /* El selector ocupa todo el ancho */
+    margin-top: 5px; /* Añade un pequeño margen superior */
   }
-  
+
   .removeButton {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 1.5em;
-    margin-left: 15px;
-    color: #d9534f;
+    margin-left: 0; /* Elimina el margen izquierdo */
+    margin-top: 10px; /* Añade margen superior para separar del selector */
+    font-size: 1.2em; /* Reduce el tamaño del botón */
   }
-  
-  .removeButton:hover {
-    opacity: 0.8;
-  }
+}

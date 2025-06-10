@@ -167,22 +167,25 @@ export const Header = () => {
 
   // Manejador para cuando se envía la búsqueda (presionar Enter o clic en icono)
   const handleSearchSubmit = useCallback(() => {
-    if (searchQuery.trim()) { // Solo navega si hay algo escrito
+    if (searchQuery.trim()) {
+      // Solo navega si hay algo escrito
       const params = new URLSearchParams();
       // Asumiendo que tu backend/página de productos usa 'denominacion' para buscar por nombre
-      params.append('denominacion', searchQuery.trim());
+      params.append("denominacion", searchQuery.trim());
       navigate(`/productos?${params.toString()}`);
       setSearchQuery(""); // Limpiar el input después de la búsqueda
     }
   }, [searchQuery, navigate]);
 
   // Manejador para el evento keydown (para detectar 'Enter')
-  const handleSearchKeyDown = useCallback((event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter') {
-      handleSearchSubmit();
-    }
-  }, [handleSearchSubmit]);
-
+  const handleSearchKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        handleSearchSubmit();
+      }
+    },
+    [handleSearchSubmit]
+  );
 
   return (
     <>
@@ -200,42 +203,38 @@ export const Header = () => {
         </div>
         <div
           className={styles.megaMenuArea}
-          onMouseLeave={closeAllDrops}
+          onMouseLeave={closeAllDrops} // Cierra todos los drops cuando el ratón sale de TODA esta área
         >
+          {/* Contenedor de los títulos (Calzado, Ropa, Deporte) */}
           <div className={styles.containerTitles}>
-            <h3
-              onMouseEnter={() => handleMouseEnterH3(setDropShoes)}
-              ref={shoesMenuRef}
-            >
+            <h3 onMouseEnter={() => handleMouseEnterH3(setDropShoes)}>
               Calzado
             </h3>
 
-            <h3
-              onMouseEnter={() => handleMouseEnterH3(setDropClothes)}
-              ref={clothesMenuRef}
-            >
+            <h3 onMouseEnter={() => handleMouseEnterH3(setDropClothes)}>
               Ropa
             </h3>
 
-            <h3
-              onMouseEnter={() => handleMouseEnterH3(setDropSport)}
-              ref={sportMenuRef}
-            >
+            <h3 onMouseEnter={() => handleMouseEnterH3(setDropSport)}>
               Deporte
             </h3>
           </div>
           {(dropShoes || dropClothes || dropSport) && (
             <div
               className={styles.megaDropDownWrapper}
-              onMouseEnter={handleMegaDropdownMouseEnter}
-              ref={megaDropDownWrapperRef}
+              onMouseEnter={() => {
+                if (dropShoes) setDropShoes(true);
+                if (dropClothes) setDropClothes(true);
+                if (dropSport) setDropSport(true);
+              }}
             >
               {dropShoes && <DropDownShoes />}
               {dropClothes && <DropDownClothes />}
               {dropSport && <DropDownSport />}
             </div>
-          )}
-        </div>
+          )}{" "}
+          {/* <-- ESTA ES LA ETIQUETA DE CIERRE QUE FALTABA */}
+        </div>{" "}
         <div className={styles.containerRight}>
           <div className={styles.containerLogin}>
             {isAuthenticated ? (
@@ -289,17 +288,18 @@ export const Header = () => {
             <div className={styles.containerSearch}>
               {/* Input de búsqueda */}
               <input
-                type="text"
+                type="search"
                 placeholder="Buscar"
                 value={searchQuery} // Conecta el valor del input al estado
                 onChange={handleSearchInputChange} // Actualiza el estado cuando el input cambia
                 onKeyDown={handleSearchKeyDown} // Permite buscar al presionar Enter
+                className={styles.inputSearch}
               />
               {/* Icono de búsqueda - ahora con onClick para disparar la búsqueda */}
               <FaSearch
                 className={styles.searchIcon}
                 onClick={handleSearchSubmit} // Dispara la búsqueda al hacer clic
-                style={{ cursor: 'pointer' }} // Indica que es clickeable
+                style={{ cursor: "pointer" }} // Indica que es clickeable
               />
             </div>
 
