@@ -1,3 +1,4 @@
+// CheckoutModal.tsx
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import styles from "./CheckoutModal.module.css";
 import { useCartStore } from "../../../../store/cartStore";
@@ -11,9 +12,6 @@ import { CreateOrdenCompraDetalleDTO, MercadoPagoItemRequestDTO, MercadoPagoPref
 import InputField from "../../InputField/InputField";
 import { AddressForm } from "../AddressForm/AddressForm";
 import { formatCurrency } from "../../../../types/formatUtils";
-
-// Rutas de importación de DTOs actualizadas (asumiendo que están en src/types/dtos/)
-
 
 interface CheckoutModalProps {
     isOpen: boolean;
@@ -73,9 +71,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
         }
 
         if (user?.id) {
-            // Se recomienda refetchUser si el user props puede estar desactualizado
-            // Si el `user` prop ya es el más reciente, `fetchUser()` podría ser redundante aquí.
-            // Para este ejemplo, lo mantendremos asumiendo que `fetchUser` actualiza el `user` en el store.
             fetchUser();
         }
     }, [isOpen, user?.id, fetchUser, resetState]);
@@ -105,8 +100,8 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                     piso: null,
                     departamento: null,
                     cp: 0,
-                    localidad: null, // *** CAMBIO: Ahora permite null para inicialización ***
-                    active: true // Asumo que una nueva dirección empieza activa
+                    localidad: null,
+                    active: true
                 });
             }
         } else if (isOpen) {
@@ -165,7 +160,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                 !selectedAddress.calle?.trim() ||
                 selectedAddress.numero === undefined ||
                 selectedAddress.numero <= 0 ||
-                selectedAddress.cp === undefined || // Asegúrate de que cp exista y sea un número válido
+                selectedAddress.cp === undefined ||
                 selectedAddress.cp <= 0 ||
                 !selectedAddress.localidad ||
                 !selectedAddress.localidad.id
@@ -204,12 +199,12 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                             provincia: selectedAddress.localidad.provincia ? {
                                 id: selectedAddress.localidad.provincia.id,
                                 nombre: selectedAddress.localidad.provincia.nombre,
-                                active: selectedAddress.localidad.provincia.active || false // Asegurarse de `active` aquí
-                            } as ProvinciaDTO : null, // *** CAMBIO: Asegura que provincia pueda ser null si es necesario ***
-                            active: selectedAddress.localidad.active || false // Asegurarse de `active` aquí
-                        } as LocalidadDTO) // *** CAMBIO: Casteo explícito a LocalidadDTO ***
-                        : null, // *** CAMBIO: Permite null aquí ***
-                    active: true // Nueva dirección se asume activa
+                                active: selectedAddress.localidad.provincia.active || false
+                            } as ProvinciaDTO : null,
+                            active: selectedAddress.localidad.active || false
+                        } as LocalidadDTO)
+                        : null,
+                    active: true
                 };
                 finalDireccionId = null;
             }
@@ -229,7 +224,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
 
         const mpItems: MercadoPagoItemRequestDTO[] = cartItems.map((item) => ({
             id: item.productDetail.id?.toString() || "",
-            // CORRECCIÓN AQUÍ: Accede a las propiedades `nombreColor` y `nombreTalle`
             title: `${item.product.denominacion} - ${item.productDetail.color?.nombreColor || ''} - ${item.productDetail.talle?.nombreTalle || ''}`,
             description: `Color: ${item.productDetail.color?.nombreColor || ''}, Talle: ${item.productDetail.talle?.nombreTalle || ''}`,
             pictureUrl:
@@ -279,7 +273,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
         phone,
         email,
         selectedShippingOption,
-        selectedAddress, // Ya tiene los tipos correctos
+        selectedAddress,
         currentShippingCost,
         totalWithShippingAndTaxes,
         createPreference,
@@ -292,12 +286,16 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
     return (
         <div className={`${styles.modalOverlay} ${isOpen ? styles.isOpen : ''}`}>
             <div className={styles.modalContent}>
-                <button className={styles.closeButton} onClick={onClose}>
-                    &times;
-                </button>
-                <h2>Finalizar Compra</h2>
-                <div className={styles.checkoutLayout}>
-                    <div className={styles.customerInfoSection}>
+                {/* Aquí puedes agregar un encabezado de modal si no lo tienes */}
+                <div className={styles.modalHeader}>
+                    <h2>Finalizar Compra</h2>
+                    <button className={styles.closeButton} onClick={onClose}>
+                        &times;
+                    </button>
+                </div>
+
+                <div className={styles.modalBodyWrapper}> {/* Este es el contenedor de las dos columnas */}
+                    <div className={styles.checkoutFormsSection}> {/* Columna izquierda: Formularios */}
                         {user ? (
                             <>
                                 <div className={styles.personalInfoSection}>
@@ -393,7 +391,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                                                 piso: null,
                                                                 departamento: null,
                                                                 cp: 0,
-                                                                localidad: null, // *** CAMBIO: Permite null ***
+                                                                localidad: null,
                                                                 active: true
                                                             });
                                                         } else {
@@ -444,6 +442,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                         )}
                                     </div>
                                 )}
+                                {/* Botón de "Confirmar Compra" dentro de la sección de formularios */}
                                 <div className={styles.paymentSection}>
                                     <button
                                         type="button"
@@ -467,7 +466,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                         )}
                     </div>
 
-                    <div className={styles.cartSummarySection}>
+                    <div className={styles.cartSummarySection}> {/* Columna derecha: Resumen del Pedido */}
                         <h3>Resumen del Pedido</h3>
 
                         <div className={styles.orderSummary}>
@@ -488,6 +487,20 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({ isOpen, onClose, subtotal
                                 <span>{formatCurrency(totalWithShippingAndTaxes)}</span>
                             </div>
                         </div>
+                        {/* Botón "Proceder al pago" en el resumen del pedido */}
+                        {/* Se puede duplicar el botón o moverlo aquí si solo debe aparecer en el resumen */}
+                        {user && ( // Solo muestra el botón si hay un usuario logueado
+                            <button
+                                type="button"
+                                className={styles.proceedToPaymentButton} // Nueva clase para el botón en el resumen
+                                onClick={handleProceedToPay}
+                                disabled={loadingPaymentProcess || cartItems.length === 0}
+                            >
+                                {loadingPaymentProcess
+                                    ? "Procesando..."
+                                    : "Proceder al Pago"}
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>

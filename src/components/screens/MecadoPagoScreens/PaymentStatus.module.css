@@ -1,0 +1,179 @@
+/* Contenedor principal para todas las páginas de estado de pago */
+.statusContainer {
+    padding: 40px 20px;
+    max-width: 700px;
+    margin: 50px auto;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px; /* Asegura un tamaño mínimo para la estética */
+}
+
+/* Títulos principales */
+.statusContainer h1 {
+    font-size: 2.8em;
+    margin-bottom: 20px;
+    animation: fadeInDown 0.8s ease-out;
+}
+
+/* Párrafos descriptivos */
+.statusContainer p {
+    font-size: 1.1em;
+    line-height: 1.6;
+    margin-bottom: 25px;
+    color: #555;
+    max-width: 80%; /* Para que el texto no sea demasiado ancho */
+}
+
+/* Estilos específicos para el mensaje de éxito */
+.successTitle {
+    color: #28a745; /* Verde para éxito */
+}
+
+/* Estilos específicos para el mensaje de fallo */
+.failureTitle {
+    color: #dc3545; /* Rojo para fallo */
+}
+
+/* Estilos específicos para el mensaje pendiente */
+.pendingTitle {
+    color: #ffc107; /* Amarillo/Naranja para pendiente */
+}
+
+/* Número de orden o ID de transacción (si aplica) */
+.orderIdHighlight {
+    font-size: 1.8em;
+    color: #007bff; /* Azul para resaltar IDs */
+    margin: 20px 0;
+    animation: fadeInUp 1s ease-out;
+}
+
+.orderIdHighlight strong {
+    background-color: #e0f2f7;
+    padding: 8px 15px;
+    border-radius: 8px;
+    display: inline-block;
+    letter-spacing: 1px;
+}
+
+/* Contenedor para detalles adicionales (en OrderConfirmation) */
+.orderDetails {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #dee2e6;
+    width: 100%;
+    max-width: 400px; /* Limita el ancho de los detalles */
+    text-align: left;
+}
+
+.orderDetails p {
+    margin: 5px 0;
+    font-size: 1em;
+    color: #444;
+}
+
+/* Estilos para los enlaces/botones */
+.actionLink {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 25px;
+    background-color: #007bff; /* Azul primario */
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    min-width: 180px; /* Ancho mínimo para consistencia */
+}
+
+.actionLink:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+/* Animaciones */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+    .statusContainer {
+        padding: 30px 15px;
+        margin: 30px auto;
+        min-height: 250px;
+    }
+
+    .statusContainer h1 {
+        font-size: 2.2em;
+    }
+
+    .statusContainer p {
+        font-size: 1em;
+        max-width: 90%;
+    }
+
+    .orderIdHighlight {
+        font-size: 1.5em;
+    }
+
+    .actionLink {
+        padding: 10px 20px;
+        font-size: 1em;
+        min-width: 150px;
+    }
+}
+
+@media (max-width: 480px) {
+    .statusContainer {
+        padding: 20px 10px;
+        margin: 20px auto;
+        min-height: 200px;
+    }
+
+    .statusContainer h1 {
+        font-size: 1.8em;
+    }
+
+    .statusContainer p {
+        font-size: 0.95em;
+        max-width: 100%;
+    }
+
+    .orderIdHighlight {
+        font-size: 1.3em;
+    }
+
+    .actionLink {
+        padding: 8px 15px;
+        font-size: 0.95em;
+        min-width: 120px;
+    }
+}

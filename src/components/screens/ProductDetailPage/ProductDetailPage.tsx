@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useProductDetailStore } from "../../../store/productDetailStore";
@@ -7,11 +7,11 @@ import { useCartStore } from "../../../store/cartStore";
 import styles from "./ProductDetailPage.module.css";
 import { Header } from "../../ui/Header/Header";
 import { Footer } from "../../ui/Footer/Footer";
-import { ProductoDetalleDTO } from "../../dto/ProductoDetalleDTO";
 import { ImagenDTO } from "../../dto/ImagenDTO";
 import { ColorDTO } from "../../dto/ColorDTO";
 import { TalleDTO } from "../../dto/TalleDTO";
-import { ProductoDTO } from "../../dto/ProductoDTO";
+import { ProductoDetalleDTO } from "../../dto/ProductoDetalleDTO"; // Asegúrate de importar ProductoDetalleDTO
+
 
 const ProductDetailPage: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -49,7 +49,8 @@ const ProductDetailPage: React.FC = () => {
     }, [id, fetchProductById, clearSelectedProduct, clearSelectedProductDetail]);
 
     // Calcula todas las opciones de colores disponibles para el producto (únicos por ID)
-    const allAvailableColors: ColorDTO[] = useMemo(() => {
+    // Estos son todos los colores que tiene el producto, sin importar stock o talle.
+    const allUniqueColors: ColorDTO[] = useMemo(() => {
         const uniqueColorIds = new Set<number>();
         const colors: ColorDTO[] = [];
         selectedProduct?.productos_detalles?.forEach(pd => {
@@ -62,7 +63,8 @@ const ProductDetailPage: React.FC = () => {
     }, [selectedProduct]);
 
     // Calcula todas las opciones de talles disponibles para el producto (únicos por ID)
-    const allAvailableTalles: TalleDTO[] = useMemo(() => {
+    // Estos son todos los talles que tiene el producto, sin importar stock o color.
+    const allUniqueTalles: TalleDTO[] = useMemo(() => {
         const uniqueTalleIds = new Set<number>();
         const talles: TalleDTO[] = [];
         selectedProduct?.productos_detalles?.forEach(pd => {
@@ -74,64 +76,88 @@ const ProductDetailPage: React.FC = () => {
         return talles;
     }, [selectedProduct]);
 
-    // Filtra los talles disponibles basándose en el color seleccionado y el stock
-    const filteredAvailableTalles = useMemo(() => {
+    // Opciones de talles disponibles basadas en el color SELECCIONADO y el stock actual.
+    const availableTallesForSelectedColor: TalleDTO[] = useMemo(() => {
         if (!selectedProduct || !selectedProduct.productos_detalles) return [];
 
-        let relevantDetails = selectedProduct.productos_detalles;
+        if (selectedColorId === null) {
+            // Si no hay color seleccionado, mostramos todos los talles que tienen stock,
+            // independientemente del color (esto es menos útil si el usuario debe elegir color y talle)
+            // O podemos optar por no mostrar nada hasta que elija un color.
+            // Por ahora, devolveremos talles que tienen stock con CUALQUIER color.
+            const tallesWithStock = selectedProduct.productos_detalles
+                .filter(pd => pd.stockActual > 0)
+                .map(pd => pd.talle)
+                .filter((talle): talle is TalleDTO => talle !== null);
 
-        // Si hay un color seleccionado, filtramos los detalles por ese color
-        if (selectedColorId !== null) {
-            relevantDetails = relevantDetails.filter(pd => pd.color?.id === selectedColorId);
+            const uniqueTalleIds = new Set<number>();
+            const uniqueTalles: TalleDTO[] = [];
+            tallesWithStock.forEach(talle => {
+                if (!uniqueTalleIds.has(talle.id)) {
+                    uniqueTalleIds.add(talle.id);
+                    uniqueTalles.push(talle);
+                }
+            });
+            return uniqueTalles;
+
+        } else {
+            // Si hay un color seleccionado, filtramos los detalles por ese color y stock.
+            const tallesForColorWithStock = selectedProduct.productos_detalles
+                .filter(pd => pd.color?.id === selectedColorId && pd.stockActual > 0)
+                .map(pd => pd.talle)
+                .filter((talle): talle is TalleDTO => talle !== null);
+
+            const uniqueTalleIds = new Set<number>();
+            const uniqueTalles: TalleDTO[] = [];
+            tallesForColorWithStock.forEach(talle => {
+                if (!uniqueTalleIds.has(talle.id)) {
+                    uniqueTalleIds.add(talle.id);
+                    uniqueTalles.push(talle);
+                }
+            });
+            return uniqueTalles;
         }
-
-        // De los detalles relevantes, obtenemos los talles que tienen stock
-        const tallesWithStock = relevantDetails
-            .filter(pd => pd.stockActual > 0)
-            .map(pd => pd.talle)
-            .filter((talle): talle is TalleDTO => talle !== null);
-
-        // Aseguramos unicidad por ID
-        const uniqueTalleIds = new Set<number>();
-        const uniqueTalles: TalleDTO[] = [];
-        tallesWithStock.forEach(talle => {
-            if (!uniqueTalleIds.has(talle.id)) {
-                uniqueTalleIds.add(talle.id);
-                uniqueTalles.push(talle);
-            }
-        });
-
-        return uniqueTalles;
     }, [selectedProduct, selectedColorId]);
 
-    // Filtra los colores disponibles basándose en el talle seleccionado y el stock
-    const filteredAvailableColors = useMemo(() => {
+    // Opciones de colores disponibles basadas en el talle SELECCIONADO y el stock actual.
+    const availableColorsForSelectedTalle: ColorDTO[] = useMemo(() => {
         if (!selectedProduct || !selectedProduct.productos_detalles) return [];
 
-        let relevantDetails = selectedProduct.productos_detalles;
+        if (selectedTalleId === null) {
+            // Si no hay talle seleccionado, mostramos todos los colores que tienen stock,
+            // independientemente del talle.
+            const colorsWithStock = selectedProduct.productos_detalles
+                .filter(pd => pd.stockActual > 0)
+                .map(pd => pd.color)
+                .filter((color): color is ColorDTO => color !== null);
 
-        // Si hay un talle seleccionado, filtramos los detalles por ese talle
-        if (selectedTalleId !== null) {
-            relevantDetails = relevantDetails.filter(pd => pd.talle?.id === selectedTalleId);
+            const uniqueColorIds = new Set<number>();
+            const uniqueColors: ColorDTO[] = [];
+            colorsWithStock.forEach(color => {
+                if (!uniqueColorIds.has(color.id)) {
+                    uniqueColorIds.add(color.id);
+                    uniqueColors.push(color);
+                }
+            });
+            return uniqueColors;
+
+        } else {
+            // Si hay un talle seleccionado, filtramos los detalles por ese talle y stock.
+            const colorsForTalleWithStock = selectedProduct.productos_detalles
+                .filter(pd => pd.talle?.id === selectedTalleId && pd.stockActual > 0)
+                .map(pd => pd.color)
+                .filter((color): color is ColorDTO => color !== null);
+
+            const uniqueColorIds = new Set<number>();
+            const uniqueColors: ColorDTO[] = [];
+            colorsForTalleWithStock.forEach(color => {
+                if (!uniqueColorIds.has(color.id)) {
+                    uniqueColorIds.add(color.id);
+                    uniqueColors.push(color);
+                }
+            });
+            return uniqueColors;
         }
-
-        // De los detalles relevantes, obtenemos los colores que tienen stock
-        const colorsWithStock = relevantDetails
-            .filter(pd => pd.stockActual > 0)
-            .map(pd => pd.color)
-            .filter((color): color is ColorDTO => color !== null);
-
-        // Aseguramos unicidad por ID
-        const uniqueColorIds = new Set<number>();
-        const uniqueColors: ColorDTO[] = [];
-        colorsWithStock.forEach(color => {
-            if (!uniqueColorIds.has(color.id)) {
-                uniqueColorIds.add(color.id);
-                uniqueColors.push(color);
-            }
-        });
-
-        return uniqueColors;
     }, [selectedProduct, selectedTalleId]);
 
 
@@ -145,41 +171,26 @@ const ProductDetailPage: React.FC = () => {
                 setMainImageUrl(undefined);
             }
 
-            // Inicializa selectedColorId si no está seleccionado y hay colores disponibles (filtrados)
-            if (selectedColorId === null && filteredAvailableColors.length > 0) {
-                setSelectedColorId(filteredAvailableColors[0].id);
+            // Inicializa selectedColorId si no está seleccionado o si la selección actual no es válida.
+            // Prioriza mantener la selección si es posible.
+            if (selectedColorId === null || !availableColorsForSelectedTalle.some(c => c.id === selectedColorId)) {
+                setSelectedColorId(availableColorsForSelectedTalle.length > 0 ? availableColorsForSelectedTalle[0].id : null);
             }
 
-            // Inicializa selectedTalleId si no está seleccionado y hay talles disponibles (filtrados)
-            if (selectedTalleId === null && filteredAvailableTalles.length > 0) {
-                setSelectedTalleId(filteredAvailableTalles[0].id);
+            // Inicializa selectedTalleId si no está seleccionado o si la selección actual no es válida.
+            // Prioriza mantener la selección si es posible.
+            if (selectedTalleId === null || !availableTallesForSelectedColor.some(t => t.id === selectedTalleId)) {
+                setSelectedTalleId(availableTallesForSelectedColor.length > 0 ? availableTallesForSelectedColor[0].id : null);
             }
         }
-    }, [selectedProduct, mainImageUrl, selectedColorId, selectedTalleId, filteredAvailableColors, filteredAvailableTalles]);
+    }, [selectedProduct, mainImageUrl, selectedColorId, selectedTalleId, availableColorsForSelectedTalle, availableTallesForSelectedColor]);
 
 
-    // Efecto para ajustar selectedTalleId si la opción actual ya no está disponible
-    useEffect(() => {
-        if (selectedTalleId !== null && !filteredAvailableTalles.some(talle => talle.id === selectedTalleId)) {
-            setSelectedTalleId(filteredAvailableTalles.length > 0 ? filteredAvailableTalles[0].id : null);
-        }
-    }, [selectedTalleId, filteredAvailableTalles]);
-
-    // Efecto para ajustar selectedColorId si la opción actual ya no está disponible
-    useEffect(() => {
-        if (selectedColorId !== null && !filteredAvailableColors.some(color => color.id === selectedColorId)) {
-            setSelectedColorId(filteredAvailableColors.length > 0 ? filteredAvailableColors[0].id : null);
-        }
-    }, [selectedColorId, filteredAvailableColors]);
-
-
-    // Efecto para cargar el ProductoDetalle específico cuando cambian color/talle/producto
+    // Efecto para buscar el ProductoDetalle cuando cambian las selecciones
     useEffect(() => {
         if (selectedProduct && selectedColorId !== null && selectedTalleId !== null) {
-            // Buscamos los objetos completos de Color y Talle de las listas "allAvailable"
-            // para asegurar que pasamos los nombres correctos a la función de búsqueda.
-            const colorObj = allAvailableColors.find(c => c.id === selectedColorId);
-            const talleObj = allAvailableTalles.find(t => t.id === selectedTalleId);
+            const colorObj = allUniqueColors.find(c => c.id === selectedColorId);
+            const talleObj = allUniqueTalles.find(t => t.id === selectedTalleId);
 
             if (colorObj && talleObj) {
                 fetchProductDetailByProductTalleColor(
@@ -188,6 +199,7 @@ const ProductDetailPage: React.FC = () => {
                     colorObj.nombreColor
                 );
             } else {
+                // Si la combinación de IDs no se encuentra (lo que podría ocurrir si el producto no tiene ese detalle)
                 console.warn("No se encontró el objeto de Color o Talle para los IDs seleccionados. Limpiando detalle.");
                 clearSelectedProductDetail();
             }
@@ -200,9 +212,30 @@ const ProductDetailPage: React.FC = () => {
         selectedProduct,
         fetchProductDetailByProductTalleColor,
         clearSelectedProductDetail,
-        allAvailableColors,
-        allAvailableTalles
+        allUniqueColors, // Asegúrate de que estas dependencias sean correctas
+        allUniqueTalles
     ]);
+
+    // Manejador para el cambio de color
+    const handleColorChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newColorId = Number(e.target.value);
+        setSelectedColorId(newColorId);
+        // Cuando cambias el color, el talle seleccionado puede dejar de ser válido.
+        // Lo que hacemos es re-evaluar los talles disponibles para el nuevo color.
+        // El useEffect de inicialización y ajuste de talles se encargará de esto.
+        setQuantity(1); // Reiniciar cantidad
+    }, []);
+
+    // Manejador para el cambio de talle
+    const handleTalleChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+        const newTalleId = Number(e.target.value);
+        setSelectedTalleId(newTalleId);
+        // Cuando cambias el talle, el color seleccionado puede dejar de ser válido.
+        // Lo que hacemos es re-evaluar los colores disponibles para el nuevo talle.
+        // El useEffect de inicialización y ajuste de colores se encargará de esto.
+        setQuantity(1); // Reiniciar cantidad
+    }, []);
+
 
     // Función para manejar el clic en las miniaturas
     const handleThumbnailClick = (imageUrl: string | undefined) => {
@@ -211,14 +244,13 @@ const ProductDetailPage: React.FC = () => {
 
     // Manejador para agregar al carrito
     const handleAddToCart = () => {
-        // Validación temprana para asegurar que selectedProduct no es null
         if (!selectedProduct) {
             toast.error("Error: Producto no cargado. Intenta de nuevo.");
             return;
         }
 
-        const currentSelectedColor = allAvailableColors.find(c => c.id === selectedColorId)?.nombreColor;
-        const currentSelectedTalle = allAvailableTalles.find(t => t.id === selectedTalleId)?.nombreTalle;
+        const currentSelectedColor = allUniqueColors.find(c => c.id === selectedColorId)?.nombreColor;
+        const currentSelectedTalle = allUniqueTalles.find(t => t.id === selectedTalleId)?.nombreTalle;
 
         if (selectedColorId === null || selectedTalleId === null) {
             toast.error("Por favor, selecciona un color y un talle.");
@@ -240,7 +272,6 @@ const ProductDetailPage: React.FC = () => {
             return;
         }
 
-        // En este punto, selectedProduct está garantizado como no nulo
         addToCart(selectedProduct, selectedProductDetail, quantity);
         toast.success(`"${selectedProduct.denominacion}" (color: ${currentSelectedColor || 'N/A'}, talle: ${currentSelectedTalle || 'N/A'}) añadido al carrito.`);
 
@@ -305,34 +336,34 @@ const ProductDetailPage: React.FC = () => {
 
                         <div className={styles.productOptions}>
                             <div>
-                                <label htmlFor="talle-select">Seleccionar talla:</label>
+                                <label htmlFor="color-select">Seleccionar color:</label>
                                 <select
-                                    id="talle-select"
-                                    value={selectedTalleId === null ? "" : selectedTalleId}
-                                    onChange={(e) => setSelectedTalleId(Number(e.target.value))}
-                                    disabled={filteredAvailableTalles.length === 0}
+                                    id="color-select"
+                                    value={selectedColorId === null ? "" : selectedColorId}
+                                    onChange={handleColorChange}
+                                    disabled={availableColorsForSelectedTalle.length === 0}
                                 >
-                                    <option value="">Seleccionar talla</option>
-                                    {filteredAvailableTalles.map((talle: TalleDTO) => (
-                                        <option key={talle.id} value={talle.id}>
-                                            {talle.nombreTalle}
+                                    <option value="">Seleccionar color</option>
+                                    {availableColorsForSelectedTalle.map((color: ColorDTO) => (
+                                        <option key={color.id} value={color.id}>
+                                            {color.nombreColor}
                                         </option>
                                     ))}
                                 </select>
                             </div>
 
                             <div>
-                                <label htmlFor="color-select">Seleccionar color:</label>
+                                <label htmlFor="talle-select">Seleccionar talle:</label>
                                 <select
-                                    id="color-select"
-                                    value={selectedColorId === null ? "" : selectedColorId}
-                                    onChange={(e) => setSelectedColorId(Number(e.target.value))}
-                                    disabled={filteredAvailableColors.length === 0}
+                                    id="talle-select"
+                                    value={selectedTalleId === null ? "" : selectedTalleId}
+                                    onChange={handleTalleChange}
+                                    disabled={availableTallesForSelectedColor.length === 0}
                                 >
-                                    <option value="">Seleccionar color</option>
-                                    {filteredAvailableColors.map((color: ColorDTO) => (
-                                        <option key={color.id} value={color.id}>
-                                            {color.nombreColor}
+                                    <option value="">Seleccionar talle</option>
+                                    {availableTallesForSelectedColor.map((talle: TalleDTO) => (
+                                        <option key={talle.id} value={talle.id}>
+                                            {talle.nombreTalle}
                                         </option>
                                     ))}
                                 </select>
@@ -379,7 +410,7 @@ const ProductDetailPage: React.FC = () => {
                                 !selectedProductDetail ||
                                 selectedProductDetail.stockActual < quantity ||
                                 quantity === 0 ||
-                                loadingDetail // Deshabilitar el botón mientras se carga el detalle
+                                loadingDetail
                             }
                         >
                             Agregar al carrito <span className={styles.arrow}>➔</span>

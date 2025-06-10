@@ -12,12 +12,14 @@ interface TalleState {
 }
 
 interface TalleActions {
-    fetchAllTalles: () => Promise<void>; // Ahora buscará todos los talles (activos e inactivos)
+    // Método para obtener solo los talles activos (para la UI de usuario final)
+    fetchActiveTalles: () => Promise<void>; 
+    // Método para obtener todos los talles (activos e inactivos, para vistas de administración)
+    fetchAllTallesForAdmin: () => Promise<void>; 
     fetchTalleById: (id: number | string) => Promise<void>;
     fetchTalleByName: (name: string) => Promise<void>;
     createTalle: (talleData: Partial<Omit<TalleDTO, 'id'>>) => Promise<TalleDTO>;
     updateTalle: (talleData: TalleDTO) => Promise<TalleDTO>;
-    // Unificamos deactivateTalle y activateTalle en un solo método toggle
     toggleTalleStatus: (id: number | string, currentStatus: boolean, denominacion: string) => Promise<TalleDTO>; 
     clearSelectedTalle: () => void;
     clearError: () => void;
@@ -35,26 +37,38 @@ export const useTalleStore = create<TalleState & TalleActions>((set, get) => ({
     error: null,
     selectedTalle: null,
 
-    // --- CAMBIO CLAVE AQUÍ: Llama a getAllForAdmin para obtener TODOS los talles ---
-    fetchAllTalles: async () => {
+    // --- NUEVO MÉTODO: Para obtener solo talles activos (para UI de usuario final) ---
+    fetchActiveTalles: async () => {
         set({ loading: true, error: null });
         try {
-            // Usa el nuevo método del servicio que trae todos los talles (activos e inactivos)
+            // Llama al método del servicio que solo trae los activos (GET /talles)
+            const talles = await talleService.getAllActive();
+            set({ talles, loading: false });
+        } catch (error: any) {
+            console.error("Error al cargar talles activos:", error);
+            set({ error: `Error al cargar talles activos: ${error.message || String(error)}`, loading: false });
+            toast.error("Error al cargar talles activos: " + (error.message || "Error desconocido"));
+        }
+    },
+
+    // --- MÉTODO: Para obtener todos los talles (para vistas de administración) ---
+    fetchAllTallesForAdmin: async () => { 
+        set({ loading: true, error: null });
+        try {
+            // Llama al método del servicio que trae todos los talles (GET /talles/all)
             const talles = await talleService.getAllForAdmin();
             set({ talles, loading: false });
         } catch (error: any) {
-            console.error("Error fetching all talles:", error);
-            set({ error: `Error al cargar talles: ${error.message || String(error)}`, loading: false });
-            toast.error("Error al cargar talles: " + (error.message || "Error desconocido"));
+            console.error("Error al cargar todos los talles (admin):", error);
+            set({ error: `Error al cargar talles (admin): ${error.message || String(error)}`, loading: false });
+            toast.error("Error al cargar todos los talles (admin): " + (error.message || "Error desconocido"));
         }
     },
 
     fetchTalleById: async (id: number | string) => {
         set({ loading: true, error: null, selectedTalle: null });
         try {
-            // Este método del servicio getById solo debería traer activos según tu BaseService.
-            // Si quieres que aquí traiga inactivos también, necesitarías un endpoint y un método en talleService.ts que use el
-            // buscarPorIdIncluyendoInactivos del backend, o que tu getById en talleService llame a ese.
+            // Este getById en el servicio está llamando a GET /talles/{id} que solo busca activos.
             const talle = await talleService.getById(id); 
             set({ selectedTalle: talle, loading: false });
         } catch (error: any) {
@@ -80,8 +94,10 @@ export const useTalleStore = create<TalleState & TalleActions>((set, get) => ({
         set({ loading: true, error: null });
         try {
             const newTalle = await talleService.create(talleData);
+            // Si creas un talle, lo más probable es que sea activo por defecto.
+            // Si estás en una vista de administración, lo añades a la lista.
             set((state) => ({
-                talles: [...state.talles, newTalle],
+                talles: [...state.talles, newTalle], // Asume que quieres verlo inmediatamente en la lista "todos"
                 loading: false,
             }));
             toast.success(`Talle "${newTalle.nombreTalle}" creado exitosamente.`);
@@ -114,21 +130,9 @@ export const useTalleStore = create<TalleState & TalleActions>((set, get) => ({
         }
     },
 
-    /**
-     * @method toggleTalleStatus
-     * @description Alterna el estado activo/inactivo de un talle usando el servicio.
-     * Este método del store ahora llama al endpoint /toggleStatus del backend,
-     * que es el que gestiona el cambio de estado y devuelve la entidad actualizada.
-     * @param {number | string} id El ID del talle.
-     * @param {boolean} currentStatus El estado actual del talle.
-     * @param {string} denominacion El nombre del talle (para notificaciones).
-     * @returns {Promise<TalleDTO>} La promesa que resuelve con el TalleDTO actualizado.
-     */
     toggleTalleStatus: async (id: number | string, currentStatus: boolean, denominacion: string) => {
         set({ loading: true, error: null });
         try {
-            // Llama al método unificado en talleService, que a su vez usa el endpoint /toggleStatus del backend.
-            // El backend recibe 'currentStatus' y lo invierte internamente.
             const updatedTalle = await talleService.toggleActiveStatus(id, currentStatus);
             
             // Actualiza el estado del store con el talle recibido del backend
@@ -139,7 +143,7 @@ export const useTalleStore = create<TalleState & TalleActions>((set, get) => ({
                 loading: false,
             }));
             toast.success(`Talle "${denominacion}" ${updatedTalle.activo ? 'activado' : 'desactivado'} correctamente.`);
-            return updatedTalle; // Devuelve el talle actualizado
+            return updatedTalle; 
         } catch (error: any) {
             console.error(`Error al alternar estado del talle ${id}:`, error);
             set({ error: `Error al alternar estado de talle "${denominacion}": ${error.message || String(error)}`, loading: false });
