@@ -1,3 +1,4 @@
+/* Estilos por defecto para pantallas grandes (desktop-first) */
 .filterPanelOverlay {
     position: fixed;
     top: 0;
@@ -19,9 +20,9 @@
 }
 
 .filterPanel {
-    background-color: #fff; 
-    width: 300px; /* Ancho del panel */
-    max-width: 90%; /* Máximo 90% del ancho de la pantalla en móviles */
+    background-color: #fff;
+    width: 300px; /* Ancho del panel para desktop */
+    max-width: 90%; /* Máximo 90% del ancho de la pantalla en móviles (se aplica desde este punto) */
     height: 100%;
     box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
     display: flex;
@@ -103,7 +104,6 @@
     width: 100%;
     padding: 10px 12px;
     border: 1px solid #ccc; /* Gris claro */
-    border-radius: 8px;
     font-size: 1em;
     box-sizing: border-box;
     margin-bottom: 10px;
@@ -126,9 +126,12 @@
     display: flex;
     gap: 10px;
     align-items: center;
+    flex-wrap: wrap; /* Permite que los inputs de precio se envuelvan en pantallas pequeñas */
 }
 
 .priceInputs .filterInputNumber {
+    flex: 1; /* Permite que cada input ocupe el espacio disponible */
+    min-width: 80px; /* Ancho mínimo para evitar que se pongan muy pequeños */
     margin-bottom: 0;
 }
 
@@ -153,7 +156,7 @@
     width: 20px;
     height: 20px;
     border: 2px solid #999; /* Gris para el borde */
-    border-radius: 4px;
+    border-radius: 2px;
     margin-right: 10px;
     cursor: pointer;
     display: grid;
@@ -169,7 +172,7 @@
     transform: scale(0);
     transition: transform 0.2s ease-in-out;
     /* Color del "tick" - negro */
-    box-shadow: inset 1em 1em var(--accent-color, #333); 
+    box-shadow: inset 1em 1em var(--accent-color, #333);
     background-color: CanvasText; /* Esto asegura que el box-shadow sea visible */
     clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 60%);
 }
@@ -201,7 +204,6 @@
 .clearFilterButton,
 .applyFilterButton {
     padding: 12px 15px;
-    border-radius: 5px;
     cursor: pointer;
     font-size: 1em;
     transition: all 0.2s ease-in-out;
@@ -232,18 +234,100 @@
     border-color: #555;
 }
 
-
-/* Media Queries para Responsividad (Mantener lo existente) */
+/* Para tablets y dispositivos con ancho de pantalla de hasta 768px */
 @media (max-width: 768px) {
     .filterPanel {
-        width: 100%;
-        max-width: 100%;
+        width: 100%; /* El panel ocupa todo el ancho en pantallas más pequeñas */
+        max-width: 100%; /* Asegura que no haya límite de ancho */
     }
+
+    .filterPanelHeader {
+        padding: 12px 15px; /* Ajusta el padding del header */
+    }
+
+    .filterPanelHeader h2 {
+        font-size: 1.1em; /* Un poco más pequeño el título */
+    }
+
+    .filterPanelContent {
+        padding: 15px; /* Reduce el padding interno */
+    }
+
+    .filterSection {
+        margin-bottom: 15px; /* Reduce el margen inferior de las secciones */
+        padding-bottom: 10px; /* Reduce el padding inferior de las secciones */
+    }
+
+    .filterSection h3 {
+        font-size: 0.95em; /* Un poco más pequeño el título de la sección */
+    }
+
+    .filterInputText,
+    .filterInputNumber,
+    .filterSelect {
+        padding: 10px; /* Ajusta el padding de los inputs */
+        font-size: 0.9em; /* Fuente un poco más pequeña */
+    }
+
+    /* Ajuste para los inputs de precio para que se apilen si la pantalla es muy estrecha */
+    .priceInputs {
+        flex-direction: column; /* Apila los inputs de precio verticalmente */
+        align-items: flex-start; /* Alinea los ítems al inicio */
+        gap: 5px; /* Reduce el espacio entre ellos */
+    }
+
+    .priceInputs span {
+        align-self: center; /* Centra el guion "-" entre los inputs */
+        font-size: 1em; /* Ajusta el tamaño de fuente del guion */
+    }
+
+    .checkboxItem label {
+        font-size: 0.9em; /* Texto de label de checkbox un poco más pequeño */
+    }
+
     .filterPanelFooter {
-        flex-direction: column;
+        flex-direction: column; /* Apila los botones del footer verticalmente */
+        padding: 10px 15px; /* Reduce el padding del footer */
     }
+
     .clearFilterButton,
     .applyFilterButton {
-        margin: 5px 0;
+        margin: 5px 0; /* Agrega margen vertical entre los botones apilados */
+        padding: 10px; /* Ajusta el padding de los botones */
+        font-size: 0.95em; /* Ajusta el tamaño de fuente de los botones */
+    }
+}
+
+/* Para teléfonos muy pequeños (menos de 480px de ancho) */
+@media (max-width: 480px) {
+    .closeFilterButton {
+        font-size: 1.4em; /* Un poco más pequeño el botón de cerrar */
+        padding: 3px 8px;
+    }
+
+    .filterPanelHeader h2 {
+        font-size: 1em; /* Título aún más pequeño */
+    }
+
+    .filterInputText,
+    .filterInputNumber,
+    .filterSelect {
+        padding: 8px; /* Padding reducido para inputs */
+        font-size: 0.85em; /* Fuente más pequeña para inputs */
+    }
+
+    .checkboxItem input[type="checkbox"] {
+        width: 18px; /* Checkbox un poco más pequeño */
+        height: 18px;
+    }
+
+    .checkboxItem label {
+        font-size: 0.85em; /* Texto de label de checkbox más pequeño */
+    }
+
+    .clearFilterButton,
+    .applyFilterButton {
+        padding: 8px; /* Padding reducido para botones del footer */
+        font-size: 0.9em; /* Fuente más pequeña para botones */
     }
 }

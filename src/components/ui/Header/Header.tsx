@@ -14,8 +14,21 @@ import RegisterModal from "../Modal/Register/RegisterModal";
 
 import Avatar from "@mui/material/Avatar";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { useProductStore } from "../../../store/productStore";
 
-export const Header = () => {
+export const Header: React.FC = () => {
+  const [searchText, setSearchText] = useState("");
+  const setAndFetchFilteredProducts = useProductStore(
+    (state) => state.setAndFetchFilteredProducts
+  );
+
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    navigate("/ProductScreen");
+    // Llamamos al store con solo el filtro denominacion
+    setAndFetchFilteredProducts({ denominacion: searchText });
+  };
+
   const [dropClothes, setDropClothes] = useState(false);
   const [dropShoes, setDropShoes] = useState(false);
   const [dropSport, setDropSport] = useState(false);
@@ -67,7 +80,6 @@ export const Header = () => {
       displayedProfileImageUrl
     );
   }, [isAuthenticated, user, displayedProfileImageUrl]);
-
 
   // ********** INICIO DE LA CORRECCIÓN CRÍTICA: APLICAR useCallback **********
 
@@ -221,7 +233,6 @@ export const Header = () => {
                 <h4 onClick={handleLogout} style={{ cursor: "pointer" }}>
                   Cerrar Sesión
                 </h4>
-                <p>|</p>
                 <Link to="/HelpScreen">
                   <h4>Ayuda</h4>
                 </Link>
@@ -246,10 +257,20 @@ export const Header = () => {
             )}
           </div>
           <div className={styles.containerPurchase}>
-            <div className={styles.containerSearch}>
-              <FaSearch className={styles.searchIcon} />
-              <input type="text" placeholder="Buscar" />
-            </div>
+            <form
+              className={styles.containerSearch}
+              onSubmit={handleSearchSubmit}
+            >
+              <input
+                type="search"
+                placeholder="Buscar"
+                value={searchText}
+                onChange={(e) => setSearchText(e.target.value)}
+              />
+              <button type="submit" className={styles.searchButton}>
+                <FaSearch className={styles.searchIcon} type="submit" />
+              </button>
+            </form>
 
             <div className={styles.iconBag}>
               <AiOutlineShopping

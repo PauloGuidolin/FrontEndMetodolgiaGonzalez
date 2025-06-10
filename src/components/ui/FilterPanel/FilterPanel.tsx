@@ -214,19 +214,6 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
           </button>
         </div>
         <div className={styles.filterPanelContent}>
-          {/* Sección de Búsqueda por Nombre */}
-          <div className={styles.filterSection}>
-            <h3>BUSCAR POR NOMBRE</h3>
-            <input
-              type="text"
-              className={styles.filterInputText}
-              value={selectedFilters.denominacion ?? ""} // Usar ?? '' para manejar null/undefined
-              onChange={(e) =>
-                handleFilterChange("denominacion", e.target.value)
-              }
-              placeholder="Nombre del producto..."
-            />
-          </div>
 
           {/* Sección de Ordenar Por */}
           <div className={styles.filterSection}>
