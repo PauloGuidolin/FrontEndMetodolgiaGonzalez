@@ -1,9 +1,6 @@
-/* Archivo: src/components/ProductCard/ProductCard.module.css */
-
 .card {
     max-width: 500px; /* Puedes ajustar esto si es necesario */
     width: 100%;
-    border-radius: 0.5rem; /* rounded-md */
     overflow: hidden;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* shadow-md */
     margin: 1rem; /* m-4 */
@@ -60,7 +57,6 @@
 .categoryTag {
     display: inline-block;
     background-color: #e5e7eb; /* gray-200 */
-    border-radius: 9999px; /* rounded-full */
     padding: 0.125rem 0.75rem; /* py-0.5 px-3 */
     font-size: 0.75rem; /* text-xs */
     font-weight: 600; /* font-semibold */
@@ -91,7 +87,6 @@
 .promotionIndicator {
     display: inline-block;
     background-color: #facc15; /* yellow-400 */
-    border-radius: 9999px; /* rounded-full */
     padding: 0.25rem 0.5rem; /* px-2 py-1 */
     font-size: 0.75rem; /* text-xs */
     font-weight: bold; /* font-bold */
@@ -110,25 +105,3 @@
     flex-direction: column;
     gap: 0.25rem; /* Pequeño espacio entre líneas de detalles */
 }
-
-/* Estilos opcionales para el pie de la tarjeta si lo usas */
-/*
-.cardFooter {
-    padding: 1rem;
-}
-
-.detailsButton {
-    background-color: #3b82f6; // blue-500
-    color: white;
-    font-weight: bold;
-    padding: 0.5rem 1rem; // py-2 px-4
-    border-radius: 0.25rem; // rounded
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.detailsButton:hover {
-    background-color: #2563eb; // blue-600
-}
-*/

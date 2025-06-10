@@ -1,3 +1,4 @@
+/* Estilos por defecto (para pantallas grandes, desktop first approach) */
 .main {
   display: grid;
   grid-template-columns: 1fr 3fr;
@@ -7,37 +8,37 @@
 
 .profileContainer {
   margin: 20px;
-  height: 80%;
+  height: 80%; /* Considerar ajustar esto para pantallas pequeñas si el contenido lo requiere */
   padding-top: 20px;
   display: flex;
   flex-direction: column;
   background-color: rgb(168, 167, 167);
   align-items: center;
   text-align: center;
+}
 
-  img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-  }
+.profileContainer img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
 
-  p {
-    padding-top: 10px;
-    font-size: 30px;
-  }
+.profileContainer p {
+  padding-top: 10px;
+  font-size: 30px;
+}
 
-  button {
-    margin-top: 30px;
-    padding: 10px;
-    font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
-    background-color: black;
-    color: white;
-    font-size: 30px;
-  }
+.profileContainer button {
+  margin-top: 30px;
+  padding: 10px;
+  font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+  background-color: black;
+  color: white;
+  font-size: 30px;
+}
 
-  button:hover {
-    cursor: pointer;
-  }
+.profileContainer button:hover {
+  cursor: pointer;
 }
 
 .dataContainer {
@@ -47,34 +48,34 @@
   margin: 20px;
   padding: 20px;
   background-color: rgb(168, 167, 167);
-  flex-direction: column;
   font-family: "Gill Sans", "Gill Sans MT", Calibri, "Trebuchet MS", sans-serif;
+}
 
-  h4 {
-    font-size: 30px;
-  }
+.dataContainer h4 {
+  font-size: 30px;
+}
 
-  h5 {
-    font-size: 25px;
-  }
+.dataContainer h5 {
+  font-size: 25px;
+}
 
-  p {
-    font-size: 25px;
-  }
-  .editButton {
-    max-width: 50px;
-    margin-top: 10px;
-    background-color: transparent;
-    border: none;
-    border-bottom: 1px solid black;
-    color: black;
-    font-size: 20px;
-    font-weight: bold;
-  }
+.dataContainer p {
+  font-size: 25px;
+}
 
-  button:hover {
-    cursor: pointer;
-  }
+.dataContainer .editButton {
+  max-width: 50px; /* Esto puede ser demasiado pequeño, considera auto o un ancho fijo mayor */
+  margin-top: 10px;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid black;
+  color: black;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.dataContainer button:hover {
+  cursor: pointer;
 }
 
 .deleteButton {
@@ -84,4 +85,88 @@
   background-color: black;
   color: white;
   font-size: 30px;
+}
+
+
+/* -------------------------- MEDIA QUERIES -------------------------- */
+
+/* Para tabletas y pantallas más pequeñas (máximo 768px de ancho) */
+@media (max-width: 768px) {
+  .main {
+    grid-template-columns: 1fr; /* Una sola columna para un diseño de pila */
+    gap: 30px; /* Reducir el espacio entre elementos */
+  }
+
+  .profileContainer,
+  .dataContainer {
+    height: auto;
+    margin: 15px; /* Ajustar márgenes para pantallas más pequeñas */
+    padding: 15px; /* Ajustar padding */
+  }
+
+  .profileContainer p,
+  .dataContainer h4 {
+    font-size: 24px; /* Reducir tamaño de fuente */
+  }
+
+  .profileContainer button,
+  .deleteButton {
+    font-size: 24px; /* Reducir tamaño de fuente de botones */
+    padding: 8px; /* Ajustar padding de botones */
+  }
+
+  .profileContainer img {
+    width: 120px;
+    height: 120px;
+  }
+
+  .dataContainer h5,
+  .dataContainer p {
+    font-size: 20px; /* Reducir tamaño de fuente */
+  }
+
+  .dataContainer .editButton {
+    font-size: 18px; /* Reducir tamaño de fuente del botón de edición */
+    max-width: 70px; /* Permitir que sea un poco más ancho o auto */
+  }
+}
+
+/* Para teléfonos móviles y pantallas muy pequeñas (máximo 480px de ancho) */
+@media (max-width: 480px) {
+  .main {
+    gap: 20px; /* Reducir aún más el espacio */
+  }
+
+  .profileContainer,
+  .dataContainer {
+    height: auto;
+    margin: 10px; /* Márgenes más pequeños */
+    padding: 10px; /* Padding más pequeño */
+  }
+
+  .profileContainer p,
+  .dataContainer h4 {
+    font-size: 20px; /* Fuentes más pequeñas para títulos */
+  }
+
+  .profileContainer button,
+  .deleteButton {
+    font-size: 20px; /* Fuentes más pequeñas para botones */
+    padding: 6px;
+  }
+
+  .profileContainer img {
+    width: 50px;
+    height: 50px;
+  }
+
+  .dataContainer h5,
+  .dataContainer p {
+    font-size: 16px; /* Fuentes más pequeñas para el contenido */
+  }
+
+  .dataContainer .editButton {
+    font-size: 16px; /* Ajustar tamaño de fuente del botón de edición */
+    max-width: 100%; /* Permitir que ocupe todo el ancho si es necesario */
+  }
 }

@@ -7,12 +7,12 @@ interface InputFieldProps {
   id: string;
   label: string;
   type?: string;
-  value: string | number; // ¡CAMBIO AQUÍ! Ahora acepta string o number
+  value: string | number; 
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
-  className?: string; // Permitir pasar clases adicionales
-  name?: string; // ¡CAMBIO AQUÍ! Agregamos la prop 'name'
+  className?: string; 
+  name?: string; 
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -32,7 +32,7 @@ const InputField: React.FC<InputFieldProps> = ({
       <input
         type={type}
         id={id}
-        name={name} // ¡CAMBIO AQUÍ! Pasamos la prop 'name' al input HTML
+        name={name}
         value={value}
         onChange={onChange}
         placeholder={placeholder}

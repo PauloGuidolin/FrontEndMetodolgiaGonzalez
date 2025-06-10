@@ -8,22 +8,22 @@ export const DropDownClothes = () => {
         <div className={styles.containerInfo}>
           <div className={styles.containerTable}>
             <div className={styles.containerColumn1}>
-              <h2>Fútbol</h2>
-              <p>Botines</p>
-              <p>Selección Argentina</p>
-              <p>Camisetas de Fútbol</p>
+              <h2>Mujer</h2>
+              <p>Tops Deportivos</p>
+              <p>Calzas</p>
+              <p>Buzos</p>
             </div>
             <div className={styles.containerColumn2}>
-              <h2>Ténis</h2>
-              <p>Calzado</p>
-              <p>Ropa</p>
-              <p>Medias</p>
+              <h2>Hombre</h2>
+              <p>Remeras</p>
+              <p>Camperas</p>
+              <p>Shorts</p>
             </div>
             <div className={styles.containerColumn3}>
-              <h2>Running</h2>
-              <p>Calzado</p>
-              <p>Ropa</p>
-              <p>Carreras</p>
+              <h2>Niños</h2>
+              <p>Camiseta Fútbol</p>
+              <p>Buzos</p>
+              <p>Pantalones</p>
             </div>
           </div>
           <img style={{height: "70px"}} src="../../../images/imageDrop.png" alt="" />

@@ -85,13 +85,12 @@
     padding: 0.8rem 1.5rem; /* Más padding para botones */
     border: none;
     cursor: pointer;
-    border-radius: 8px; /* Bordes redondeados para botones */
     transition: background-color 0.3s ease, transform 0.2s ease; /* Transiciones suaves */
     width: 48%; /* Ajusta el ancho para que quepan bien con gap */
 }
 
 .containerButtons button:first-child { /* Botón Cancelar */
-    background-color: #dc3545; /* Rojo para cancelar */
+    background-color: #0000009a; 
     color: white;
 }
 
@@ -101,7 +100,7 @@
 }
 
 .containerButtons button:last-child { /* Botón Aceptar */
-    background-color: #007bff; /* Azul para aceptar */
+    background-color: #0000009a; 
     color: white;
 }
 
