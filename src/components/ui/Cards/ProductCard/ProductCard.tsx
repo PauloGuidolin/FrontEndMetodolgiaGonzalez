@@ -57,7 +57,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     console.log("  precioFinal:", product.precioFinal);
     console.log("  tienePromocion:", product.tienePromocion);
     console.log("  descuento (ID):", product.descuento ? product.descuento.id : "N/A"); // Check if discount exists
-    console.log("  descuento (activo):", product.descuento ? product.descuento.active : "N/A"); // Check discount active state
+    console.log("  descuento (activo):", product.descuento ? product.descuento.activo : "N/A"); // Check discount active state
     console.log("  descuento (precioPromocional):", product.descuento ? product.descuento.precioPromocional : "N/A"); // Check promotional price
     console.log("  Imágenes:", product.imagenes);
     console.log("  Detalles de Producto:", product.productos_detalles);

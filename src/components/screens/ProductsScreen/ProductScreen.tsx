@@ -12,10 +12,11 @@ import { useShallow } from "zustand/shallow";
 
 import { productService } from "../../../https/productApi";
 
-import FilterPanel from "../../ui/FilterPanel/FilterPanel";
+
 import ProductCard from "../../ui/Cards/ProductCard/ProductCard";
 import { Footer } from "../../ui/Footer/Footer";
 import { Header } from "../../ui/Header/Header";
+import { FilterPanel } from "../../ui/FilterPanel/FilterPanel";
 
 const ProductScreen: React.FC = () => {
   const location = useLocation(); // Hook para acceder al objeto de localización de React Router

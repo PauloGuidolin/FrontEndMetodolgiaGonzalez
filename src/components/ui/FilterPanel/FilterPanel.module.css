@@ -295,6 +295,7 @@
 }
 
 .clearFilterButton,
+.clearFilterButton,
 .applyFilterButton {
     flex: 1;
     padding: 12px var(--spacing-md);

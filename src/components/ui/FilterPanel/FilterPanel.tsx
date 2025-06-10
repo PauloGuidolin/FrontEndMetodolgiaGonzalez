@@ -23,14 +23,14 @@ export interface FilterPanelProps {
 }
 
 export const FilterPanel: React.FC<FilterPanelProps> = ({
-    isOpen,
-    onClose,
-    onApplyFilters,
-    onClearFilters,
-    availableCategories,
-    availableColors,
-    availableSizes,
-    initialFilters
+  isOpen,
+  onClose,
+  onApplyFilters,
+  onClearFilters,
+  availableCategories,
+  availableColors,
+  availableSizes,
+  initialFilters,
 }) => {
     const [selectedFilters, setSelectedFilters] = useState<ProductFilters>(() => {
         const defaultFilters: ProductFilters = {
@@ -342,13 +342,23 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
 
                 </div>
 
-                <div className={styles.filterPanelFooter}>
-                    <button className={styles.clearFilterButton} onClick={handleClearClick}>Limpiar Filtros</button>
-                    <button className={styles.applyFilterButton} onClick={handleApplyClick}>Aplicar</button>
-                </div>
-            </div>
+        <div className={styles.filterPanelFooter}>
+          <button
+            className={styles.clearFilterButton}
+            onClick={handleClearClick}
+          >
+            Limpiar Filtros
+          </button>
+          <button
+            className={styles.applyFilterButton}
+            onClick={handleApplyClick}
+          >
+            Aplicar
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default FilterPanel;
