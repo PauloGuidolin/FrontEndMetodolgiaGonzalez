@@ -1,43 +1,17 @@
-/* Archivo: src/ui/FilterPanel/FilterPanel.module.css */
-
-/* Variables CSS para consistencia (pueden ir en un archivo global si lo prefieres) */
-:root {
-    --primary-blue: #007bff; /* Azul vibrante */
-    --primary-blue-dark: #0056b3; /* Azul más oscuro para hover */
-    --text-color-dark: #212529; /* Casi negro */
-    --text-color-medium: #495057; /* Gris oscuro para texto secundario */
-    --text-color-light: #6c757d; /* Gris más claro */
-    --border-color-light: #e9ecef; /* Borde muy claro */
-    --border-color-medium: #dee2e6; /* Borde medio */
-    --background-light: #f8f9fa; /* Fondo muy claro */
-    --spacing-xs: 5px;
-    --spacing-sm: 10px;
-    --spacing-md: 15px;
-    --spacing-lg: 20px;
-    --spacing-xl: 25px;
-    --border-radius-sm: 4px;
-    --border-radius-md: 8px;
-    --transition-speed: 0.3s;
-    --shadow-light: 0 4px 12px rgba(0, 0, 0, 0.1);
-    --shadow-medium: 0 6px 20px rgba(0, 0, 0, 0.15);
-}
-
-/* ----------------------------------------------------- */
-/* OVERLAY DEL PANEL */
-/* ----------------------------------------------------- */
+/* Estilos por defecto para pantallas grandes (desktop-first) */
 .filterPanelOverlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro semitransparente */
+    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: flex-end; /* Alinea el panel a la derecha */
     z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transition: opacity var(--transition-speed) ease-in-out, visibility var(--transition-speed) ease-in-out;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
 .filterPanelOverlay.isOpen {
@@ -45,347 +19,315 @@
     visibility: visible;
 }
 
-/* ----------------------------------------------------- */
-/* PANEL PRINCIPAL */
-/* ----------------------------------------------------- */
 .filterPanel {
-    background-color: #fff; /* Fondo blanco */
-    width: 320px; /* Ancho fijo para el panel */
-    max-width: 90%; /* Máximo 90% del ancho en pantallas pequeñas */
+    background-color: #fff;
+    width: 300px; /* Ancho del panel para desktop */
+    max-width: 90%; /* Máximo 90% del ancho de la pantalla en móviles (se aplica desde este punto) */
     height: 100%;
-    box-shadow: var(--shadow-medium); /* Sombra más definida */
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
     display: flex;
     flex-direction: column;
-    overflow-y: auto; /* Permite scroll vertical */
-    transform: translateX(100%); /* Inicia fuera de la pantalla */
-    transition: transform var(--transition-speed) ease-in-out;
-    padding-bottom: env(safe-area-inset-bottom); /* Manejo de áreas seguras en iOS */
+    overflow-y: auto;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
 }
 
 .filterPanelOverlay.isOpen .filterPanel {
-    transform: translateX(0); /* Desliza a la vista */
+    transform: translateX(0);
 }
 
-/* ----------------------------------------------------- */
-/* ENCABEZADO DEL PANEL */
-/* ----------------------------------------------------- */
 .filterPanelHeader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacing-lg) var(--spacing-xl); /* Padding generoso */
-    border-bottom: 1px solid var(--border-color-light); /* Borde sutil */
-    background-color: var(--background-light); /* Fondo ligeramente gris */
-    position: sticky; /* Se mantiene arriba al hacer scroll */
-    top: 0;
-    z-index: 10;
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee; /* Gris muy claro */
 }
 
 .filterPanelHeader h2 {
     margin: 0;
-    font-size: 1.4em;
-    color: var(--text-color-dark);
-    font-weight: 600;
+    font-size: 1.2em;
+    color: #333; /* Gris oscuro */
 }
 
-.closeFilterButton {
-    background: none;
-    border: none;
-    font-size: 1.8em;
-    cursor: pointer;
-    color: var(--text-color-light);
-    padding: var(--spacing-xs);
-    border-radius: 50%;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-.closeFilterButton:hover {
-    background-color: var(--border-color-light);
-    color: var(--text-color-medium);
-}
-
-/* ----------------------------------------------------- */
-/* CONTENIDO DE FILTROS */
-/* ----------------------------------------------------- */
 .filterPanelContent {
     flex-grow: 1;
-    padding: var(--spacing-xl);
+    padding: 20px;
 }
 
 .filterSection {
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border-color-light);
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee; /* Gris muy claro */
 }
 
-.filterSection:last-child {
-    border-bottom: none; /* Elimina el borde de la última sección */
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.sectionTitleWithIcon {
-    display: flex;
-    align-items: center;
+.filterSection h3 {
     margin-top: 0;
-    margin-bottom: var(--spacing-md);
-    font-size: 1.05em;
-    color: var(--text-color-dark);
+    margin-bottom: 10px;
+    font-size: 1em;
+    color: #555; /* Gris medio */
     text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 0.5px;
 }
 
-.sectionIcon {
-    margin-right: var(--spacing-sm); /* Espacio entre el ícono y el texto */
-    font-size: 1.2em; /* Tamaño del ícono */
-    color: var(--primary-blue); /* Color del ícono */
+.filterPanelFooter {
+    padding: 15px 20px;
+    border-top: 1px solid #eee; /* Gris muy claro */
+    text-align: center;
 }
 
-.noFiltersMessage {
-    font-size: 0.9em;
-    color: var(--text-color-light);
-    margin-top: var(--spacing-sm);
-    margin-bottom: var(--spacing-sm);
+/* --- FIN Estilos Existentes (NO MODIFICAR ESTOS) --- */
+
+
+/* --- NUEVOS ESTILOS PARA HACERLO MÁS BONITO Y MINIMALISTA (NEGRO, GRIS, BLANCO) --- */
+
+/* Estilo para el botón de cerrar (X) */
+.closeFilterButton {
+    background: none;
+    border: none;
+    font-size: 1.6em;
+    cursor: pointer;
+    color: #666; /* Gris medio-oscuro */
+    padding: 5px 10px;
+    border-radius: 5px;
+    transition: all 0.2s ease-in-out;
 }
 
-/* ----------------------------------------------------- */
-/* INPUTS DE TEXTO Y SELECTS */
-/* ----------------------------------------------------- */
+.closeFilterButton:hover {
+    color: #333; /* Gris más oscuro al pasar el ratón */
+    background-color: #f5f5f5; /* Gris muy claro de fondo */
+}
+
+/* Estilos generales para inputs de texto y número, y selects */
 .filterInputText,
-.filterSelect,
-.filterInputNumber {
+.filterInputNumber,
+.filterSelect {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid var(--border-color-medium);
-    border-radius: var(--border-radius-sm);
+    border: 1px solid #ccc; /* Gris claro */
     font-size: 1em;
-    color: var(--text-color-medium);
     box-sizing: border-box;
-    margin-bottom: var(--spacing-sm); /* Espacio entre elementos */
-    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    margin-bottom: 10px;
+    transition: all 0.2s ease-in-out;
+    color: #333; /* Gris oscuro para el texto */
+    background-color: #fff; /* Fondo blanco */
 }
 
+/* Estilos de enfoque para inputs y selects */
 .filterInputText:focus,
-.filterSelect:focus,
-.filterInputNumber:focus {
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+.filterInputNumber:focus,
+.filterSelect:focus {
+    border-color: #333; /* Borde negro suave al enfocar */
+    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1); /* Sombra muy sutil */
     outline: none;
 }
 
-.filterSelect {
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23495057"><path d="M7 10l5 5 5-5z"/></svg>'); /* Flecha SVG custom */
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    background-size: 14px;
-    padding-right: 30px; /* Espacio para la flecha */
-}
-
-/* Estado deshabilitado para inputs */
-.filterInputText[disabled],
-.filterSelect[disabled],
-.filterInputNumber[disabled] {
-    opacity: 0.7;
-    cursor: not-allowed;
-    background-color: var(--background-light);
-    border-color: var(--border-color-light);
-}
-
-/* ----------------------------------------------------- */
-/* INPUTS DE PRECIO */
-/* ----------------------------------------------------- */
+/* Ajuste específico para los inputs de precio (para que estén uno al lado del otro) */
 .priceInputs {
     display: flex;
+    gap: 10px;
     align-items: center;
-    gap: var(--spacing-sm);
+    flex-wrap: wrap; /* Permite que los inputs de precio se envuelvan en pantallas pequeñas */
 }
 
 .priceInputs .filterInputNumber {
-    flex: 1;
-    margin-bottom: 0; /* Eliminar margen inferior aquí */
-}
-
-.priceInputs span {
-    color: var(--text-color-medium);
-    font-size: 1.1em;
-    font-weight: 600;
-}
-
-/* ----------------------------------------------------- */
-/* CHECKBOXES PERSONALIZADOS */
-/* ----------------------------------------------------- */
-.checkboxItem {
-    display: flex;
-    align-items: center;
-    margin-bottom: var(--spacing-sm);
-    cursor: pointer;
-    padding: var(--spacing-xs); /* Padding para aumentar el área de hover */
-    border-radius: var(--border-radius-sm);
-    transition: background-color 0.2s ease;
-}
-
-.checkboxItem:last-child {
+    flex: 1; /* Permite que cada input ocupe el espacio disponible */
+    min-width: 80px; /* Ancho mínimo para evitar que se pongan muy pequeños */
     margin-bottom: 0;
 }
 
-.checkboxItem:hover {
-    background-color: var(--background-light); /* Fondo claro al pasar el mouse */
+.priceInputs span {
+    color: #555; /* Gris medio */
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+
+/* Estilos para los checkboxes y sus labels */
+.checkboxItem {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: pointer;
 }
 
 .checkboxItem input[type="checkbox"] {
     appearance: none;
+    -webkit-appearance: none;
     width: 20px;
     height: 20px;
-    border: 1px solid var(--border-color-medium);
-    border-radius: var(--border-radius-sm);
-    margin-right: var(--spacing-sm);
+    border: 2px solid #999; /* Gris para el borde */
+    border-radius: 2px;
+    margin-right: 10px;
+    cursor: pointer;
     display: grid;
     place-content: center;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    flex-shrink: 0; /* Evita que el checkbox se encoja */
+    transition: all 0.2s ease-in-out;
+    background-color: #fff; /* Fondo blanco para el checkbox */
 }
 
 .checkboxItem input[type="checkbox"]::before {
     content: "";
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     transform: scale(0);
     transition: transform 0.2s ease-in-out;
-    box-shadow: inset 1em 1em var(--primary-blue);
-    background-color: CanvasText;
+    /* Color del "tick" - negro */
+    box-shadow: inset 1em 1em var(--accent-color, #333);
+    background-color: CanvasText; /* Esto asegura que el box-shadow sea visible */
     clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 60%);
 }
 
 .checkboxItem input[type="checkbox"]:checked {
-    background-color: var(--primary-blue);
-    border-color: var(--primary-blue);
+    border-color: #333; /* Borde gris oscuro/negro cuando está chequeado */
+    background-color: #333; /* Fondo gris oscuro/negro cuando está chequeado */
 }
 
 .checkboxItem input[type="checkbox"]:checked::before {
     transform: scale(1);
 }
 
-.checkboxItem input[type="checkbox"]:focus {
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-    outline: none;
-}
-
 .checkboxItem label {
-    font-size: 1em;
-    color: var(--text-color-dark); /* Texto de la etiqueta */
+    font-size: 0.95em;
+    color: #444; /* Gris oscuro para el texto */
     cursor: pointer;
-    flex-grow: 1; /* Permite que la etiqueta ocupe el espacio restante */
 }
 
-/* ----------------------------------------------------- */
-/* PIE DEL PANEL (BOTONES) */
-/* ----------------------------------------------------- */
+
+/* Estilos para los botones del footer */
 .filterPanelFooter {
-    padding: var(--spacing-lg) var(--spacing-xl);
-    border-top: 1px solid var(--border-color-light);
     display: flex;
-    gap: var(--spacing-md);
-    background-color: var(--background-light);
-    position: sticky; /* Se mantiene abajo al hacer scroll */
-    bottom: 0;
-    z-index: 10;
+    justify-content: space-between;
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
 }
 
-.clearFilterButton,
 .clearFilterButton,
 .applyFilterButton {
-    flex: 1;
-    padding: 12px var(--spacing-md);
-    border: none;
-    border-radius: var(--border-radius-md);
+    padding: 12px 15px;
     cursor: pointer;
-    font-size: 1.05em;
-    font-weight: 600;
-    transition: background-color var(--transition-speed) ease, transform 0.1s ease, box-shadow var(--transition-speed) ease;
+    font-size: 1em;
+    transition: all 0.2s ease-in-out;
+    flex-grow: 1;
+    margin: 0 5px;
 }
 
 .clearFilterButton {
-    background-color: var(--border-color-medium);
-    color: var(--text-color-medium);
+    background-color: #f0f0f0; /* Gris muy claro */
+    color: #555; /* Gris medio */
+    border: 1px solid #ccc; /* Gris claro */
 }
 
 .clearFilterButton:hover {
-    background-color: #c9d2da; /* Un gris ligeramente más oscuro */
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-light);
+    background-color: #e0e0e0; /* Gris un poco más oscuro al pasar el ratón */
+    color: #333; /* Gris oscuro */
+    border-color: #bbb;
 }
 
 .applyFilterButton {
-    background-color: var(--primary-blue);
-    color: #fff;
+    background-color: #333; /* Negro/Gris oscuro principal */
+    color: #fff; /* Texto blanco */
+    border: 1px solid #333;
 }
 
 .applyFilterButton:hover {
-    background-color: var(--primary-blue-dark);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-light);
+    background-color: #555; /* Gris un poco más claro al pasar el ratón */
+    border-color: #555;
 }
 
-.applyFilterButton:active,
-.clearFilterButton:active {
-    transform: translateY(0); /* Vuelve a la posición normal al hacer clic */
-    box-shadow: none; /* Elimina la sombra al hacer clic */
-}
-
-/* Estado deshabilitado para botones */
-.clearFilterButton[disabled],
-.applyFilterButton[disabled] {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background-color: var(--border-color-light);
-    color: var(--text-color-light);
-    transform: none; /* Sin transformaciones al estar deshabilitado */
-    box-shadow: none;
-}
-
-
-/* ----------------------------------------------------- */
-/* MEDIA QUERIES (RESPONSIVIDAD) */
-/* ----------------------------------------------------- */
+/* Para tablets y dispositivos con ancho de pantalla de hasta 768px */
 @media (max-width: 768px) {
     .filterPanel {
-        width: 100%;
-        max-width: 100%;
-        border-radius: 0; /* Sin bordes redondeados en móviles */
+        width: 100%; /* El panel ocupa todo el ancho en pantallas más pequeñas */
+        max-width: 100%; /* Asegura que no haya límite de ancho */
     }
 
-    .filterPanelHeader,
-    .filterPanelContent,
-    .filterPanelFooter {
-        padding-left: var(--spacing-lg);
-        padding-right: var(--spacing-lg);
+    .filterPanelHeader {
+        padding: 12px 15px; /* Ajusta el padding del header */
+    }
+
+    .filterPanelHeader h2 {
+        font-size: 1.1em; /* Un poco más pequeño el título */
+    }
+
+    .filterPanelContent {
+        padding: 15px; /* Reduce el padding interno */
+    }
+
+    .filterSection {
+        margin-bottom: 15px; /* Reduce el margen inferior de las secciones */
+        padding-bottom: 10px; /* Reduce el padding inferior de las secciones */
+    }
+
+    .filterSection h3 {
+        font-size: 0.95em; /* Un poco más pequeño el título de la sección */
+    }
+
+    .filterInputText,
+    .filterInputNumber,
+    .filterSelect {
+        padding: 10px; /* Ajusta el padding de los inputs */
+        font-size: 0.9em; /* Fuente un poco más pequeña */
+    }
+
+    /* Ajuste para los inputs de precio para que se apilen si la pantalla es muy estrecha */
+    .priceInputs {
+        flex-direction: column; /* Apila los inputs de precio verticalmente */
+        align-items: flex-start; /* Alinea los ítems al inicio */
+        gap: 5px; /* Reduce el espacio entre ellos */
+    }
+
+    .priceInputs span {
+        align-self: center; /* Centra el guion "-" entre los inputs */
+        font-size: 1em; /* Ajusta el tamaño de fuente del guion */
+    }
+
+    .checkboxItem label {
+        font-size: 0.9em; /* Texto de label de checkbox un poco más pequeño */
     }
 
     .filterPanelFooter {
-        flex-direction: column; /* Botones apilados */
-        gap: var(--spacing-sm);
+        flex-direction: column; /* Apila los botones del footer verticalmente */
+        padding: 10px 15px; /* Reduce el padding del footer */
     }
 
     .clearFilterButton,
     .applyFilterButton {
-        padding: 14px var(--spacing-md); /* Más padding en botones para móvil */
+        margin: 5px 0; /* Agrega margen vertical entre los botones apilados */
+        padding: 10px; /* Ajusta el padding de los botones */
+        font-size: 0.95em; /* Ajusta el tamaño de fuente de los botones */
     }
 }
 
-@media (max-width: 380px) {
-    .filterPanelHeader h2 {
-        font-size: 1.3em;
-    }
+/* Para teléfonos muy pequeños (menos de 480px de ancho) */
+@media (max-width: 480px) {
     .closeFilterButton {
-        font-size: 1.6em;
+        font-size: 1.4em; /* Un poco más pequeño el botón de cerrar */
+        padding: 3px 8px;
     }
-    .filterPanelContent {
-        padding: var(--spacing-md); /* Reducir padding en pantallas muy pequeñas */
+
+    .filterPanelHeader h2 {
+        font-size: 1em; /* Título aún más pequeño */
     }
-    .filterPanelFooter {
-        padding: var(--spacing-md);
+
+    .filterInputText,
+    .filterInputNumber,
+    .filterSelect {
+        padding: 8px; /* Padding reducido para inputs */
+        font-size: 0.85em; /* Fuente más pequeña para inputs */
+    }
+
+    .checkboxItem input[type="checkbox"] {
+        width: 18px; /* Checkbox un poco más pequeño */
+        height: 18px;
+    }
+
+    .checkboxItem label {
+        font-size: 0.85em; /* Texto de label de checkbox más pequeño */
+    }
+
+    .clearFilterButton,
+    .applyFilterButton {
+        padding: 8px; /* Padding reducido para botones del footer */
+        font-size: 0.9em; /* Fuente más pequeña para botones */
     }
 }

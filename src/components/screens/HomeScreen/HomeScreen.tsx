@@ -5,6 +5,7 @@ import styles from "./HomeScreen.module.css";
 import { useProductStore } from "../../../store/productStore";
 import CardList from "../../ui/Cards/CardList/CardList";
 import { useShallow } from "zustand/shallow";
+import { useNavigate } from "react-router";
 
 /**
  * Componente HomeScreen
@@ -13,6 +14,53 @@ import { useShallow } from "zustand/shallow";
  * Utiliza el store de Zustand para gestionar el estado de los productos.
  */
 export const HomeScreen = () => {
+  const navigate = useNavigate();
+
+  const handleFilterNavigation = (filters: {
+    categorias?: string[];
+    colores?: string[];
+    denominacion?: string;
+  }) => {
+    const params = new URLSearchParams(); // Objeto para construir parámetros de consulta URL.
+
+    let combinedCategories: string[] = [];
+
+    // Agrega categorías si existen y no están ya presentes.
+    if (filters.categorias && filters.categorias.length > 0) {
+      filters.categorias.forEach((cat) => {
+        if (!combinedCategories.includes(cat)) {
+          combinedCategories.push(cat);
+        }
+      });
+    }
+
+    // Agrega cada categoría al objeto URLSearchParams.
+    combinedCategories.forEach((cat) => {
+      params.append("categorias", cat);
+    });
+
+    // Agrega colores si existen.
+    if (filters.colores && filters.colores.length > 0) {
+      filters.colores.forEach((color) => {
+        params.append("colores", color);
+      });
+    }
+
+    // Agrega la denominación si existe.
+    if (filters.denominacion) {
+      params.append("denominacion", filters.denominacion);
+    }
+
+    // Convierte los parámetros a una cadena de consulta.
+    const queryString = params.toString();
+    // Construye la ruta de destino, añadiendo la cadena de consulta si existe.
+    const targetPath = `/productos${queryString ? `?${queryString}` : ""}`;
+
+    console.log("Navegando a:", targetPath);
+    // Navega a la ruta construida.
+    navigate(targetPath);
+  };
+
   // Consumimos el estado y las acciones del store de productos utilizando `useShallow`
   // para optimizar las re-renderizaciones, solo re-renderiza si los valores seleccionados cambian superficialmente.
   const {
@@ -138,7 +186,46 @@ export const HomeScreen = () => {
           </div>
 
           {/* Sección "Tendencias de las tiendas" - Muestra una lista de productos promocionales */}
-         
+          <div className={styles.tendenciesContainerPrincipal}>
+            <h2 className={styles.titleTendencies}>
+              Conoce las tendencias de Adidas
+            </h2>
+            <div className={styles.imagesTendenciesContainer}>
+              <div
+                onClick={() => handleFilterNavigation({ categorias: ["Boca"] })}
+                className={styles.tendencieContainer}
+              >
+                <img
+                  className={styles.imgTendencies}
+                  src="../../../../images/camisetabocaentrenamiento.avif"
+                  alt="Escudo Boca Juniors"
+                />
+                <h2>PRODUCTOS DE BOCA</h2>
+              </div>
+              <div
+                onClick={() => handleFilterNavigation({ categorias: ["Buzo"] })}
+                className={styles.tendencieContainer}
+              >
+                <img
+                  className={styles.imgTendencies}
+                  src="../../../../images/buzoGenerico.avif"
+                />
+                <h2>BUZOS</h2>
+              </div>
+              <div
+                onClick={() =>
+                  handleFilterNavigation({ categorias: ["Calzados"] })
+                }
+                className={styles.tendencieContainer}
+              >
+                <img
+                  className={styles.imgTendencies}
+                  src="../../../../images/zapaGenerica.avif"
+                />
+                <h2>ZAPATILLAS</h2>
+              </div>
+            </div>
+          </div>
           <Footer />
         </div>
       </div>

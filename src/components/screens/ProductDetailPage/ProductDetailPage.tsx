@@ -10,8 +10,6 @@ import { Footer } from "../../ui/Footer/Footer";
 import { ImagenDTO } from "../../dto/ImagenDTO";
 import { ColorDTO } from "../../dto/ColorDTO";
 import { TalleDTO } from "../../dto/TalleDTO";
-import { ProductoDetalleDTO } from "../../dto/ProductoDetalleDTO";
-
 /**
  * Componente `ProductDetailPage`
  * Muestra los detalles de un producto específico, permitiendo al usuario
