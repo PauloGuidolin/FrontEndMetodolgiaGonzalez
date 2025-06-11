@@ -173,12 +173,31 @@
   .text {
     display: none;
   }
+
+  .imgTendencies {
+    height: 300px;
+  }
+
+  .tendencieContainer {
+    max-width: 90%;
+  }
 }
 
 @media (max-width: 768px) {
   /* Aseguramos que el texto esté oculto en móviles también */
   .text {
     display: none;
+  }
+  .imagesTendenciesContainer {
+    justify-content: center;
+  }
+
+  .imgTendencies {
+    height: 250px;
+  }
+
+  .titleTendencies {
+    font-size: 1.3rem;
   }
 }
 
@@ -187,6 +206,20 @@
   /* .text {
     display: none;
   } */
+
+  .imgTendencies {
+    height: 200px;
+  }
+
+  .titleTendencies {
+    font-size: 1.1rem;
+    margin: 10px;
+  }
+
+  .tendencieContainer {
+    padding: 15px;
+    gap: 15px;
+  }
 }
 
 /*Aplicado CSS al scroll bar de la home screen */
